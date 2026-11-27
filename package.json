@@ -1,0 +1,17 @@
+{
+  "name": "sk-l-co",
+  "private": true,
+  "version": "0.5.0",
+  "description": "SKÅL & CO, visningsversion av en webbutik för glas, koppar och karaffer.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs && node --check docs/assets/site.js",
+    "dev": "node scripts/build.mjs && python3 -m http.server 8765 --directory docs",
+    "test": "python3 tests/flows.py && python3 tests/legal_and_consent.py",
+    "test:a11y": "python3 tests/a11y.py"
+  },
+  "devDependencies": {
+    "axe-core": "^4.10.0"
+  }
+}
