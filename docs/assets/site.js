@@ -1198,11 +1198,7 @@ function openLogin(mode="in"){
   <p class="note" style="margin-top:14px">Genom att skapa ett konto godkänner du att vi sparar ditt glasskåp enligt <a href="#villkor" data-lj="l-integritet" data-mclose>integritetspolicyn</a>.</p></div>`,"Logga in","login");
   const mb=$("#mbody"),err=m=>{$("#lErr",mb).textContent=m||""};
   $$("[data-lm]",mb).forEach(b=>b.addEventListener("click",()=>openLogin(b.dataset.lm)));
-  $("#gLogin",mb).addEventListener("click",async()=>{
-    const {auth,au}=AUTH.api,p=new auth.GoogleAuthProvider();
-    try{await auth.signInWithPopup(au,p);closeModal();toast("Välkommen! Ditt glasskåp sparas nu på kontot.")}
-    catch(e){if(e.code==="auth/popup-blocked"){auth.signInWithRedirect(au,p);return}err(authMsg(e))}
-  });
+  $("#gLogin",mb).addEventListener("click",()=>googleLogin(err));
   $("#loginForm",mb).addEventListener("submit",async e=>{e.preventDefault();
     const mail=$("#lMail",mb).value.trim(),pass=$("#lPass",mb).value,{auth,au}=AUTH.api;
     if(!mail||pass.length<6){err("Fyll i e-post och ett lösenord på minst 6 tecken.");return}
@@ -1215,6 +1211,12 @@ function openLogin(mode="in"){
   });
   $("#lReset",mb)?.addEventListener("click",async()=>{const mail=$("#lMail",mb).value.trim();if(!mail){err("Skriv din e-post först.");return}
     try{await AUTH.api.auth.sendPasswordResetEmail(AUTH.api.au,mail);err("");toast("Vi har skickat en länk för att välja nytt lösenord.")}catch(x){err(authMsg(x))}});
+}
+async function googleLogin(err){
+  if(!authOn()||!AUTH.api){openLogin();return}
+  const {auth,au}=AUTH.api,p=new auth.GoogleAuthProvider();
+  try{await auth.signInWithPopup(au,p);if(modal.classList.contains("open")&&modal.dataset.kind==="login")closeModal();toast("Välkommen! Ditt glasskåp sparas nu på kontot.")}
+  catch(e){if(e.code==="auth/popup-blocked"){auth.signInWithRedirect(au,p);return}(err||toast)(authMsg(e))}
 }
 async function logout(){
   if(!AUTH.api||!AUTH.user)return;
@@ -1233,7 +1235,7 @@ async function deleteAccount(){
   });
 }
 document.addEventListener("click",e=>{
-  if(e.target.closest("[data-login]")){e.preventDefault();openLogin(e.target.closest("[data-login]").dataset.login||"in")}
+  const lg=e.target.closest("[data-login]");if(lg){e.preventDefault();if(lg.dataset.login==="google")googleLogin();else openLogin(lg.dataset.login||"in")}
   if(e.target.closest("[data-logout]")){e.preventDefault();logout()}
   if(e.target.closest("[data-delacc]")){e.preventDefault();deleteAccount()}
 });
@@ -1256,7 +1258,7 @@ function renderGlasskap(){
   function score(a){let s=0;if(S.finder&&a[0]===S.finder.drink)s+=2;if(owned.some(o=>byId[o.id]&&(byId[o.id].cat===a[0]||byId[o.id].drinks.includes(a[0]))))s+=1.5;if(a[0]==="skotsel"&&owned.length)s+=1;return s}
   const u=AUTH.user;
   const acct=authOn()?(u?`<section class="gk wide acct"><div><span class="mono">Ditt konto</span><h2 class="gk-h">${esc(u.displayName||"Inloggad")}</h2><p style="color:var(--ink2)">${esc(u.email||"")}${u.email&&!u.emailVerified&&u.providerData[0]?.providerId==="password"?" · bekräfta e-posten via länken vi skickade":""}</p></div><div class="pdp-actions"><button class="small-btn" data-logout>Logga ut</button><button class="small-btn" data-delacc>Radera konto</button></div></section>`
-    :`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Spara ditt glasskåp på alla enheter.</h2><p style="color:var(--ink2)">Logga in med Google eller skapa ett konto med e-post. Det du redan sparat här följer med in på kontot.</p></div><div class="pdp-actions"><button class="btn btn-google" data-login="in"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.6 2.3 2.3 6.6 2.3 12s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg> Logga in</button><button class="btn btn-ghost" data-login="up">Skapa konto</button></div></section>`)
+    :`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Spara ditt glasskåp på alla enheter.</h2><p style="color:var(--ink2)">Logga in med Google eller skapa ett konto med e-post. Det du redan sparat här följer med in på kontot.</p></div><div class="pdp-actions"><button class="btn btn-google" data-login="google"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.6 2.3 2.3 6.6 2.3 12s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg> Fortsätt med Google</button><button class="btn btn-ghost" data-login="in">Logga in med e-post</button><button class="btn btn-ghost" data-login="up">Skapa konto</button></div></section>`)
     :(window.claude?"":`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Inloggning kommer snart.</h2><p style="color:var(--ink2)">Snart kan du logga in med Google eller e-post och nå ditt glasskåp på alla enheter. Tills dess sparas allt i den här webbläsaren.</p></div></section>`);
   el.innerHTML=acct+`
   <section class="gk"><span class="mono">Smakprofil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea fram din stil eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan.</p>`}

@@ -849,3 +849,4 @@ body.view-home .nav:not(.solid){color:#22201d}
   #hero.hero-light .hero-scrim{background:linear-gradient(180deg,rgba(246,241,233,.8) 0%,rgba(246,241,233,0) 14%),linear-gradient(0deg,rgba(246,241,233,.96) 0%,rgba(246,241,233,.85) 38%,rgba(246,241,233,0) 70%)}
   #hero.hero-light .hero-media img,#hero.hero-light .hero-media video{object-position:70% 30%}
 }
+.consent{z-index:94}

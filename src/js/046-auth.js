@@ -71,11 +71,7 @@ function openLogin(mode="in"){
   <p class="note" style="margin-top:14px">Genom att skapa ett konto godkänner du att vi sparar ditt glasskåp enligt <a href="#villkor" data-lj="l-integritet" data-mclose>integritetspolicyn</a>.</p></div>`,"Logga in","login");
   const mb=$("#mbody"),err=m=>{$("#lErr",mb).textContent=m||""};
   $$("[data-lm]",mb).forEach(b=>b.addEventListener("click",()=>openLogin(b.dataset.lm)));
-  $("#gLogin",mb).addEventListener("click",async()=>{
-    const {auth,au}=AUTH.api,p=new auth.GoogleAuthProvider();
-    try{await auth.signInWithPopup(au,p);closeModal();toast("Välkommen! Ditt glasskåp sparas nu på kontot.")}
-    catch(e){if(e.code==="auth/popup-blocked"){auth.signInWithRedirect(au,p);return}err(authMsg(e))}
-  });
+  $("#gLogin",mb).addEventListener("click",()=>googleLogin(err));
   $("#loginForm",mb).addEventListener("submit",async e=>{e.preventDefault();
     const mail=$("#lMail",mb).value.trim(),pass=$("#lPass",mb).value,{auth,au}=AUTH.api;
     if(!mail||pass.length<6){err("Fyll i e-post och ett lösenord på minst 6 tecken.");return}
@@ -88,6 +84,12 @@ function openLogin(mode="in"){
   });
   $("#lReset",mb)?.addEventListener("click",async()=>{const mail=$("#lMail",mb).value.trim();if(!mail){err("Skriv din e-post först.");return}
     try{await AUTH.api.auth.sendPasswordResetEmail(AUTH.api.au,mail);err("");toast("Vi har skickat en länk för att välja nytt lösenord.")}catch(x){err(authMsg(x))}});
+}
+async function googleLogin(err){
+  if(!authOn()||!AUTH.api){openLogin();return}
+  const {auth,au}=AUTH.api,p=new auth.GoogleAuthProvider();
+  try{await auth.signInWithPopup(au,p);if(modal.classList.contains("open")&&modal.dataset.kind==="login")closeModal();toast("Välkommen! Ditt glasskåp sparas nu på kontot.")}
+  catch(e){if(e.code==="auth/popup-blocked"){auth.signInWithRedirect(au,p);return}(err||toast)(authMsg(e))}
 }
 async function logout(){
   if(!AUTH.api||!AUTH.user)return;
@@ -106,7 +108,7 @@ async function deleteAccount(){
   });
 }
 document.addEventListener("click",e=>{
-  if(e.target.closest("[data-login]")){e.preventDefault();openLogin(e.target.closest("[data-login]").dataset.login||"in")}
+  const lg=e.target.closest("[data-login]");if(lg){e.preventDefault();if(lg.dataset.login==="google")googleLogin();else openLogin(lg.dataset.login||"in")}
   if(e.target.closest("[data-logout]")){e.preventDefault();logout()}
   if(e.target.closest("[data-delacc]")){e.preventDefault();deleteAccount()}
 });
