@@ -262,6 +262,7 @@
 <div class="view" data-view="dukning" hidden>
   <div class="wrap">
     <header class="page-head"><span class="mono">Dukningsstudion</span><h1>Bygg din dukning. Köp den med ett klick.</h1><p class="lead">Välj tillfälle, stil och gäster. Byt glas per roll, se bordet från sidan eller ovanifrån, och spara dukningen till nästa gång.</p></header>
+    <div id="bordVote" hidden></div>
     <div class="studio">
       <div class="ctrl">
         <h2 class="ctrl-h">Tillfälle</h2><div class="seasons" id="tSeason"></div>
@@ -278,7 +279,7 @@
         </div>
       </div>
       <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap"><div class="vtoggle" id="tView"><button data-tv="side" aria-pressed="true">Från sidan</button><button data-tv="top" aria-pressed="false">Ovanifrån</button></div><div class="pdp-actions" style="margin:0"><button class="small-btn" id="tSave">Spara dukning</button><button class="small-btn" id="tCopy">Kopiera inköpslista</button></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap"><div class="vtoggle" id="tView"><button data-tv="side" aria-pressed="true">Från sidan</button><button data-tv="top" aria-pressed="false">Ovanifrån</button></div><div class="pdp-actions" style="margin:0"><button class="small-btn" id="tShare">Dela och få röster</button><button class="small-btn" id="tSave">Spara dukning</button><button class="small-btn" id="tCopy">Kopiera inköpslista</button></div></div>
         <div class="scene" id="scene"><svg id="tableSvg" viewBox="0 0 1000 420" role="img" aria-label="Förhandsvisning av dukningen"></svg><div class="sum"><div><b id="tTotal"></b><small id="tDetail"></small></div><button class="btn btn-primary" id="tAdd">Lägg hela dukningen i varukorgen</button></div></div>
         <p class="note" id="tWhy"></p>
       </div>
@@ -347,6 +348,10 @@
 <!-- ================= MITT GLASSKÅP ================= -->
 <div class="view" data-view="glasskap" hidden>
   <div class="wrap" id="gk"></div>
+</div>
+
+<div class="view" data-view="lista" hidden>
+  <div class="wrap" id="listaV"></div>
 </div>
 
 <!-- ================= JOURNAL ================= -->

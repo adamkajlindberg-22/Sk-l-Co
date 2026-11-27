@@ -7,6 +7,8 @@ const viewHooks={};
 function route(){
   const h=decodeURIComponent(location.hash.slice(1));
   if(/^rum-[A-Za-z0-9]{6}$/.test(h)){showView("upptack");gOpen(h.slice(4).toUpperCase());return}
+  if(/^lista-[A-Za-z0-9]{10}$/.test(h)){showView("lista");openList(h.slice(6));return}
+  if(/^bord-[A-Za-z0-9]{10}$/.test(h)){showView("dukning");openBord(h.slice(5));return}
   if(h==="tillsammans"){showView("upptack");setSwMode("group");return}
   if(h.startsWith("p-")&&byId[h.slice(2)]){
     if(!$("[data-view]:not([hidden])"))showView("hem");

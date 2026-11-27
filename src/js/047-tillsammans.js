@@ -94,13 +94,14 @@ function renderGroupPanel(){
   const row=x=>`<div class="gk-item" data-open="${x.p.id}" style="cursor:pointer"><img src="${img(x.p,true)}" data-pimg="${x.p.id}" alt=""><div><b>${esc(x.p.name)}</b><small>${kr(per(x.p))} per glas${x.who.length?" · gillas av "+esc(lista(x.who)):""}${x.lovers.length?" · "+esc(lista(x.lovers))+" sparade det":""}</small></div></div>`;
   el.innerHTML=`<span class="mono">Swipea tillsammans</span><h2 class="pc-h">${esc(G.meta.name||"Vår grupp")}</h2>
   <div class="g-code"><span>Kod <b>${esc(G.code)}</b></span><button class="small-btn" data-ginvite>Bjud in</button></div>
-  <ul class="g-folk">${st.people.sort((a,b)=>b.me-a.me).map(f=>{const n=prog(f);return `<li><span class="g-av" aria-hidden="true">${esc((f.name[0]||"?").toUpperCase())}</span><span class="g-nm">${esc(f.me?"Du":f.name)}${G.meta.host&&f.uid===G.meta.host?' <small>skapade gruppen</small>':""}</span><span class="g-pr"><i style="--w:${Math.round(n/st.len*100)}%"></i></span><small>${n===st.len?"Klar":n+" av "+st.len}</small></li>`}).join("")}</ul>
+  <ul class="g-folk">${st.people.sort((a,b)=>b.me-a.me).map(f=>{const n=prog(f);return `<li><span class="g-av" aria-hidden="true">${esc((f.name[0]||"?").toUpperCase())}</span><span class="g-nm">${esc(f.me?"Du":f.name)}${G.meta.host&&f.uid===G.meta.host?' <small>skapade gruppen</small>':""}</span><span class="g-pr"><i style="--w:${Math.round(n/st.len*100)}%"></i></span><small>${n===st.len?"Klar":f.me?n+" av "+st.len:`<button class="linkbtn" data-gremind="${esc(f.uid)}" aria-label="Påminn ${esc(f.name)}">${n} av ${st.len} · påminn</button>`}</small></li>`}).join("")}</ul>
+  ${st.n>=2&&st.people.every(f=>prog(f)===st.len)?`<div class="g-alldone"><b>Alla är klara!</b> ${st.matches.length?(st.matches.length===1?"Ni matchar på ett glas.":"Ni matchar på "+st.matches.length+" glas."):"Här är det ni gillar mest."}</div>`:""}
   ${st.n<2?`<p class="note">Bjud in någon för att se vad ni matchar på. Länken går att skicka i sms, WhatsApp eller mejl.</p>`:""}
   <span class="mono" style="display:block;margin-top:18px">${st.matches.length?"Alla gillar":"Matchningar"}</span>
   ${st.matches.length?`<div class="gk-list g-match">${st.matches.map(row).join("")}</div>`:`<p class="note">${st.n<2?"Matchningarna visas när ni är minst två.":"Inga glas som alla gillar än. Fortsätt swipea."}</p>`}
   ${st.ranked.filter(x=>!st.matches.includes(x)).length?`<span class="mono" style="display:block;margin-top:18px">Flest gillar</span><div class="gk-list">${st.ranked.filter(x=>!st.matches.includes(x)).slice(0,4).map(row).join("")}</div>`:""}
   ${st.prof&&st.n>=2?`<p class="g-prof">Er gemensamma stil: <b>${esc(st.prof.name)}</b>. Ni gillar ${esc(st.prof.summary)}.</p>`:""}
-  <div class="pdp-actions" style="margin-top:16px">${st.ranked.length?'<button class="small-btn" data-gsave>Spara i Mitt glasskåp</button>':""}<button class="small-btn" data-gleave>Lämna gruppvyn</button></div>`;
+  <div class="pdp-actions" style="margin-top:16px">${st.ranked.length?'<button class="small-btn" data-glist>Gör en önskelista att dela</button><button class="small-btn" data-gsave>Spara i Mitt glasskåp</button>':""}<button class="small-btn" data-gleave>Lämna gruppvyn</button></div>`;
 }
 function gDone(){
   if(!G)return;const st=gStats(),wait=st.people.filter(f=>!f.me&&G.deck.some(c=>f.votes[c.p.id]==null));

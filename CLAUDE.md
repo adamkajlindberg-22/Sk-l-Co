@@ -32,6 +32,8 @@ src/js/               Källkod, sätts ihop i denna ordning:
   04-tools.js         Glasguiden, Glas-swipe, Glasväggen, Dukningsstudion, Barstudion, Provlådan, Present, Journal
   045-legal.js        Villkor, samtycke, mätpunkter (track), ångerfunktion
   046-auth.js         Inloggning till Mitt glasskåp (Firebase: Google och e-post)
+  047-tillsammans.js  Swipea tillsammans: grupper med kod och länk (#rum-KOD, #tillsammans)
+  048-delat.js        Delade listor (#lista-ID), röstning på dukning (#bord-ID), påminnelser i grupper
   05-account.js       Mitt glasskåp, glassommelieren (AI), tema, meny, hjältefilm, start
 scripts/build.mjs     Byggskript
 tests/                Playwright och axe
@@ -45,6 +47,38 @@ tests/                Playwright och axe
 - **Claude-förmågor:** när sajten körs som Claude-artefakt finns `window.claude.use("db" | "user" | "sample")`. Då synkas Mitt glasskåp till kontot och AI-funktionerna går via Claude. Utanför Claude (GitHub Pages, Hostinger) är `window.claude` odefinierat och allt faller tillbaka: lagring i webbläsaren och regelbaserade svar. **Varje AI-funktion ska ha en reserv.** Inför lansering ersätts `getSample()` med ett eget API.
 - **Inloggning (Mitt glasskåp):** Firebase Authentication (Google och e-post med lösenord) laddas från gstatic när `FIREBASE_CONFIG` i `046-auth.js` är ifyllt. Projektet heter `skal-co` och använder Realtime Database (europe-west1, `FIREBASE_DB="rtdb"`). Glasskåpet sparas som JSON under `glasskap/{uid}`, och reglerna släpper bara in ägaren (`auth.uid === $uid`). Koden stödjer även Firestore. Lagt till domäner i Firebase: `adamkajlindberg-22.github.io` (lägg till egen domän vid lansering). Vid utloggning töms webbläsarens kopia. Inne i Claude används `claude.use("db")` i stället.
 - **Mitt glasskåp utan inloggning:** `#glasskap` visar en inloggningssida (`gkLanding`) tills man loggar in eller väljer "Fortsätt utan konto" (`gkGuest`, sparas i sessionStorage). Inloggad vy har flikar (`gkTab`: översikt, glas, sparat, köp, konto). Allt på sajten fungerar utan konto. När något sparas utan konto visas en mjuk inloggningsruta en gång per besök (`nudgeLogin`). Knappen "Mitt glasskåp" i menyn är `#userBtn` (`.gk-btn`). På mobil ligger sök, favoriter och ljust läge i menyn.
+- **Glasguiden** har flerval (drycker, tillfällen, stilar, krav). Resultatet är ett glas per dryck med matchprocent och skäl, knappar för att byta glas och snabbjusteringar. `S.finder` har `drinks[]`, `styles[]`, `must[]`, `picks[]` och `drink` (första drycken) för äldre kod.
+- **Swipea tillsammans** (`047-tillsammans.js`): kräver inloggning. `rum/{KOD}` har `meta` (bara skaparen skriver), `folk/{uid}/votes` (var och en sin egen rad) och `paminn/{uid}` (skaparen påminner). Matchning = alla deltagare gillar. Grupperna sparas i `S.rooms`.
+- **Delat** (`048-delat.js`): en lista i Mitt glasskåp delas som länk (`listor/{ID}`). Gäster behöver inget konto för att se listan och markera ett glas som köpt, och ett köpt glas kan bara ändras av ägaren. Dukningar delas för röstning (`bord/{ID}`, kräver inloggning). Vid inloggning kollas grupperna och en notis visar påminnelser, "alla är klara" och glas som är kvar. Glassommelieren läser stilen och setet från Glasguiden (`setAdvice`).
+- **Test med låtsas-Firebase:** `tests/group.py` och `tests/shared.py` byter ut gstatic-modulerna mot `tests/fake-firebase.js`.
+- **Databasreglerna** (Realtime Database, Rules):
+  ```json
+  {"rules":{
+    "glasskap":{"$uid":{".read":"auth != null && auth.uid === $uid",".write":"auth != null && auth.uid === $uid"}},
+    "rum":{"$rid":{
+      ".read":"auth != null && $rid.matches(/^[A-Z0-9]{6}$/)",
+      "meta":{".write":"auth != null && (!data.exists() || data.child('host').val() === auth.uid) && newData.child('host').val() === auth.uid"},
+      "folk":{"$uid":{".write":"auth != null && auth.uid === $uid"}},
+      "paminn":{"$uid":{".write":"auth != null && root.child('rum').child($rid).child('meta').child('host').val() === auth.uid"}}
+    }},
+    "listor":{"$lid":{
+      ".read":"$lid.matches(/^[A-Za-z0-9]{10}$/)",
+      "meta":{".write":"auth != null && (!data.exists() || data.child('owner').val() === auth.uid) && newData.child('owner').val() === auth.uid"},
+      "kopt":{"$pid":{
+        ".write":"(!data.exists() && newData.exists()) || (auth != null && root.child('listor').child($lid).child('meta').child('owner').val() === auth.uid)",
+        ".validate":"$pid.matches(/^[a-z]{2,20}$/) && newData.child('name').isString() && newData.child('name').val().length <= 40 && newData.child('ts').isNumber()"
+      }}
+    }},
+    "bord":{"$bid":{
+      ".read":"auth != null && $bid.matches(/^[A-Za-z0-9]{10}$/)",
+      "meta":{".write":"auth != null && (!data.exists() || data.child('owner').val() === auth.uid) && newData.child('owner').val() === auth.uid"},
+      "rost":{"$uid":{
+        ".write":"auth != null && auth.uid === $uid",
+        ".validate":"newData.child('v').isNumber() && (!newData.child('c').exists() || (newData.child('c').isString() && newData.child('c').val().length <= 200))"
+      }}
+    }}
+  }}
+  ```
 - **3D** laddas först när fliken öppnas, från `cdn.jsdelivr.net/npm/three@0.160.0`. LatheGeometry från profilerna i `PROF`, inga tillägg.
 - **Hjältefilmen "Svävet"** (mörk, åtta glasmodeller med dryck svävar i luften och en kupa häller ut bubbel på sten) hämtas som Blob och scrubbas med `requestAnimationFrame`. Statiskt läge (bild som tonas) på mobil, med reducerad rörelse och vid sparat data-läge.
 

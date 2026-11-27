@@ -8,7 +8,7 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/build.mjs && node --check docs/assets/site.js",
     "dev": "node scripts/build.mjs && python3 -m http.server 8765 --directory docs",
-    "test": "python3 tests/flows.py && python3 tests/legal_and_consent.py",
+    "test": "python3 tests/flows.py && python3 tests/legal_and_consent.py && python3 tests/group.py && python3 tests/shared.py",
     "test:a11y": "python3 tests/a11y.py"
   },
   "devDependencies": {

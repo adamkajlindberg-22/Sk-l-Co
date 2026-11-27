@@ -1000,3 +1000,44 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line);font-size:15px;color
 .g-gk .g-mine{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:10px}
 @media (max-width:900px){.g-lobby{grid-template-columns:1fr}}
 @media (max-width:600px){.g-themes{grid-template-columns:1fr}.sw-mode{display:flex}.sw-mode button{flex:1;justify-content:center}.g-folk li{grid-template-columns:32px minmax(0,1fr) auto}.g-pr{display:none}}
+/* ===== Version 10: delade listor, röstning, påminnelser ===== */
+#listaV{padding-top:clamp(96px,12vh,140px);padding-bottom:40px}
+.lv-head{max-width:760px}
+.lv-prog{display:grid;gap:8px;margin:22px 0 20px;max-width:420px}
+.lv-prog span{color:var(--ink2)}.lv-prog b{font-family:var(--serif);font-weight:400;font-size:26px;color:var(--ink)}
+.lv-prog i{display:block;height:4px;border-radius:4px;background:var(--line);position:relative;overflow:hidden}
+.lv-prog i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--accent);border-radius:4px}
+.lv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;margin-top:10px}
+.lv-item{border-radius:22px;border:1px solid var(--line);background:var(--card);overflow:hidden;display:flex;flex-direction:column}
+.lv-img{position:relative;aspect-ratio:4/5;cursor:pointer;overflow:hidden}
+.lv-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.lv-img:hover img{transform:scale(1.03)}
+.lv-tag{position:absolute;left:12px;top:12px;padding:6px 12px;border-radius:999px;background:var(--accent);color:var(--bg);font-size:13px;font-weight:600}
+.lv-item.bought .lv-img img{filter:saturate(.5) brightness(.75)}
+.lv-body{padding:18px 18px 20px;display:grid;gap:4px}
+.lv-body b{font-family:var(--serif);font-weight:400;font-size:22px}
+.lv-body small{color:var(--muted);font-size:14px}
+.lv-body .pdp-actions{margin-top:10px}
+.lv-empty{padding:40px 0;max-width:640px}
+.lv-empty .btn{margin-top:18px}
+#bordVote{margin-bottom:22px}
+.bv{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:28px 40px;padding:clamp(22px,3vw,36px);border-radius:24px;border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 10%,transparent),transparent 70%),var(--panel)}
+.bv h2{font-size:clamp(28px,3vw,40px);margin:8px 0 10px}
+.bv-vote{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 14px}
+.bv-vote button{padding:11px 18px;border-radius:999px;border:1px solid var(--line2);background:none;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.bv-vote button[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+#bvForm textarea{width:100%;min-height:76px;margin:6px 0 12px}
+.bv-tally{display:flex;gap:28px;margin-bottom:14px}
+.bv-tally b{display:block;font-family:var(--serif);font-weight:400;font-size:40px;line-height:1}
+.bv-tally small{color:var(--muted);font-size:13px}
+.bv-list{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:12px;max-height:300px;overflow:auto}
+.bv-list li{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start}
+.bv-list small{color:var(--muted)}.bv-list p{margin:2px 0 0;color:var(--ink2);font-size:15px}
+.notis{position:fixed;left:22px;bottom:22px;z-index:95;max-width:380px;padding:18px 20px;border-radius:18px;background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);box-shadow:0 24px 60px -20px rgba(0,0,0,.6);transform:translateY(140%);opacity:0;transition:transform .6s var(--ease),opacity .4s}
+.notis.on{transform:none;opacity:1}
+.notis p{margin:6px 0 12px}
+.g-alldone{margin:12px 0 4px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink2);font-size:15px}
+.g-alldone b{color:var(--ink)}
+.g-folk .linkbtn{font-size:13px}
+@media (max-width:900px){.bv{grid-template-columns:1fr}}
+@media (max-width:600px){.notis{left:12px;right:12px;bottom:12px;max-width:none}}

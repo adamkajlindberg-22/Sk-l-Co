@@ -138,6 +138,8 @@ const viewHooks={};
 function route(){
   const h=decodeURIComponent(location.hash.slice(1));
   if(/^rum-[A-Za-z0-9]{6}$/.test(h)){showView("upptack");gOpen(h.slice(4).toUpperCase());return}
+  if(/^lista-[A-Za-z0-9]{10}$/.test(h)){showView("lista");openList(h.slice(6));return}
+  if(/^bord-[A-Za-z0-9]{10}$/.test(h)){showView("dukning");openBord(h.slice(5));return}
   if(h==="tillsammans"){showView("upptack");setSwMode("group");return}
   if(h.startsWith("p-")&&byId[h.slice(2)]){
     if(!$("[data-view]:not([hidden])"))showView("hem");
@@ -1391,13 +1393,14 @@ function renderGroupPanel(){
   const row=x=>`<div class="gk-item" data-open="${x.p.id}" style="cursor:pointer"><img src="${img(x.p,true)}" data-pimg="${x.p.id}" alt=""><div><b>${esc(x.p.name)}</b><small>${kr(per(x.p))} per glas${x.who.length?" · gillas av "+esc(lista(x.who)):""}${x.lovers.length?" · "+esc(lista(x.lovers))+" sparade det":""}</small></div></div>`;
   el.innerHTML=`<span class="mono">Swipea tillsammans</span><h2 class="pc-h">${esc(G.meta.name||"Vår grupp")}</h2>
   <div class="g-code"><span>Kod <b>${esc(G.code)}</b></span><button class="small-btn" data-ginvite>Bjud in</button></div>
-  <ul class="g-folk">${st.people.sort((a,b)=>b.me-a.me).map(f=>{const n=prog(f);return `<li><span class="g-av" aria-hidden="true">${esc((f.name[0]||"?").toUpperCase())}</span><span class="g-nm">${esc(f.me?"Du":f.name)}${G.meta.host&&f.uid===G.meta.host?' <small>skapade gruppen</small>':""}</span><span class="g-pr"><i style="--w:${Math.round(n/st.len*100)}%"></i></span><small>${n===st.len?"Klar":n+" av "+st.len}</small></li>`}).join("")}</ul>
+  <ul class="g-folk">${st.people.sort((a,b)=>b.me-a.me).map(f=>{const n=prog(f);return `<li><span class="g-av" aria-hidden="true">${esc((f.name[0]||"?").toUpperCase())}</span><span class="g-nm">${esc(f.me?"Du":f.name)}${G.meta.host&&f.uid===G.meta.host?' <small>skapade gruppen</small>':""}</span><span class="g-pr"><i style="--w:${Math.round(n/st.len*100)}%"></i></span><small>${n===st.len?"Klar":f.me?n+" av "+st.len:`<button class="linkbtn" data-gremind="${esc(f.uid)}" aria-label="Påminn ${esc(f.name)}">${n} av ${st.len} · påminn</button>`}</small></li>`}).join("")}</ul>
+  ${st.n>=2&&st.people.every(f=>prog(f)===st.len)?`<div class="g-alldone"><b>Alla är klara!</b> ${st.matches.length?(st.matches.length===1?"Ni matchar på ett glas.":"Ni matchar på "+st.matches.length+" glas."):"Här är det ni gillar mest."}</div>`:""}
   ${st.n<2?`<p class="note">Bjud in någon för att se vad ni matchar på. Länken går att skicka i sms, WhatsApp eller mejl.</p>`:""}
   <span class="mono" style="display:block;margin-top:18px">${st.matches.length?"Alla gillar":"Matchningar"}</span>
   ${st.matches.length?`<div class="gk-list g-match">${st.matches.map(row).join("")}</div>`:`<p class="note">${st.n<2?"Matchningarna visas när ni är minst två.":"Inga glas som alla gillar än. Fortsätt swipea."}</p>`}
   ${st.ranked.filter(x=>!st.matches.includes(x)).length?`<span class="mono" style="display:block;margin-top:18px">Flest gillar</span><div class="gk-list">${st.ranked.filter(x=>!st.matches.includes(x)).slice(0,4).map(row).join("")}</div>`:""}
   ${st.prof&&st.n>=2?`<p class="g-prof">Er gemensamma stil: <b>${esc(st.prof.name)}</b>. Ni gillar ${esc(st.prof.summary)}.</p>`:""}
-  <div class="pdp-actions" style="margin-top:16px">${st.ranked.length?'<button class="small-btn" data-gsave>Spara i Mitt glasskåp</button>':""}<button class="small-btn" data-gleave>Lämna gruppvyn</button></div>`;
+  <div class="pdp-actions" style="margin-top:16px">${st.ranked.length?'<button class="small-btn" data-glist>Gör en önskelista att dela</button><button class="small-btn" data-gsave>Spara i Mitt glasskåp</button>':""}<button class="small-btn" data-gleave>Lämna gruppvyn</button></div>`;
 }
 function gDone(){
   if(!G)return;const st=gStats(),wait=st.people.filter(f=>!f.me&&G.deck.some(c=>f.votes[c.p.id]==null));
@@ -1425,6 +1428,163 @@ document.addEventListener("submit",e=>{
 /* Kom någon via en inbjudan innan inloggningen var klar, gå med så fort den är det. */
 let gAsked=false;
 onState(()=>{if(gPending&&AUTH.user&&AUTH.rt){const c=gPending;gPending=null;gOpen(c)}else if(gPending&&AUTH.ready&&AUTH.api&&!AUTH.user&&!gAsked&&curView==="upptack"){gAsked=true;openLogin("in",{h:"Du är inbjuden att swipea glas tillsammans.",p:"Logga in med Google eller e-post så är du med direkt. Ni ser vilka glas ni alla gillar."})}else if(swMode==="group"&&!G&&curView==="upptack")renderLobby()});
+/* ---------- Delat: önskelistor gäster kan köpa från, dukningar man röstar på, påminnelser i grupper ----------
+   listor/{ID}/meta {owner, ownerName, name, type, items:[id], ts}   ägaren skriver. Alla med länken kan läsa.
+   listor/{ID}/kopt/{produktid} {name, ts}                           vem som helst kan markera köpt en gång. Ägaren kan ångra.
+   bord/{ID}/meta {owner, ownerName, title, data, ts}                ägaren skriver. Inloggade med länken kan läsa.
+   bord/{ID}/rost/{uid} {name, v: 1|-1, c, ts}                       var och en skriver sin egen röst.
+   rum/{KOD}/paminn/{uid} tidpunkt                                    den som skapade gruppen kan påminna. */
+const id10=()=>{const A="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";let s="";for(let i=0;i<10;i++)s+=A[Math.floor(Math.random()*A.length)];return s};
+const idOk=s=>/^[A-Za-z0-9]{10}$/.test(s||"");
+const shareLink=h=>location.origin+location.pathname+"#"+h;
+const firstName=()=>gMe().split(" ")[0];
+async function shareOut(title,text,url,msg){
+  if(navigator.share){try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  copy(text+"\n"+url,msg||"Länken är kopierad. Klistra in den i sms, WhatsApp eller mejl.");
+}
+function needLogin(h,p){if(!authOn()){toast("Det här fungerar på den publicerade sajten med inloggning.");return true}if(!AUTH.user||!AUTH.rt){openLogin("in",{h,p});return true}return false}
+
+/* ===== 1. Delade listor ===== */
+const listSynced={};
+async function pubList(L,silent){
+  if(needLogin("Logga in för att dela listan.","Då kan gästerna öppna listan, köpa glas och se vad som redan är köpt."))return;
+  const rt=AUTH.rt;if(!L.pub){L.pub=id10();save()}
+  try{await rt.set(rt.ref("listor/"+L.pub+"/meta"),{owner:AUTH.user.uid,ownerName:firstName(),name:L.name,type:L.type||"egen",items:L.items,ts:Date.now()});listSynced[L.pub]=JSON.stringify([L.name,L.items]);
+    track("share",{method:"lank",content_type:"lista"});
+    if(!silent)shareOut(L.name,`${L.name}: här är glasen jag önskar mig hos SKÅL & CO. Du ser vad som redan är köpt.`,shareLink("lista-"+L.pub));
+  }catch(e){gErr(e)}
+}
+/* Håll den delade listan i takt med ändringar i Mitt glasskåp */
+onState(()=>{if(!AUTH.user||!AUTH.rt)return;(S.lists||[]).forEach(L=>{if(!L.pub)return;const k=JSON.stringify([L.name,L.items]);if(listSynced[L.pub]!==undefined&&listSynced[L.pub]!==k){listSynced[L.pub]=k;AUTH.rt.update(AUTH.rt.ref("listor/"+L.pub+"/meta"),{name:L.name,items:L.items,ts:Date.now()}).catch(()=>{})}else if(listSynced[L.pub]===undefined)listSynced[L.pub]=k})});
+const LKOPT={};
+function listBought(pub){/* antal köpta, hämtas i bakgrunden */
+  if(!AUTH.rt||!pub)return null;const c=LKOPT[pub];
+  if(!c||Date.now()-c.t>30000){LKOPT[pub]={n:c?c.n:null,t:Date.now()};AUTH.rt.get(AUTH.rt.ref("listor/"+pub+"/kopt")).then(s=>{const n=s.exists()?Object.keys(s.val()).length:0;const old=LKOPT[pub].n;LKOPT[pub]={n,t:Date.now()};if(old!==n&&curView==="glasskap")renderGlasskap()}).catch(()=>{})}
+  return LKOPT[pub].n;
+}
+let LV=null,listPending=null;
+function openList(id){
+  const el=$("#listaV");if(!el)return;
+  if(LV&&LV.id===id)return;
+  if(LV&&LV.off)try{LV.off()}catch(e){}LV=null;
+  if(!authOn()){el.innerHTML=`<div class="lv-empty"><h1>Listan kan inte visas här.</h1><p class="lead">Öppna länken på den publicerade sajten.</p></div>`;return}
+  if(!AUTH.rt){listPending=id;el.innerHTML=`<p class="ai-note" style="padding:40px 0"><i class="spin"></i>Hämtar listan</p>`;return}
+  listPending=null;LV={id,meta:null,kopt:{}};
+  LV.off=AUTH.rt.onValue(AUTH.rt.ref("listor/"+id),s=>{if(!LV||LV.id!==id)return;const v=s.val();if(!v||!v.meta){el.innerHTML=`<div class="lv-empty"><span class="mono">Önskelista</span><h1>Vi hittar inte listan.</h1><p class="lead">Länken kan vara fel, eller så har listan tagits bort.</p><a class="btn btn-ghost" href="#handla">Titta på glasen</a></div>`;return}
+    LV.meta=v.meta;LV.kopt=v.kopt||{};renderListView()},e=>{el.innerHTML=`<div class="lv-empty"><h1>Listan kunde inte hämtas.</h1><p class="lead">Prova att ladda om sidan.</p></div>`;console.warn(e)});
+}
+function renderListView(){
+  const el=$("#listaV"),m=LV.meta,k=LV.kopt,mine=AUTH.user&&AUTH.user.uid===m.owner;
+  const items=(m.items||[]).map(id=>byId[id]).filter(Boolean),n=items.filter(p=>k[p.id]).length;
+  el.innerHTML=`<header class="page-head lv-head"><span class="mono">${m.type==="brollop"?"Bröllopslista":"Önskelista"}</span><h1>${esc(m.name)}</h1><p class="lead">${mine?"Det här är din lista. Dela länken, så ser gästerna vad som redan är köpt.":esc(m.ownerName||"Någon")+" önskar sig de här glasen. Köp ett och markera det, så köper ingen annan samma."}</p>
+    <div class="lv-prog"><span><b>${n}</b> av ${items.length} köpta</span><i style="--w:${items.length?Math.round(n/items.length*100):0}%"></i></div>
+    ${mine?`<div class="pdp-actions"><button class="btn btn-primary" data-lvshare>Dela listan</button><a class="btn btn-ghost" href="#glasskap" data-gtab="sparat">Ändra i Mitt glasskåp</a></div>`:""}</header>
+  <div class="lv-grid">${items.map(p=>{const b=k[p.id];return `<article class="lv-item${b?" bought":""}"><div class="lv-img" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt="${esc(p.name)}" loading="lazy">${b?`<span class="lv-tag">${mine?"Köpt av "+esc(b.name):"Redan köpt"}</span>`:""}</div>
+    <div class="lv-body"><b>${esc(p.name)}</b><small>${esc(p.mat)} · ${packTxt(p)} · ${kr(p.price)}</small>
+    <div class="pdp-actions">${b?(mine?`<button class="small-btn" data-lvundo="${p.id}">Ångra köpt</button>`:`<span class="note" style="margin:0">Tack, den är redan köpt.</span>`):`<button class="small-btn" data-add="${p.id}">Lägg i varukorgen</button><button class="small-btn" data-lvbuy="${p.id}">Jag har köpt den</button>`}</div></div></article>`}).join("")||'<p class="lead">Listan är tom än så länge.</p>'}</div>
+  <p class="note" style="margin-top:24px">Visningsversion: inget köp görs på riktigt.</p>`;
+}
+function markBought(pid){
+  const p=byId[pid];if(!p||!LV)return;
+  openModal(`<div class="co"><span class="mono">Markera som köpt</span><h2 style="margin:8px 0 10px">${esc(p.name)}</h2><p class="lead" style="font-size:17px">Då ser alla andra att den redan är köpt. ${esc(LV.meta.ownerName||"Den som önskar")} kan se ditt namn.</p>
+    <form id="lvForm" style="display:grid;gap:10px;margin-top:14px"><label class="note" for="lvName" style="margin:0">Ditt namn</label><input class="field" id="lvName" maxlength="40" value="${esc(gMe())}" autocomplete="name" required><button class="btn btn-primary">Markera som köpt</button></form></div>`,"Markera som köpt","lvbuy");
+  $("#lvForm").addEventListener("submit",async e=>{e.preventDefault();const name=$("#lvName").value.trim().slice(0,40);if(!name){toast("Skriv ditt namn");return}
+    try{await AUTH.rt.set(AUTH.rt.ref("listor/"+LV.id+"/kopt/"+pid),{name,ts:Date.now()});closeModal();toast("Tack! Den är markerad som köpt.");track("tool_use",{tool:"delad-lista",action:"kopt"})}
+    catch(x){closeModal();toast(/permission/i.test(String(x&&(x.code||x.message)))?"Någon hann markera den före dig.":"Det gick inte. Prova igen.")}});
+}
+
+/* ===== 2. Rösta på en dukning ===== */
+let BV=null,bordPending=null;
+async function shareBord(){
+  if(needLogin("Logga in för att dela dukningen.","Då kan familj och vänner rösta och kommentera, och du ser svaren i Mitt glasskåp."))return;
+  const id=id10(),title=`${SEASONS[T.season][0]} för ${T.guests}, ${STY[T.style][0].toLowerCase()}`,data={season:T.season,style:T.style,guests:T.guests,on:[...T.on],pick:{...T.pick},table:T.table};
+  try{await AUTH.rt.set(AUTH.rt.ref("bord/"+id+"/meta"),{owner:AUTH.user.uid,ownerName:firstName(),title,data,ts:Date.now()});
+    S.saved.unshift({type:"dukning",title,data,bord:id,ts:Date.now()});save();
+    track("share",{method:"lank",content_type:"dukning"});
+    history.replaceState(null,"","#bord-"+id);openBord(id);
+    shareOut("Vad tycker du om dukningen?",`Vad tycker du om dukningen till ${title.toLowerCase()}? Rösta och kommentera hos SKÅL & CO.`,shareLink("bord-"+id));
+  }catch(e){gErr(e)}
+}
+function openBord(id){
+  const el=$("#bordVote");if(!el)return;el.hidden=false;
+  if(BV&&BV.id===id)return;
+  if(BV&&BV.off)try{BV.off()}catch(e){}BV=null;
+  if(!authOn()){el.innerHTML=`<p class="lead">Röstning fungerar på den publicerade sajten.</p>`;return}
+  if(!AUTH.user||!AUTH.rt){bordPending=id;el.innerHTML=`<div class="bv"><div><span class="mono">Rösta på dukningen</span><h2>Någon vill veta vad du tycker.</h2><p class="lead" style="font-size:17px">Logga in med Google eller e-post så ser du bordet och kan rösta.</p></div><div class="pdp-actions"><button class="btn btn-google" data-login="google">${GSVG} Fortsätt med Google</button><button class="btn btn-ghost" data-login="in">E-post</button></div></div>`;
+    if(AUTH.ready&&AUTH.api&&!AUTH.user&&!bordAsked){bordAsked=true;openLogin("in",{h:"Vad tycker du om dukningen?",p:"Logga in så ser du bordet och kan rösta och kommentera."})}return}
+  bordPending=null;BV={id,meta:null,rost:{},loaded:false};
+  BV.off=AUTH.rt.onValue(AUTH.rt.ref("bord/"+id),s=>{if(!BV||BV.id!==id)return;const v=s.val();
+    if(!v||!v.meta){el.innerHTML=`<div class="bv"><div><h2>Vi hittar inte dukningen.</h2><p class="lead" style="font-size:17px">Länken kan vara fel.</p></div><button class="small-btn" data-bvclose>Stäng</button></div>`;return}
+    BV.meta=v.meta;BV.rost=v.rost||{};if(!BV.loaded){BV.loaded=true;if(v.meta.data){loadDukning(v.meta.data);if(v.meta.data.table&&TABLES[v.meta.data.table]){T.table=v.meta.data.table;renderTable()}}}
+    renderBordVote()},e=>{gErr(e)});
+}
+let bordAsked=false;
+function renderBordVote(){
+  const el=$("#bordVote"),m=BV.meta,uid=AUTH.user.uid,mine=uid===m.owner,R=Object.entries(BV.rost).map(([u,r])=>({u,...r})).sort((a,b)=>b.ts-a.ts),me=BV.rost[uid];
+  const up=R.filter(r=>r.v>0).length,dn=R.filter(r=>r.v<0).length;
+  el.innerHTML=`<div class="bv"><div class="bv-main"><span class="mono">${mine?"Din delade dukning":"Rösta på dukningen"}</span><h2>${mine?esc(m.title):esc(m.ownerName||"Någon")+" vill veta vad du tycker."}</h2>
+    ${mine?`<p class="lead" style="font-size:17px">Dela länken med familj och vänner. Rösterna syns här direkt.</p>`:`<p class="lead" style="font-size:17px">${esc(m.title)}. Titta på bordet nedanför, byt gärna glas och säg vad du tycker.</p>
+    <form id="bvForm"><div class="bv-vote" role="group" aria-label="Din röst"><button type="button" data-bvv="1" aria-pressed="${me?me.v>0:false}">Snyggt, kör på det</button><button type="button" data-bvv="-1" aria-pressed="${me?me.v<0:false}">Jag skulle byta något</button></div>
+    <label class="note" for="bvC">Kommentar, om du vill</label><textarea class="field" id="bvC" maxlength="200" placeholder="Till exempel: ta coupe i stället för flöjt">${esc(me&&me.c||"")}</textarea><button class="btn btn-primary">${me?"Uppdatera min röst":"Skicka min röst"}</button></form>`}
+    </div>
+    <div class="bv-side"><div class="bv-tally"><div><b>${up}</b><small>gillar</small></div><div><b>${dn}</b><small>vill byta</small></div></div>
+      <ul class="bv-list">${R.map(r=>`<li><span class="g-av" aria-hidden="true">${esc((r.name||"?")[0].toUpperCase())}</span><div><b>${esc(r.u===uid?"Du":r.name||"Gäst")}</b> <small>${r.v>0?"gillar":"vill byta"}</small>${r.c?`<p>${esc(r.c)}</p>`:""}</div></li>`).join("")||'<li class="note">Inga röster än.</li>'}</ul>
+      <div class="pdp-actions">${mine?'<button class="small-btn" data-bvshare>Dela igen</button>':""}<button class="small-btn" data-bvclose>Stäng röstningen</button></div></div></div>`;
+}
+let bvPick=null;
+document.addEventListener("click",e=>{
+  if(e.target.closest("#tShare")){shareBord();return}
+  const v=e.target.closest("[data-bvv]");if(v){bvPick=+v.dataset.bvv;$$("[data-bvv]").forEach(b=>b.setAttribute("aria-pressed",String(b===v)));return}
+  if(e.target.closest("[data-bvshare]")&&BV){shareOut("Vad tycker du om dukningen?",`Vad tycker du om dukningen till ${BV.meta.title.toLowerCase()}? Rösta hos SKÅL & CO.`,shareLink("bord-"+BV.id));return}
+  if(e.target.closest("[data-bvclose]")){if(BV&&BV.off)try{BV.off()}catch(x){}BV=null;$("#bordVote").hidden=true;$("#bordVote").innerHTML="";history.replaceState(null,"","#dukning");return}
+  if(e.target.closest("[data-lvshare]")&&LV){const L=S.lists.find(l=>l.pub===LV.id);if(L)pubList(L);else shareOut(LV.meta.name,LV.meta.name+" hos SKÅL & CO",shareLink("lista-"+LV.id));return}
+  const lb=e.target.closest("[data-lvbuy]");if(lb){markBought(lb.dataset.lvbuy);return}
+  const lu=e.target.closest("[data-lvundo]");if(lu&&LV){AUTH.rt.remove(AUTH.rt.ref("listor/"+LV.id+"/kopt/"+lu.dataset.lvundo)).catch(gErr);return}
+  const lp=e.target.closest("[data-lpub]");if(lp){const L=S.lists.find(l=>l.id===lp.dataset.lpub);if(L)pubList(L);return}
+  if(e.target.closest("[data-glist]")&&G){const st=gStats(),ids=(st.matches.length?st.matches:st.ranked).slice(0,8).map(x=>x.p.id);if(!ids.length){toast("Swipea lite först, så finns det något att lägga i listan.");return}
+    const name=(G.meta.name||"Vår lista").slice(0,40),L={id:"l"+Date.now(),name,type:/bröllop/i.test(name)?"brollop":"egen",items:ids};S.lists.push(L);save();pubList(L);return}
+  const rm=e.target.closest("[data-gremind]");if(rm&&G){const f=(G.folk||{})[rm.dataset.gremind],left=G.deck.filter(c=>!(f&&f.votes&&f.votes[c.p.id]!=null)).length;
+    if(AUTH.user&&G.meta.host===AUTH.user.uid)AUTH.rt.set(AUTH.rt.ref("rum/"+G.code+"/paminn/"+rm.dataset.gremind),Date.now()).catch(()=>{});
+    shareOut("Swipea glas med oss",`Hej ${String(f&&f.name||"").split(" ")[0]}! Du har ${left} glas kvar att swipea i ${G.meta.name||"vår grupp"}. Det tar en minut.`,gLink(G.code),"Påminnelsen är kopierad. Skicka den i sms eller WhatsApp.");return}
+});
+document.addEventListener("submit",async e=>{
+  if(e.target.id!=="bvForm"||!BV)return;e.preventDefault();
+  const me=BV.rost[AUTH.user.uid],v=bvPick||(me&&me.v);if(!v){toast("Välj om du gillar dukningen eller vill byta något");return}
+  try{await AUTH.rt.set(AUTH.rt.ref("bord/"+BV.id+"/rost/"+AUTH.user.uid),{name:firstName(),v,c:$("#bvC").value.trim().slice(0,200),ts:Date.now()});toast("Tack för din röst!");track("tool_use",{tool:"dukning-rost"})}catch(x){gErr(x)}
+});
+
+/* ===== 4. Påminnelser och "alla är klara" ===== */
+let roomsChecked=false;
+function seenGet(){try{return JSON.parse(localStorage.getItem("skal-rum-sett")||"{}")}catch(e){return {}}}
+function seenSet(o){try{localStorage.setItem("skal-rum-sett",JSON.stringify(o))}catch(e){}}
+async function checkRooms(){
+  if(roomsChecked||!AUTH.user||!AUTH.rt||!(S.rooms||[]).length)return;roomsChecked=true;
+  const uid=AUTH.user.uid,seen=seenGet(),notes=[];
+  for(const r of S.rooms.slice(0,6)){
+    try{const s=await AUTH.rt.get(AUTH.rt.ref("rum/"+r.code));if(!s.exists())continue;const v=s.val(),deck=(v.meta&&v.meta.deck)||[],folk=v.folk||{},me=folk[uid];if(!me)continue;
+      const left=f=>deck.filter(id=>!(f.votes&&f.votes[id]!=null)).length,myLeft=left(me),ppl=Object.values(folk),allDone=ppl.length>=2&&ppl.every(f=>left(f)===0);
+      const pm=v.paminn&&v.paminn[uid],sn=seen[r.code]||{};
+      const matches=allDone?deck.filter(id=>ppl.every(f=>f.votes&&f.votes[id]>0)).length:0;
+      if(pm&&myLeft&&pm>(sn.pm||0)){notes.push({code:r.code,k:"pm",v:pm,t:`${esc((v.meta&&v.meta.hostName)||"Någon")} påminner dig: ${myLeft} glas kvar i ${esc(v.meta.name)}.`,b:"Swipea nu"});continue}
+      if(allDone&&!sn.done){notes.push({code:r.code,k:"done",v:1,t:`Alla i ${esc(v.meta.name)} är klara. ${matches?(matches===1?"Ni matchar på ett glas.":"Ni matchar på "+matches+" glas."):"Se vad ni gillar mest."}`,b:"Se resultatet"});continue}
+      if(myLeft&&myLeft<deck.length&&!sessionStorage.getItem("skal-rum-left-"+r.code))notes.push({code:r.code,k:"left",v:1,t:`Du har ${myLeft} glas kvar i ${esc(v.meta.name)}.`,b:"Fortsätt"});
+    }catch(e){}
+  }
+  if(notes.length)showNotis(notes[0]);
+}
+function showNotis(n){
+  let el=$("#notis");if(!el){el=document.createElement("div");el.id="notis";el.className="notis";el.setAttribute("role","status");document.body.appendChild(el)}
+  el.innerHTML=`<span class="mono">Swipea tillsammans</span><p>${n.t}</p><div class="pdp-actions"><a class="btn btn-primary btn-sm" href="#rum-${esc(n.code)}" data-notisok>${n.b}</a><button class="small-btn" data-notisx>Senare</button></div>`;
+  requestAnimationFrame(()=>el.classList.add("on"));
+  const done=()=>{const s=seenGet();s[n.code]=s[n.code]||{};if(n.k==="pm")s[n.code].pm=n.v;if(n.k==="done")s[n.code].done=true;seenSet(s);if(n.k==="left")try{sessionStorage.setItem("skal-rum-left-"+n.code,"1")}catch(e){}el.classList.remove("on")};
+  $("[data-notisok]",el).addEventListener("click",done);$("[data-notisx]",el).addEventListener("click",done);
+}
+/* Väntande länkar och påminnelser när inloggningen är klar */
+onState(()=>{
+  if(listPending&&AUTH.rt)openList(listPending);
+  if(bordPending&&AUTH.user&&AUTH.rt)openBord(bordPending);else if(bordPending&&AUTH.ready&&AUTH.api&&!AUTH.user&&curView==="dukning")openBord(bordPending);
+  if(AUTH.user&&AUTH.rt&&!roomsChecked)setTimeout(checkRooms,1500);
+});
 
 /* ---------- Mitt glasskåp ---------- */
 const fmtDate=ts=>new Date(ts).toLocaleDateString("sv-SE",{day:"numeric",month:"short"});
@@ -1511,12 +1671,12 @@ function renderGlasskap(){
     <div class="gk-list">${S.favs.map(id=>byId[id]).filter(Boolean).map(p=>`<div class="gk-item"><img src="${img(p,true)}" data-pimg="${p.id}" alt="" data-open="${p.id}" style="cursor:pointer"><div><b>${esc(p.name)}</b><small>${kr(p.price)}</small></div><div class="acts"><button class="small-btn" data-add="${p.id}">Köp</button><button class="small-btn" data-fav="${p.id}" aria-pressed="true" aria-label="Ta bort favorit">${heartSvg}</button></div></div>`).join("")||'<p class="gk-empty">Tryck på hjärtat på ett glas, eller swipea uppåt i Glas-swipe.</p>'}</div>
   </section>
   <section class="gk"><span class="mono">Listor</span><h2 class="gk-h">Önskelistor och bröllopslistor.</h2>
-    ${S.lists.map(l=>`<div style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>${esc(l.name)}</b><span class="acts" style="display:flex;gap:6px"><button class="small-btn" data-lshare="${esc(l.id)}">Kopiera listan</button>${l.id!=="onske"?`<button class="small-btn" data-ldel="${esc(l.id)}">Ta bort</button>`:""}</span></div><div class="gk-list">${l.items.map(id=>byId[id]).filter(Boolean).map(p=>`<div class="gk-item"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><div><b>${esc(p.name)}</b><small>${kr(p.price)}</small></div><button class="small-btn" data-lrm="${esc(l.id)}~${p.id}">Ta bort</button></div>`).join("")||'<p class="gk-empty">Tom. Spara glas hit från produktsidan.</p>'}</div></div>`).join("")}
+    ${S.lists.map(l=>`<div style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>${esc(l.name)}</b><span class="acts" style="display:flex;gap:6px;flex-wrap:wrap">${l.pub?`<a class="small-btn" href="#lista-${esc(l.pub)}">${(n=>n==null?"Öppna":n+" av "+l.items.length+" köpta")(listBought(l.pub))}</a>`:""}<button class="small-btn" data-lpub="${esc(l.id)}">${l.pub?"Dela igen":"Dela länk"}</button>${l.id!=="onske"?`<button class="small-btn" data-ldel="${esc(l.id)}">Ta bort</button>`:""}</span></div><div class="gk-list">${l.items.map(id=>byId[id]).filter(Boolean).map(p=>`<div class="gk-item"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><div><b>${esc(p.name)}</b><small>${kr(p.price)}</small></div><button class="small-btn" data-lrm="${esc(l.id)}~${p.id}">Ta bort</button></div>`).join("")||'<p class="gk-empty">Tom. Spara glas hit från produktsidan.</p>'}</div></div>`).join("")}
     <form class="inline-form" id="listNew"><input id="listName" placeholder="Ny lista, till exempel Bröllop 2027" aria-label="Namn på ny lista"><button class="small-btn">Skapa</button></form>
-    <p class="note">I butiken kan du dela en länk till listan, och gäster ser vad som redan är köpt.</p>
+    <p class="note">Dela länken, så kan gästerna köpa glas och markera dem. Alla ser vad som redan är köpt.</p>
   </section>
   <section class="gk"><span class="mono">Sparade val</span><h2 class="gk-h">Dukningar, kit och förslag.</h2>
-    <div class="gk-list">${S.saved.slice(0,8).map((s,i)=>`<div class="gk-item"><span class="sil">${sil(s.type==="dukning"?"rott":s.type==="kit"?"whisky":s.type==="swipe"?"coupe":"vitt","currentColor",6)}</span><div><b>${esc(s.title)}</b><small>${fmtDate(s.ts)}</small></div><div class="acts"><button class="small-btn" data-sopen="${i}">Öppna</button><button class="small-btn" data-sdel="${i}" aria-label="Ta bort">×</button></div></div>`).join("")||'<p class="gk-empty">Spara en dukning, ett barkit eller dina förslag från Glasguiden.</p>'}</div>
+    <div class="gk-list">${S.saved.slice(0,8).map((s,i)=>`<div class="gk-item"><span class="sil">${sil(s.type==="dukning"?"rott":s.type==="kit"?"whisky":s.type==="swipe"?"coupe":"vitt","currentColor",6)}</span><div><b>${esc(s.title)}</b><small>${fmtDate(s.ts)}</small></div><div class="acts">${s.bord?`<a class="small-btn" href="#bord-${esc(s.bord)}">Röster</a>`:""}<button class="small-btn" data-sopen="${i}">Öppna</button><button class="small-btn" data-sdel="${i}" aria-label="Ta bort">×</button></div></div>`).join("")||'<p class="gk-empty">Spara en dukning, ett barkit eller dina förslag från Glasguiden.</p>'}</div>
   </section>
   <section class="gk"><span class="mono">Bevakningar</span><h2 class="gk-h">Serier du följer</h2>
     <div class="gk-list">${S.watches.map((w,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(w.series)}<small style="display:block;color:var(--muted)">Nyheter och prisändringar</small></span><button class="small-btn" data-wdel="${i}">Sluta</button></div>`).join("")||'<p class="gk-empty">Bevaka en serie från produktsidan.</p>'}</div>
@@ -1627,12 +1787,26 @@ const conc=$("#conc"),msgs=$("#msgs");
 let convo=[],busy=false;
 function botBubble(){const d=document.createElement("div");d.className="msg bot";msgs.appendChild(d);return d}
 function meSay(t){const d=document.createElement("div");d.className="msg me";d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
-function prodMini(p,qty){return `<div class="mp"><img src="${img(p,true)}" alt="" data-open="${p.id}" style="cursor:pointer"><div><b>${esc(p.name)}</b><small>${esc(p.mat)} · ${p.vol} cl · ${kr(per(p))}/glas${p.props.includes("diskmaskin")?" · tål diskmaskin":""}</small></div><button class="round" data-add="${p.id}" ${qty?`data-qty="${qty}"`:""} aria-label="Lägg ${esc(p.name)} i varukorgen">+</button></div>`}
+function prodMini(p,qty){return `<div class="mp"><img src="${img(p,true)}" alt="" data-open="${p.id}" style="cursor:pointer"><div><b>${esc(p.name)}</b><small>${esc(p.mat)} · ${p.vol} cl · ${p.cat==="karaff"?kr(p.price):kr(per(p))+"/glas"}${p.props.includes("diskmaskin")?" · tål diskmaskin":""}</small></div><button class="round" data-add="${p.id}" ${qty?`data-qty="${qty}"`:""} aria-label="Lägg ${esc(p.name)} i varukorgen">+</button></div>`}
 function renderAI(text){
   const parts=String(text).split(/\[\[([a-z]+)\]\]/);
   return parts.map((s,i)=>i%2?(byId[s]?prodMini(byId[s]):""):esc(s).trim().replace(/\n{2,}/g,"<br><br>").replace(/\n/g,"<br>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")).join("");
 }
 const NUM={två:2,tre:3,fyra:4,fem:5,sex:6,sju:7,åtta:8,tio:10,tolv:12};
+/* Glassommelieren läser stilen och setet från Glasguiden och Glas-swipe */
+function setAdvice(){
+  const picks=((S.finder&&S.finder.picks)||[]).map(id=>byId[id]).filter(Boolean),owned=S.owned.map(o=>byId[o.id]).filter(Boolean),have=[...picks,...owned],ids=new Set(have.map(p=>p.id)),cats=new Set(have.map(p=>p.cat));
+  if(!have.length&&!S.profile)return "Jag vet inte din stil än. Gör Glasguiden eller Glas-swipe, så kan jag komplettera ditt set. Eller berätta vad du dricker, så föreslår jag något direkt.";
+  const out=[],add=(p,why)=>{if(p&&!ids.has(p.id)&&!out.some(o=>o.p.id===p.id))out.push({p,why})};
+  const best=f=>recommend(P.length,[...ids]).map(r=>r.p).find(f);
+  if((cats.has("vin")||cats.has("champagne"))&&!cats.has("karaff"))add(byId.karaff,"Ger vinet luft och samlar bordet.");
+  if(!cats.has("vatten")&&have.length)add(best(p=>p.cat==="vatten"),"Ett vattenglas vid varje kuvert gör setet komplett.");
+  if(cats.has("vin")&&!cats.has("champagne")&&S.finder&&(S.finder.occ==="fest"||S.finder.occ==="middag"))add(best(p=>p.cat==="champagne"),"Till skålen innan middagen.");
+  if(cats.has("whisky")&&!cats.has("cocktail"))add(best(p=>p.cat==="cocktail"),"För hemmabaren när någon vill ha något annat än whisky.");
+  recommend(4,[...ids]).forEach(r=>add(r.p,r.why?r.why+".":"Passar din stil."));
+  const intro=picks.length?`Ditt set från Glasguiden är ${picks.map(p=>p.name).join(", ")}${S.profile?`, och din stil är ${S.profile.name.toLowerCase()}`:""}. Det här skulle jag lägga till:`:S.profile?`Din stil är ${S.profile.name.toLowerCase()}: du gillar ${S.profile.summary}. Det här passar dig:`:"Utifrån glasen du har skulle jag lägga till:";
+  return esc(intro)+out.slice(0,3).map(o=>prodMini(o.p)+`<p class="note" style="margin:2px 0 8px">${esc(o.why)}</p>`).join("");
+}
 function answer(raw){
   const t=raw.toLowerCase();
   if(/bly|blyfri|ursprung|tillverkas i|vilket land/.test(t))return "Den uppgiften har vi inte verifierad i produktdatan än, så jag vill inte gissa. Vi lägger bara upp fakta från tillverkaren.";
@@ -1640,6 +1814,7 @@ function answer(raw){
   const b=t.match(/(\d[\d\s]{1,6})\s*(kr|kronor|:-)/); const budget=b?+b[1].replace(/\s/g,""):null;
   let cnt=null;const c=t.match(/(\d+)\s*(st|glas|koppar)/);if(c)cnt=+c[1];else for(const [w,v] of Object.entries(NUM))if(hasWord(t,w))cnt=v;
   const wantDish=/diskmaskin/.test(t), thin=/tunn|elegant|lätt|munblås/.test(t), gift=/present|bröllop|gåva/.test(t), mine=/mitt glasskåp|jag har|mina glas|saknas/.test(t);
+  if(/mitt set|min stil|komplettera|lägga till|vad mer|passar mig/.test(t))return setAdvice();
   if(mine){const r=recommend(3,S.owned.map(o=>o.id));return (S.owned.length?`Du har ${S.owned.length} sorters glas i Mitt glasskåp. Det här kompletterar dem:`:"Du har inga glas i Mitt glasskåp än. Det här är bra att börja med:")+r.map(x=>prodMini(x.p)).join("")}
   let L=P.filter(p=>!drinks.length||drinks.some(d=>p.drinks.includes(d)||p.cat===d));
   if(!/karaff|kanna/.test(t))L=L.filter(p=>p.cat!=="karaff");
@@ -1662,14 +1837,15 @@ Regler:
 3. Visa en produkt genom att skriva [[produkt-id]] på en egen rad, till exempel [[bourgogne]]. Högst tre produkter per svar.
 4. Räkna förpackningar: antal glas delat med förpackningens storlek, avrundat uppåt.
 5. Lägg bara något i varukorgen när kunden uttryckligen ber om det.
-6. Frågor som inte handlar om glas, dryck, dukning eller butiken: svara artigt att du bara kan hjälpa till med det.`;
+6. Har kunden en stil eller ett set i Mitt glasskåp: hämta det med my_glasskap och utgå från det. Föreslå det som saknas, inte det kunden redan har.
+7. Frågor som inte handlar om glas, dryck, dukning eller butiken: svara artigt att du bara kan hjälpa till med det.`;
 const pub=p=>({id:p.id,namn:p.name,material:p.mat,serie:p.series,volym_cl:p.vol,hojd_cm:p.h,diameter_cm:p.d,forpackning:p.pack,pris_kr:p.price,pris_per_glas:Math.round(per(p)),diskmaskin:p.props.includes("diskmaskin")?"ja enligt tillverkaren":"nej, handdisk",egenskaper:p.props.map(x=>PROPS[x]),passar_till:p.drinks.map(d=>DRINKN[d]),stil:p.style.map(s=>STYLEN[s]),tillfallen:p.occ,varfor:p.why});
 const TOOLS_AI=[
  {name:"search_products",description:"Sök i sortimentet. Alla fält är frivilliga.",inputSchema:{type:"object",properties:{drink:{type:"string",enum:Object.keys(DRINKN)},max_per_glass:{type:"number"},dishwasher:{type:"boolean"},style:{type:"string",enum:Object.keys(STYLEN)},occasion:{type:"string",enum:["vardag","middag","fest","hemmabar","frukost","present"]}}},
   execute:(i={})=>{let L=P.filter(p=>(!i.drink||p.drinks.includes(i.drink)||p.cat===i.drink)&&(!i.max_per_glass||per(p)<=i.max_per_glass)&&(i.dishwasher!==true||p.props.includes("diskmaskin"))&&(!i.style||p.style.includes(i.style))&&(!i.occasion||p.occ.includes(i.occasion)));if(i.drink!=="karaff")L=L.filter(p=>p.cat!=="karaff"||i.drink==="karaff");return {antal:L.length,produkter:L.map(pub)}}},
  {name:"get_product",description:"Hämta alla fakta om en produkt med dess id.",inputSchema:{type:"object",properties:{id:{type:"string"}},required:["id"]},execute:i=>{const p=byId[i&&i.id];if(!p)throw new Error("Okänt id");return {...pub(p),berattelse:p.story}}},
  {name:"add_to_cart",description:"Lägg en produkt i kundens varukorg. Använd bara när kunden ber om det. qty är antal förpackningar.",inputSchema:{type:"object",properties:{id:{type:"string"},qty:{type:"integer",minimum:1,maximum:12}},required:["id"]},execute:i=>{const p=byId[i&&i.id];if(!p)throw new Error("Okänt id");const q=Math.min(12,Math.max(1,parseInt(i.qty)||1));addCart(p.id,q,true);return {ok:true,lagt_till:q+" × "+p.name}}},
- {name:"my_glasskap",description:"Kundens sparade glas, favoriter och smakprofil från Mitt glasskåp.",inputSchema:{type:"object",properties:{}},execute:()=>({glas_hemma:S.owned.map(o=>({namn:o.name,form:SHNAME[o.shape],antal:o.count,id:o.id||null})),favoriter:S.favs,smakprofil:S.profile?S.profile.name+": "+S.profile.summary:null,glasguiden:S.finder||null})}
+ {name:"my_glasskap",description:"Kundens sparade glas, favoriter och smakprofil från Mitt glasskåp.",inputSchema:{type:"object",properties:{}},execute:()=>({glas_hemma:S.owned.map(o=>({namn:o.name,form:SHNAME[o.shape],antal:o.count,id:o.id||null})),favoriter:S.favs,smakprofil:S.profile?S.profile.name+": "+S.profile.summary:null,glasguiden:S.finder?{sammanfattning:finderSummary(S.finder),valda_glas:S.finder.picks||[],krav:S.finder.must||[],budget_per_glas:S.finder.budget||null}:null})}
 ];
 async function ask(q){
   if(busy)return;busy=true;$("#sugg").hidden=true;
@@ -1693,13 +1869,16 @@ async function ask(q){
   msgs.scrollTop=msgs.scrollHeight;busy=false;
 }
 const SUG=["Fyra tunna vinglas för 1 000 kr","Vad passar till glasen jag har?","Present till en whiskyälskare","Är glasen blyfria?"];
-$("#sugg").innerHTML=SUG.map(s=>`<button>${s}</button>`).join("");
+function renderSugg(){const own=[];if(S.finder&&S.finder.picks&&S.finder.picks.length)own.push("Vad passar till mitt set?");else if(S.profile)own.push("Glas som passar min stil");$("#sugg").innerHTML=[...own,...SUG].slice(0,4).map(s=>`<button>${s}</button>`).join("")}
+renderSugg();
 $("#sugg").addEventListener("click",e=>{const b=e.target.closest("button");if(b)ask(b.textContent)});
 $("#concForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#concIn").value.trim();if(v){ask(v.slice(0,500));$("#concIn").value=""}});
 async function setConcMode(){const s=await getSample();$("#concMode").textContent=s?"Drivs av Claude. Svarar bara utifrån vårt sortiment.":"Svarar utifrån vårt sortiment. Visningsversion."}
 function openConc(q){
   conc.inert=false;conc.classList.add("open");conc.setAttribute("aria-hidden","false");$("#concBtn").style.opacity=0;
-  if(!msgs.children.length){const b=botBubble();b.textContent="Hej! Jag hjälper dig hitta rätt glas. Vad ska du dricka, hur många glas behöver du och vad får det kosta?";setConcMode()}
+  if(!msgs.children.length){const b=botBubble(),pk=(S.finder&&S.finder.picks||[]).length;
+    b.textContent=S.profile||pk?`Hej${cloud.name?" "+cloud.name.split(" ")[0]:""}! ${S.profile?"Din stil är "+S.profile.name.toLowerCase()+". ":""}${pk?"Jag ser ditt set från Glasguiden. ":""}Vill du att jag kompletterar det, eller letar du efter något annat?`:"Hej! Jag hjälper dig hitta rätt glas. Vad ska du dricka, hur många glas behöver du och vad får det kosta?";
+    renderSugg();setConcMode()}
   if(q)ask(q);else setTimeout(()=>$("#concIn").focus(),200);
 }
 $("#concBtn").addEventListener("click",()=>openConc());
