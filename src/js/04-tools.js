@@ -22,7 +22,8 @@ $("#dots").innerHTML=FQ.map(()=>"<i></i>").join("");
 function drawShape(key,label){
   const l=$("#gLine"),f=$("#gFill"),fl=FILL[key];
   l.setAttribute("d",SH[key]);f.setAttribute("d",fl?fl[0]:"");
-  $$("#wine stop")[0].setAttribute("stop-color",fl?fl[1]:"#9a2a3a");$$("#wine stop")[1].setAttribute("stop-color",shade(fl?fl[1]:"#9a2a3a"));
+  // Enfärgad fyllning: url(#id) i SVG kan peka fel i Safari när sidan har <base>
+  f.setAttribute("fill",fl?fl[1]:"#9a2a3a");
   l.classList.remove("draw");f.classList.remove("on");void l.getBoundingClientRect();l.classList.add("draw");requestAnimationFrame(()=>f.classList.add("on"));
   $("#gLabel").textContent=label||"";
 }

@@ -13,7 +13,9 @@ def visible_view(pg):
     return pg.evaluate("document.querySelector('[data-view]:not([hidden])').dataset.view")
 
 with sync_playwright() as p:
-    b = p.chromium.launch(executable_path=os.environ.get("CHROME") or None)
+    # BROWSER=webkit kör testet i Safaris motor (kräver python -m playwright install webkit)
+    kind = os.environ.get("BROWSER", "chromium")
+    b = getattr(p, kind).launch(executable_path=(os.environ.get("CHROME") if kind == "chromium" else None) or None)
     pg = b.new_page(viewport={"width": 1280, "height": 900})
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("response", lambda r: errs.append("404 " + r.url) if r.status == 404 and r.url.startswith(B) else None)
