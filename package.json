@@ -1,7 +1,7 @@
 {
   "name": "sk-l-co",
   "private": true,
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "SKÅL & CO, visningsversion av en webbutik för glas, koppar och karaffer.",
   "type": "module",
   "scripts": {
