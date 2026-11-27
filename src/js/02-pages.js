@@ -23,6 +23,7 @@ function keyOf(u){
   if(rel==="")return "hem";
   if(/\.[a-z0-9]+$/i.test(rel))return null;
   const m=rel.match(/^glas\/([a-z]+)$/);if(m)return byId[m[1]]?"p-"+m[1]:"";
+  const c=rel.match(/^handla\/([a-z]+)$/);if(c)return CATPAGE[c[1]]?"handla/"+c[1]:"";
   return VIEWS.includes(rel)&&rel!=="lista"?rel:"";
 }
 function route(){
@@ -38,6 +39,7 @@ function route(){
     openProduct(k.slice(2));return;
   }
   if(modal.classList.contains("open")&&modal.dataset.kind==="product")closeModal(true);
+  if(k&&k.startsWith("handla/")){const [t,f]=CATPAGE[k.slice(7)];FACETS.forEach(x=>F[x[0]].clear());F[t].add(f);showView("handla");return}
   if(!k){
     history.replaceState(null,"",BASE);showView("hem");
     toast("Sidan finns inte längre. Här är startsidan.");return;
@@ -77,12 +79,17 @@ addEventListener("click",e=>{
   e.preventDefault();goto(k);
 });
 
+// Kategorisidor med egen adress: handla/vinglas/. Samma lista finns i scripts/pages.mjs via CATPAGE.
+const CATPAGE={vinglas:["dryck","vin"],champagneglas:["dryck","champagne"],whiskyglas:["dryck","whisky"],cocktailglas:["dryck","cocktail"],vardagsglas:["dryck","vatten"],kaffeglas:["dryck","kaffe"],teglas:["dryck","te"],olglas:["dryck","ol"],dessertglas:["dryck","dessert"],karaffer:["dryck","karaff"],kristallglas:["egenskap","kristall"]};
+const CATSLUG=Object.fromEntries(Object.entries(CATPAGE).map(([s,[t,f]])=>[t+":"+f,s]));
+function shopHref(g){return CATSLUG[g]?"handla/"+CATSLUG[g]+"/":"handla/"}
+
 /* ---------- Kategorier, kollektioner, verktyg ---------- */
 const CATS=[["vin","Vinglas","Bourgogne, Bordeaux, vitt","assets/l-middag-800.webp"],["whisky","Whisky och sprit","Provglas, tumbler, cognac","assets/l-bar-800.webp"],["champagne","Champagneglas","Flöjt, coupe, tulpan","assets/p-coupe.webp"],["cocktail","Cocktail och drink","Nick & Nora, highball","assets/p-nicknora.webp"],["vatten","Vardagsglas","Vatten, tumbler, färgat","assets/p-gron.webp"],["kaffe","Kaffe","Espresso, latte, koppar","assets/l-kaffe-800.webp"],["te","Te","Teglas, koppar och fat","assets/p-te.webp"],["dessert","Dessertglas","Skålar och coupes","assets/p-dessert.webp"],["ol","Ölglas","IPA, provning, pilsner","assets/p-ol.webp"],["karaff","Karaffer","Vin och vatten","assets/p-karaff.webp"]];
-$("#cats").innerHTML=CATS.map((c,i)=>`<a class="cat rv d${i%3}" href="handla/" data-go="dryck:${c[0]}"><img src="${c[3]}" alt="" loading="lazy"><span class="t"><b>${c[1]}</b><small>${c[2]}</small></span></a>`).join("");
-$("#miniCats").innerHTML=[["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"],["tillfalle:present","Presenter"],["stil:vintage","Vintage"]].map(c=>`<a class="chip" href="handla/" data-go="${c[0]}" style="text-decoration:none">${c[1]}</a>`).join("");
+$("#cats").innerHTML=CATS.map((c,i)=>`<a class="cat rv d${i%3}" href="${shopHref("dryck:"+c[0])}" data-go="dryck:${c[0]}"><img src="${c[3]}" alt="" loading="lazy"><span class="t"><b>${c[1]}</b><small>${c[2]}</small></span></a>`).join("");
+$("#miniCats").innerHTML=[["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"],["tillfalle:present","Presenter"],["stil:vintage","Vintage"]].map(c=>`<a class="chip" href="${shopHref(c[0])}" data-go="${c[0]}" style="text-decoration:none">${c[1]}</a>`).join("");
 const COLL=[["Whiskysamlingen","Hemmabar","assets/l-bar-800.webp","dryck:whisky"],["Skandinavisk glasdesign","Stil","assets/s-tre-glas-800.webp","stil:skandinavisk"],["Konsten att dricka vin","Vin","assets/l-middag-800.webp","dryck:vin"],["Vardagsfavoriter","Vardag","assets/p-gron.webp","tillfalle:vardag"],["Modern cocktailkultur","Cocktail","assets/p-nicknora.webp","dryck:cocktail"],["Kristallurvalet","Egenskap","assets/p-karaff.webp","egenskap:kristall"]];
-$("#collections").innerHTML=COLL.map((c,i)=>`<a class="coll rv d${i%3}" href="handla/" data-go="${c[3]}"><img src="${c[2]}" alt="" loading="lazy"><span class="t"><span class="mono">${c[1]}</span><b>${c[0]}</b></span></a>`).join("");
+$("#collections").innerHTML=COLL.map((c,i)=>`<a class="coll rv d${i%3}" href="${shopHref(c[3])}" data-go="${c[3]}"><img src="${c[2]}" alt="" loading="lazy"><span class="t"><span class="mono">${c[1]}</span><b>${c[0]}</b></span></a>`).join("");
 const I={
  guide:'<svg viewBox="0 0 48 48"><path d="M16 44h16M24 44V30M24 30c-8 0-11-6-11-12 0-5 1-9 2-12h18c1 3 2 7 2 12 0 6-3 12-11 12z"/><path d="M14 20h20"/></svg>',
  swipe:'<svg viewBox="0 0 48 48"><rect x="12" y="8" width="20" height="30" rx="4" transform="rotate(-8 22 23)"/><rect x="18" y="10" width="20" height="30" rx="4" transform="rotate(8 28 25)"/></svg>',
@@ -168,6 +175,7 @@ const FMAP=Object.fromEntries(FACETS.map(f=>[f[0],f]));
 const F={};FACETS.forEach(f=>F[f[0]]=new Set());
 let sortBy="rek", facetsOpen=false;
 const CATINTRO={
+ kristall:["Kristallglas","Klart, tunt och klingande.","Kristallglas är klarare och kan blåsas tunnare än vanligt glas. Om glaset tål diskmaskin står på varje produktsida."],
  vin:["Vinglas","Hitta rätt vinglas.","En bred kupa för röda viner med mycket doft, en smalare tulpan för vitt och rosé. Två former räcker långt."],
  champagne:["Champagneglas","Glas för fest och middag.","Flöjten håller bubblorna längst, skålen är festligast och ett vitvinsglas ger mest doft. Välj efter hur du skålar."],
  whisky:["Whiskyglas","Glas med rätt näsa.","Ett tulpanformat provglas samlar doften. En tumbler passar is och drinkar."],
@@ -182,7 +190,14 @@ const CATINTRO={
 function matchF(p,skip){return FACETS.every(([k,,,get])=>k===skip||!F[k].size||get(p).some(v=>F[k].has(v)))}
 function activeCount(){return FACETS.reduce((a,f)=>a+F[f[0]].size,0)}
 function renderShop(){
-  const one=F.dryck.size===1&&activeCount()===1?CATINTRO[[...F.dryck][0]]:null;
+  const only=activeCount()===1?FACETS.map(f=>[f[0],[...F[f[0]]][0]]).find(x=>x[1]):null;
+  const slug=only?CATSLUG[only[0]+":"+only[1]]:null;
+  const one=slug?CATINTRO[only[1]]:null;
+  // Adressen följer en ensam kategori, så att länken går att dela
+  if(curView==="handla"&&!modal.classList.contains("open")&&(keyOf(location.href)||"").startsWith("handla")){
+    const u=urlFor(slug?"handla/"+slug:"handla");if(location.href!==u)history.replaceState(null,"",u);
+    document.title=one?one[0]+" · SKÅL & CO":"SKÅL & CO · Handla glas";
+  }
   $("#shopKicker").textContent=one?"Handla · "+one[0]:"Handla";
   $("#shopTitle").textContent=one?one[0]+". "+one[1]:"Handla som du vill.";
   $("#shopLead").textContent=one?one[2]:"Kombinera dryck, tillfälle, stil, egenskaper, prisnivå och storlek. Eller beskriv vad du letar efter i sökfältet.";
@@ -225,9 +240,9 @@ const mega=$("#mega"),megaBtn=$("#megaBtn");let megaT=0;
 function renderMega(){
   const trend=[...P].sort((a,b)=>b.pop-a.pop).slice(0,2);
   mega.innerHTML=`<div class="mega-in">
-  <div><span class="mono">Kategorier</span><ul>${CATS.map(c=>`<li><a href="handla/" data-go="dryck:${c[0]}">${c[1]}</a></li>`).join("")}</ul></div>
-  <div><span class="mono">Handla efter</span><ul>${[["tillfalle:middag","Middagsbjudning"],["tillfalle:hemmabar","Hemmabar"],["tillfalle:present","Presenter"],["stil:skandinavisk","Skandinavisk stil"],["stil:lyx","Modern lyx"],["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"]].map(x=>`<li><a href="handla/" data-go="${x[0]}">${x[1]}</a></li>`).join("")}</ul></div>
-  <div><span class="mono">Kollektioner</span><ul>${COLL.map(c=>`<li><a href="handla/" data-go="${c[3]}">${c[0]}</a></li>`).join("")}<li><a href="varumarken/">Varumärken A till Ö</a></li></ul></div>
+  <div><span class="mono">Kategorier</span><ul>${CATS.map(c=>`<li><a href="${shopHref("dryck:"+c[0])}" data-go="dryck:${c[0]}">${c[1]}</a></li>`).join("")}</ul></div>
+  <div><span class="mono">Handla efter</span><ul>${[["tillfalle:middag","Middagsbjudning"],["tillfalle:hemmabar","Hemmabar"],["tillfalle:present","Presenter"],["stil:skandinavisk","Skandinavisk stil"],["stil:lyx","Modern lyx"],["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"]].map(x=>`<li><a href="${shopHref(x[0])}" data-go="${x[0]}">${x[1]}</a></li>`).join("")}</ul></div>
+  <div><span class="mono">Kollektioner</span><ul>${COLL.map(c=>`<li><a href="${shopHref(c[3])}" data-go="${c[3]}">${c[0]}</a></li>`).join("")}<li><a href="varumarken/">Varumärken A till Ö</a></li></ul></div>
   <div class="mega-feat"><a class="mega-card" href="dukning/" data-season="${seasonKey()}"><img src="assets/l-middag-800.webp" alt="" loading="lazy"><span><span class="mono">Säsongen</span><b>Duka ${seasonName().toLowerCase()} på tio minuter</b></span></a>
    <span class="mono" style="display:block;margin:16px 0 8px">Trendar nu</span>${trend.map(p=>`<a class="mega-p" href="glas/${p.id}/" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><span><b>${esc(p.name)}</b><small>${kr(p.price)}</small></span></a>`).join("")}</div></div>`;
 }

@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="sv" data-skin="dark">
+<head>
+<meta charset="utf-8">
+<base href="../../">
+<!-- Byggd av scripts/pages.mjs från docs/index.html. Ändra i docs/index.html, inte här. -->
+<script>(function(b){b.href=b.href})(document.querySelector("base"))</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cocktailglas · SKÅL &amp; CO</title>
+<meta name="description" content="Glas till hemmabaren. Nick &amp; Nora för martini och sours, highball för long drinks, coupe för allt som skakas.">
+<meta property="og:title" content="Cocktailglas · SKÅL &amp; CO">
+<meta property="og:description" content="Glas till hemmabaren. Nick &amp; Nora för martini och sours, highball för long drinks, coupe för allt som skakas.">
+<meta property="og:image" content="https://adamkajlindberg-22.github.io/Sk-l-Co/assets/hero-end.jpg">
+<meta property="og:url" content="https://adamkajlindberg-22.github.io/Sk-l-Co/handla/cocktailglas/">
+<link rel="canonical" href="https://adamkajlindberg-22.github.io/Sk-l-Co/handla/cocktailglas/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#141110">
+<meta property="og:image:alt" content="Sju olika glas möts i en skål">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 70'%3E%3Crect width='46' height='70' rx='8' fill='%23141110'/%3E%3Cpath d='M8 66 Q23 62 38 66 M23 64 L23 42 M23 42 C10 42 5 32 6 22 C7 12 10 6 11 4 M23 42 C36 42 41 32 40 22 C39 12 36 6 35 4 M11 4 L35 4' fill='none' stroke='%23c49a5e' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>try{var s=localStorage.getItem("skal-skin");if(s)document.documentElement.dataset.skin=s}catch(e){}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"SKÅL & CO","url":"https://adamkajlindberg-22.github.io/Sk-l-Co/","description":"Glas, koppar och karaffer från Europas glasbruk. Visningsversion."}</script>
+<link rel="stylesheet" href="assets/site.css?v=11">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://adamkajlindberg-22.github.io/Sk-l-Co/"},{"@type":"ListItem","position":2,"name":"Handla","item":"https://adamkajlindberg-22.github.io/Sk-l-Co/handla/"},{"@type":"ListItem","position":3,"name":"Cocktailglas","item":"https://adamkajlindberg-22.github.io/Sk-l-Co/handla/cocktailglas/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Cocktailglas","itemListElement":[{"@type":"ListItem","position":1,"url":"https://adamkajlindberg-22.github.io/Sk-l-Co/glas/coupe/","name":"Sval Coupe"},{"@type":"ListItem","position":2,"url":"https://adamkajlindberg-22.github.io/Sk-l-Co/glas/nora/","name":"Nora Cocktailglas"},{"@type":"ListItem","position":3,"url":"https://adamkajlindberg-22.github.io/Sk-l-Co/glas/bolja/","name":"Bölja Tumbler"},{"@type":"ListItem","position":4,"url":"https://adamkajlindberg-22.github.io/Sk-l-Co/glas/boljahigh/","name":"Bölja Highball"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<div class="env" aria-hidden="true"></div>
+<canvas id="motes" aria-hidden="true"></canvas>
+
+<nav class="nav" id="nav" aria-label="Huvudmeny">
+  <div class="nav-in">
+    <a class="logo" href="./">SKÅL <span>&amp;</span> CO</a>
+    <ul class="nav-links">
+      <li class="has-mega"><button id="megaBtn" aria-expanded="false" aria-controls="mega">Glas <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button></li>
+      <li><a href="glasguiden/">Glasguiden</a></li>
+      <li><a href="upptack/">Glas-swipe</a></li>
+      <li><a href="glasvaggen/">Glasväggen</a></li>
+      <li><a href="dukning/">Dukning</a></li>
+      <li><a href="varumarken/">Varumärken</a></li>
+      <li><a href="journal/">Journal</a></li>
+    </ul>
+    <div class="nav-tools">
+      <button class="icon-btn" id="searchBtn" aria-label="Sök"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+      <button class="icon-btn skin" id="skinBtn" aria-label="Byt till ljust läge"><svg class="moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+            <a class="gk-btn" id="userBtn" href="glasskap/"><span class="gk-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 21V10.5a6.5 6.5 0 0 1 13 0V21"/><path d="M3.5 21h17"/><path d="M9.8 9.5h4.4c0 2.4-1 3.6-2.2 3.6s-2.2-1.2-2.2-3.6z"/><path d="M12 13.1v3.6M10.4 16.7h3.2"/></svg><span class="u-init"></span></span><span class="gk-txt"><span class="l">Mitt glasskåp</span><span class="s">Glasskåp</span></span><span class="sr-only" id="userSr">, logga in</span><span class="badge fav" id="favBadge" aria-hidden="true">0</span></a>
+      <button class="icon-btn" id="cartBtn" aria-label="Varukorg, 0 varor"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span class="badge" id="badge">0</span></button>
+      <button class="icon-btn" id="menuBtn" aria-label="Meny" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <div class="mega" id="mega" hidden></div>
+</nav>
+<div class="mmenu" id="mmenu" aria-hidden="true" inert>
+  <div class="mm-tools"><button type="button" data-mm="search">Sök</button><a href="glasskap/" data-gtab="sparat">Favoriter</a><button type="button" data-mm="skin">Ljust eller mörkt</button></div>
+  <a href="handla/">Handla</a><a href="glasguiden/">Glasguiden</a><a href="upptack/">Glas-swipe</a><a href="glasvaggen/">Glasväggen</a><a href="dukning/">Dukningsstudion</a><a href="barstudion/">Barstudion</a><a href="provladan/">Provlådan</a><a href="present/">Presentguiden</a><a href="varumarken/">Varumärken</a><a href="journal/">Glasjournalen</a><div class="sep"></div><a href="glasskap/">Mitt glasskåp</a><a href="om/">Om oss och kontakt</a><a href="villkor/">Villkor och integritet</a>
+</div>
+
+<main id="main">
+
+<!-- ================= HEM ================= -->
+<div class="view" data-view="hem" hidden>
+<section id="hero" aria-label="SKÅL & CO">
+  <div class="hero-stage">
+    <div class="hero-media">
+      <picture><source media="(max-aspect-ratio: 1/1)" srcset="assets/hero-start-m.webp?v=4k"><img class="start" src="assets/hero-start-1600.webp?v=4k" srcset="assets/hero-start-1600.webp?v=4k 1600w, assets/hero-start.webp?v=4k 2688w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="Åtta olika glas med vin, bubbel, whisky, öl och te svävar i luften medan en kupa häller ut bubbel på en mörk sten" fetchpriority="high"></picture>
+      <picture><source media="(max-aspect-ratio: 1/1)" srcset="assets/hero-end-m.webp?v=4k"><img class="end" src="assets/hero-end.webp?v=4k" alt="" aria-hidden="true"></picture>
+      <video id="heroVideo" muted playsinline preload="none" aria-hidden="true"></video>
+    </div>
+    <div class="hero-scrim"></div>
+    <div class="bands">
+      <div class="band" data-in="0" data-out=".2"><span class="mono">Glas · Koppar · Karaffer</span><h1>Varje skål förtjänar rätt glas.</h1></div>
+      <div class="band" data-in=".24" data-out=".46"><h2>Ett glas för varje dryck.</h2><p>Vin, bubbel, whisky, öl, kaffe och te. Valt från Europas glasbruk och förklarat på riktigt.</p></div>
+      <div class="band" data-in=".5" data-out=".72"><h2>Formen gör smaken.</h2><p>En bred kupa ger vinet luft. En smal flöjt håller bubblorna. Vi förklarar skillnaden.</p></div>
+      <div class="band settle" data-in=".78" data-out="2">
+        <span class="logo-big">SKÅL &amp; CO</span>
+        <h2>Rätt glas för varje skål.</h2>
+        <div class="ctas"><a class="btn btn-primary" href="glasguiden/">Hitta ditt glas <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-ghost" href="upptack/">Swipea fram din stil</a></div>
+      </div>
+    </div>
+    <div class="scroll-cue" id="cue">SCROLLA<i></i></div>
+    <svg class="loader" id="loader" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="18"/><circle class="bar" id="loaderBar" cx="22" cy="22" r="18"/></svg>
+  </div>
+</section>
+
+<div class="trust" aria-label="Våra löften"><ul>
+  <li><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/></svg>Fri frakt över 799 kr</li>
+  <li><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.4-3 8.3-7 10-4-1.7-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Krossgaranti på allt</li>
+  <li><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg>60 dagars öppet köp</li>
+  <li><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Klarna, Swish och kort</li>
+</ul></div>
+
+<section class="block">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">Handla efter kategori</span><h2>Vad dricker du i kväll?</h2></div></div>
+    <div class="cats" id="cats"></div>
+    <div class="mini-cats rv" id="miniCats"></div>
+  </div>
+</section>
+
+<section class="block" id="forDig">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">För dig</span><h2 id="forDigTitle">Glas som passar din smak.</h2></div><a class="btn btn-ghost" href="upptack/" id="forDigCta">Swipea fram din stil</a></div>
+    <div id="forDigBody"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="today rv" id="today"></div>
+    <div id="recentWrap" hidden style="margin-top:60px"><div class="head" style="margin-bottom:24px"><div><span class="mono">Senast visade</span><h2 style="font-size:30px;margin-top:8px">Där du slutade.</h2></div></div><div class="row-scroll" id="recent"></div></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">Verktyg som hjälper dig välja</span><h2>Testa innan du bestämmer dig.</h2><p class="lead">Åtta sätt att hitta rätt, utan att gissa.</p></div></div>
+    <div class="tools rv" id="tools"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">En dryck, tre glas</span><h2>Samma dryck. Tre olika upplevelser.</h2><p class="lead">Formen ändrar doft, bubblor och temperatur. Välj en dryck och se skillnaden.</p></div><div class="chips" id="treTabs"></div></div>
+    <div class="tre-grid rv" id="treGrid"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">Utvalda kollektioner</span><h2>Sammanställt för olika stunder.</h2></div></div>
+    <div class="collections" id="collections"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="season rv" id="season"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="safe rv">
+      <div class="ph"><img src="assets/s-ask.webp" alt="Ett glas inslaget i silkespapper i en mörk ask" loading="lazy"></div>
+      <div class="txt">
+        <span class="mono">Krossgaranti</span>
+        <h2>Tryggt hela vägen hem.</h2>
+        <p class="lead" style="margin-top:14px">Glasen packas för att klara resan. Kommer något trasigt fram ersätter vi det, och finns glaset i Mitt glasskåp är det gjort på två klick.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>60 dagars öppet köp</b><span>Lagen ger dig 14 dagars ångerrätt. Vi ger dig 60.</span></div></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>Flera paket? Du ser det innan du betalar.</b><span>Glasen kan skickas direkt från olika glasbruk. Du får spårning för varje paket.</span></div></li>
+        </ul>
+        <div class="ctas" style="margin-top:22px"><a class="btn btn-ghost" href="villkor/" data-lj="l-kop">Läs alla villkor</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">Glasjournalen</span><h2>Lite kunskap gör stor skillnad.</h2></div><a class="btn btn-ghost" href="journal/">Alla guider</a></div>
+    <div class="journal" id="journalHome"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="head rv"><div><span class="mono">Frågor och svar</span><h2>Bra att veta.</h2></div></div>
+    <div class="faq rv" id="faqHome"></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="news rv">
+      <div><span class="mono">Nyhetsbrevet</span><h2>Ett glas i veckan. Inget brus.</h2>
+        <ul><li>Nya kollektioner och glasbruk</li><li>Inspiration för dukning och hemmabar</li><li>Glas vi har upptäckt</li><li>Erbjudanden bara för prenumeranter</li></ul></div>
+      <form class="news-form" data-news><label for="newsMail" class="note" style="margin:0">Din e-post</label><div class="news-row"><input id="newsMail" type="email" autocomplete="email" placeholder="namn@exempel.se"><button class="btn btn-primary">Prenumerera</button></div><p class="note">Visningsversion: inget utskick görs. Du kan avsluta när du vill.</p></form>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <img src="assets/hero-end.webp?v=4k" alt="" aria-hidden="true" loading="lazy">
+  <div class="wrap rv"><span class="mono">Glasguiden</span><h2>Rätt glas finns. Vi hittar det med dig.</h2><p>Välj drycker, stil och krav. Vi sätter ihop ett glas för varje.</p><div class="ctas"><a class="btn btn-primary" href="glasguiden/">Hitta ditt glas <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
+</section>
+</div>
+
+<!-- ================= HANDLA ================= -->
+<div class="view" data-view="handla">
+  <div class="wrap">
+    <header class="page-head"><span class="mono" id="shopKicker">Handla</span><h1 id="shopTitle">Handla som du vill.</h1><p class="lead" id="shopLead"></p></header>
+    <div class="shop">
+      <aside class="facets" id="facets" aria-label="Filter"></aside>
+      <div>
+        <div class="gridbar"><span style="display:flex;gap:10px;align-items:center"><button class="small-btn" id="fToggle" aria-expanded="false" aria-controls="facets">Filter</button><span id="count"></span></span>
+          <label>Sortera <select id="sort"><option value="rek">Rekommenderat</option><option value="pop">Bästsäljare</option><option value="new">Nyast</option><option value="low">Lägst pris</option><option value="high">Högst pris</option><option value="rate">Högst betyg</option></select></label>
+        </div>
+        <div class="activef" id="activeF"></div>
+        <h2 class="sr-only">Glas</h2><div class="products" id="products"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VARUMÄRKEN ================= -->
+<div class="view" data-view="varumarken" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Varumärken</span><h1>Glasbruk vi beundrar, A till Ö.</h1><p class="lead">Hela vägen från nordiskt vardagsglas till fransk kristall. Bevaka ett märke, så hör vi av oss när det finns här.</p></header>
+    <nav class="bidx" id="brandIdx" aria-label="Bokstäver"></nav>
+    <div id="brandList"></div>
+    <p class="note" style="margin-top:30px">Visningsversion: varumärkena visar hur sidan blir. Avtal med dem finns inte än, och exempelglasen i butiken kommer inte från dem.</p>
+  </div>
+</div>
+
+<!-- ================= GLASGUIDEN ================= -->
+<div class="view" data-view="glasguiden" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Glasguiden</span><h1>Hitta ditt glas. Eller ett helt glasskåp.</h1><p class="lead">Välj flera drycker, stilar och det som är viktigt för dig. Vi sätter ihop ett glas för varje dryck och förklarar varför. Svaren sparas i Mitt glasskåp.</p></header>
+    <div class="finder">
+      <div><div class="steps-dots" id="dots"></div><div id="fq" aria-live="polite"></div></div>
+      <div><div class="g-stage" aria-hidden="true"><svg viewBox="0 0 200 300"><defs><linearGradient id="wine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a2a3a"/><stop offset="1" stop-color="#4a0f18"/></linearGradient></defs><path id="gFill" fill="url(#wine)" d=""/><path id="gLine" pathLength="1" d=""/></svg></div><p class="g-label" id="gLabel"></p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= UPPTÄCK (SWIPE) ================= -->
+<div class="view" data-view="upptack" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Glas-swipe</span><h1>Hitta din stil på en minut.</h1><p class="lead">Dra höger på det du gillar, vänster på det du inte gillar, uppåt för att spara. Swipea själv, eller bjud in familj och vänner och se vilka glas ni matchar på.</p></header>
+    <div class="sw-mode" role="group" aria-label="Swipea själv eller tillsammans"><button type="button" data-swmode="solo" aria-pressed="true">Själv</button><button type="button" data-swmode="group" aria-pressed="false">Tillsammans <span class="sw-new">Nytt</span></button></div>
+    <div id="swLobby" hidden></div>
+    <div class="swipe-wrap" id="swWrap">
+      <div>
+        <div class="sprog" aria-hidden="true"><i id="sprog" style="width:0"></i></div>
+        <div class="deck" id="deck" aria-live="polite"></div>
+        <div class="sbtns" id="sbtns">
+          <button class="sbtn undo" data-sw="undo" aria-label="Ångra senaste"><svg viewBox="0 0 24 24"><path d="M9 7H4V2"/><path d="M4.5 7.5A8 8 0 1 1 6 17"/></svg></button>
+          <button class="sbtn no" data-sw="no" aria-label="Gillar inte"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <button class="sbtn save" data-sw="save" aria-label="Spara"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg></button>
+          <button class="sbtn yes" data-sw="yes" aria-label="Gillar"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+        </div>
+        <p class="note" style="text-align:center">Tangenter: vänsterpil, högerpil och uppåtpil. Backsteg ångrar.</p>
+      </div>
+      <aside class="profile-card" id="profile"></aside>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GLASVÄGGEN ================= -->
+<div class="view" data-view="glasvaggen" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Glasväggen</span><h1>Se storleken innan du köper.</h1><p class="lead">Alla glas i skala, sida vid sida. Jämför mot en hand, en flaska eller din mobil, och se vilka som får plats på hyllan.</p></header>
+    <div class="wall-ctrl">
+      <div class="chips" id="wallCats"></div>
+      <div class="chips" id="wallRef"></div>
+      <label class="shelf">Hyllhöjd <input type="range" id="shelf" min="10" max="40" value="28"> <output id="shelfOut">28 cm</output></label>
+    </div>
+    <div class="wall" id="wall"></div>
+    <div class="legend"><span>Klicka på ett glas för att öppna det.</span><span>Måtten är exempel i visningsversionen.</span></div>
+  </div>
+</div>
+
+<!-- ================= DUKNING ================= -->
+<div class="view" data-view="dukning" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Dukningsstudion</span><h1>Bygg din dukning. Köp den med ett klick.</h1><p class="lead">Välj tillfälle, stil och gäster. Byt glas per roll, se bordet från sidan eller ovanifrån, och spara dukningen till nästa gång.</p></header>
+    <div id="bordVote" hidden></div>
+    <div class="studio">
+      <div class="ctrl">
+        <h2 class="ctrl-h">Tillfälle</h2><div class="seasons" id="tSeason"></div>
+        <h2 class="ctrl-h">Stil</h2><div class="chips" id="tStyle"></div>
+        <h2 class="ctrl-h">Bordsskiva</h2><div class="chips" id="tTable"></div>
+        <h2 class="ctrl-h">På bordet</h2><div id="tRoles"></div>
+        <h2 class="ctrl-h">Antal gäster</h2>
+        <div class="guests"><button class="round" id="gMinus" aria-label="Färre gäster">−</button><output id="gNum">6</output><button class="round" id="gPlus" aria-label="Fler gäster">+</button></div>
+        <div class="menu-ai">
+          <span class="mono">Beskriv middagen</span>
+          <p class="note" style="margin:6px 0 10px">Till exempel: åtta personer, lamm och rödvin, bubbel till förrätt.</p>
+          <textarea class="field" id="menuIn" aria-label="Beskriv middagen"></textarea>
+          <div class="pdp-actions"><button class="btn btn-ink" id="menuGo" style="padding:11px 18px">Föreslå dukning</button><span class="ai-note" id="menuNote"></span></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap"><div class="vtoggle" id="tView"><button data-tv="side" aria-pressed="true">Från sidan</button><button data-tv="top" aria-pressed="false">Ovanifrån</button></div><div class="pdp-actions" style="margin:0"><button class="small-btn" id="tShare">Dela och få röster</button><button class="small-btn" id="tSave">Spara dukning</button><button class="small-btn" id="tCopy">Kopiera inköpslista</button></div></div>
+        <div class="scene" id="scene"><svg id="tableSvg" viewBox="0 0 1000 420" role="img" aria-label="Förhandsvisning av dukningen"></svg><div class="sum"><div><b id="tTotal"></b><small id="tDetail"></small></div><button class="btn btn-primary" id="tAdd">Lägg hela dukningen i varukorgen</button></div></div>
+        <p class="note" id="tWhy"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= BARSTUDION ================= -->
+<div class="view" data-view="barstudion" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Barstudion</span><h1>Vad serverar du hemma?</h1><p class="lead">Välj vad du dricker, så sätter vi ihop glasen du behöver. Spara kitet i Mitt glasskåp.</p></header>
+    <div class="bar">
+      <img src="assets/l-bar.webp" alt="En hemmabar med kristallglas, karaff och is i varmt ljus" loading="lazy">
+      <div class="in">
+        <span class="mono">Välj din bar</span>
+        <h2>Från whiskyhylla till cocktailbar.</h2>
+        <div class="chips" id="barChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:22px"></div>
+        <div class="kit" id="kit"></div>
+        <div class="ctas"><button class="btn btn-primary" id="kitAdd">Lägg allt i varukorgen</button><button class="btn btn-ghost" id="kitSave" style="border-color:rgba(238,229,214,.3)">Spara kitet</button></div>
+      </div>
+    </div>
+    <section class="block">
+      <div class="head"><div><span class="mono">Inspiration</span><h2>Glas hör till stunderna.</h2></div></div>
+      <div class="moments">
+        <a class="moment" href="dukning/"><img src="assets/l-middag.webp" alt="Ett dukat middagsbord med kristallglas och levande ljus" loading="lazy"><div class="t"><span class="mono">Middagsbjudningen</span><h3>Ett bord för sex, på tio minuter.</h3><p>Bygg den i Dukningsstudion.</p></div></a>
+        <a class="moment" href="handla/whiskyglas/" data-go="dryck:whisky"><img src="assets/l-bar.webp" alt="En hemmabar med whiskyglas och karaff" loading="lazy"><div class="t"><span class="mono">Hemmabaren</span><h3>Whisky, med rätt näsa.</h3></div></a>
+        <a class="moment" href="handla/kaffeglas/" data-go="dryck:kaffe"><img src="assets/l-kaffe.webp" alt="En morgon med latte i dubbelväggat glas och te i glaskanna" loading="lazy"><div class="t"><span class="mono">Morgonen</span><h3>Kaffe man vill titta på.</h3></div></a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ================= PROVLÅDAN ================= -->
+<div class="view" data-view="provladan" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Provlådan</span><h1>Känn på glasen hemma först.</h1><p class="lead">Välj tre glas. Vi skickar ett av varje. Behåll det du gillar, skicka tillbaka resten. Köper du ett set dras lådans pris av.</p></header>
+    <div class="steps3">
+      <div><span class="mono">Steg 1</span><b>Välj tre glas</b><span>Från olika serier eller samma dryck, så du kan jämföra.</span></div>
+      <div><span class="mono">Steg 2</span><b>Prova i 14 dagar</b><span>Häll upp, håll i dem, diska dem. Se hur de fungerar hos dig.</span></div>
+      <div><span class="mono">Steg 3</span><b>Behåll eller skicka</b><span>Returen är förbetald. 149 kr dras av när du köper ett set.</span></div>
+    </div>
+    <div class="trial" id="trial"></div>
+    <div class="scene" style="margin-top:22px;background:var(--panel)"><div class="sum"><div><b id="trialSum">Välj tre glas</b><small>Provlåda 149 kr inklusive retur. Visningsversion.</small></div><button class="btn btn-primary" id="trialAdd" disabled>Lägg provlådan i varukorgen</button></div></div>
+  </div>
+</div>
+
+<!-- ================= PRESENT ================= -->
+<div class="view" data-view="present" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Presentguiden</span><h1>En present som används varje vecka.</h1><p class="lead">Välj vem, tillfälle och budget. Spara datumet så påminner vi dig i Mitt glasskåp.</p></header>
+    <div class="gift">
+      <div>
+        <div class="row">
+          <label>Till vem<select id="gWho"><option value="par">Ett par</option><option value="vinalskare">Vinälskaren</option><option value="whisky">Whiskyvännen</option><option value="kaffe">Kaffeälskaren</option><option value="vardag">Någon som har allt</option></select></label>
+          <label>Tillfälle<select id="gOcc"><option value="brollop">Bröllop</option><option value="inflyttning">Inflyttning</option><option value="fodelsedag">Födelsedag</option><option value="tack">Tack</option></select></label>
+          <label>Budget<select id="gBud"><option value="400">Upp till 400 kr</option><option value="700" selected>Upp till 700 kr</option><option value="2000">Över 700 kr</option></select></label>
+        </div>
+        <p class="note">Gravyr, presentinslagning och hälsningskort väljer du på produktsidan.</p>
+        <div class="inline-form" id="dateForm"><input id="dName" placeholder="Vems dag?" aria-label="Vems dag"><input id="dDate" type="date" aria-label="Datum"><button class="btn btn-ink" style="padding:10px 16px">Spara datum</button></div>
+      </div>
+      <div class="gres" id="gRes" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MITT GLASSKÅP ================= -->
+<div class="view" data-view="glasskap" hidden>
+  <div class="wrap" id="gk"></div>
+</div>
+
+<div class="view" data-view="lista" hidden>
+  <div class="wrap" id="listaV"></div>
+</div>
+
+<!-- ================= JOURNAL ================= -->
+<div class="view" data-view="journal" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Glasjournalen</span><h1>Lite kunskap gör stor skillnad.</h1><p class="lead">Korta guider om glas, vin, kaffe och dukning. Läsning för dig visas i Mitt glasskåp.</p></header>
+    <h2 class="sr-only">Guider</h2><div class="journal" id="journalGrid"></div>
+  </div>
+  <section class="block">
+    <div class="wrap">
+      <div class="ugc-head"><div><span class="mono">#skalochco</span><h2>Era bord, era barer.</h2><p class="lead" style="margin-top:12px">Här visar vi kundernas egna bilder och verifierade omdömen. Dela din dukning med #skalochco.</p></div></div>
+      <div class="ugc" id="ugc"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ================= OM ================= -->
+<div class="view" data-view="om" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Om SKÅL &amp; CO</span><h1>Vi väljer glasen. Du väljer stunden.</h1><p class="lead">Vi har inget eget lager och tillverkar inga glas. Vi väljer ut dem från glasbruk vi litar på, förklarar dem ärligt och tar ansvar för din order hela vägen.</p></header>
+    <div class="safe">
+      <div class="ph"><img src="assets/s-tre-glas.webp" alt="Tre glas i olika former mot mörk bakgrund" loading="lazy"></div>
+      <div class="txt">
+        <span class="mono">Trygghet</span>
+        <h2>Så fungerar det.</h2>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>Krossgaranti på allt</b><span>Kommer ett glas trasigt fram ersätter vi det. Skicka en bild, skärvorna behöver vi inte. Finns glaset i Mitt glasskåp går det på två klick.</span></div></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>60 dagars öppet köp</b><span>Lagen ger dig 14 dagars ångerrätt. Vi ger dig 60.</span></div></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>Returen kostar 0 kr över 799 kr</b><span>Annars 59 kr. Det står här, inte i finstilt.</span></div></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>Flera paket? Du ser det innan du betalar.</b><span>Glasen kan skickas direkt från olika glasbruk. Du får spårning för varje paket.</span></div></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>Godkänt för mat och dryck</b><span>Vi säljer bara glas med dokumentation för livsmedelskontakt.</span></div></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><div><b>Vi ansvarar</b><span>Det är oss du handlar av, och oss du vänder dig till vid ånger, retur eller reklamation.</span></div></li>
+        </ul>
+      </div>
+    </div>
+    <section class="block">
+      <div class="head"><div><span class="mono">Frågor och svar</span><h2>Bra att veta.</h2></div></div>
+      <div class="faq" id="faqAll"></div>
+    </section>
+    <section class="block">
+      <div class="gift" style="grid-template-columns:1fr 1fr">
+        <div><span class="mono">Kontakt</span><h2 style="margin:10px 0 14px">Fråga oss om glas.</h2><p class="lead">Vardagar 9 till 17. Glassommelieren svarar dygnet runt.</p></div>
+        <div><p>hej@skalochco.se</p><p>08 000 00 00</p><p>SKÅL &amp; CO AB, Exempelgatan 1, 111 11 Stockholm</p><p class="legal-note">Kontaktuppgifterna är exempel i visningsversionen.</p><div class="pdp-actions" style="margin-top:14px"><a class="small-btn" href="villkor/">Villkor och integritet</a><button class="small-btn" id="trackShow">Visa mätpunkter</button></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ================= VILLKOR ================= -->
+<div class="view" data-view="villkor" hidden>
+  <div class="wrap">
+    <header class="page-head"><span class="mono">Villkor och integritet</span><h1>Tydligt, utan finstilt.</h1><p class="lead">Här står vad som gäller när du handlar hos oss, hur du ångrar ett köp och vad vi gör med dina uppgifter.</p><p class="draft">Utkast i visningsversionen. Texterna ska granskas av en jurist innan butiken öppnar, och företagsuppgifterna är exempel.</p></header>
+    <div class="legal-wrap">
+      <nav class="legal-toc" aria-label="Innehåll"><button data-lj="l-foretag">Företaget</button><button data-lj="l-kop">Köpvillkor</button><button data-lj="l-anger">Ångerrätt</button><button data-lj="l-reklamation">Reklamation</button><button data-lj="l-tvist">Tvister</button><button data-lj="l-integritet">Integritet</button><button data-lj="l-cookies">Cookies</button><button data-lj="l-sakerhet">Produktsäkerhet</button></nav>
+      <div class="legal-body">
+        <section id="l-foretag"><h2>Företaget</h2><p>SKÅL &amp; CO AB, organisationsnummer 559000-0000, Exempelgatan 1, 111 11 Stockholm. E-post hej@skalochco.se, telefon 08 000 00 00. Momsregistreringsnummer SE559000000001.</p><p class="note">Alla uppgifter ovan är exempel.</p></section>
+        <section id="l-kop"><h2>Köpvillkor</h2>
+          <h3>Avtalet</h3><p>Avtalet gäller mellan dig och SKÅL &amp; CO AB. Vi säljer glas från andra tillverkare, men det är vi som är din motpart och som du vänder dig till vid frågor, ånger, retur och reklamation.</p>
+          <h3>Priser och betalning</h3><p>Alla priser är i svenska kronor och inklusive moms. Fraktkostnaden visas innan du betalar. Du kan betala med Klarna, Swish, kort, Apple Pay eller Google Pay.</p>
+          <h3>Leverans</h3><p>Glasen skickas direkt från glasbruket eller deras lager, ofta inom 2 till 7 vardagar. Leveranstiden står på varje produkt. Kommer glasen från flera glasbruk får du flera paket. Det ser du i varukorgen innan du betalar, och du får spårning för varje paket.</p>
+          <h3>Om något kommer trasigt</h3><p>Skicka en bild till oss, så skickar vi ett nytt glas. Du behöver inte skicka tillbaka skärvorna. Krossgarantin gäller utöver dina rättigheter enligt lag.</p>
+        </section>
+        <section id="l-anger"><h2>Ångerrätt och öppet köp</h2>
+          <p>Enligt lagen om distansavtal har du 14 dagars ångerrätt från den dag du tar emot varan. Hos oss har du dessutom 60 dagars öppet köp.</p>
+          <div class="anger-box"><div><b>Ångra ett köp</b><p>Fyll i ditt namn och ordernummer och bekräfta. Du får ett kvitto med tidpunkten direkt.</p></div><button class="btn btn-primary" data-anger>Ångra avtalet här</button></div>
+          <h3>Så går det till</h3><p>Använd knappen ovan, knappen i sidfoten eller knappen vid ditt köp i Mitt glasskåp. Du kan också skicka ångerblanketten nedan eller ett eget meddelande till hej@skalochco.se.</p>
+          <h3>Retur och återbetalning</h3><p>Skicka tillbaka varan inom 14 dagar efter att du ångrat dig. Returen kostar 0 kr när ordern var över 799 kr, annars 59 kr. Vi betalar tillbaka inom 14 dagar från att vi fick veta att du ångrat dig, men vi får vänta tills varan kommit tillbaka. Har varan använts mer än vad som behövs för att pröva den kan vi göra ett avdrag för värdeminskningen.</p>
+          <details class="blankett"><summary>Ångerblankett</summary><div class="a"><p>Till: SKÅL &amp; CO AB, Exempelgatan 1, 111 11 Stockholm, hej@skalochco.se</p><p>Jag meddelar härmed att jag frånträder mitt avtal om köp av följande varor:</p><p>Beställd den / mottagen den:<br>Ordernummer:<br>Konsumentens namn:<br>Konsumentens adress:<br>Underskrift (endast om blanketten skickas på papper):<br>Datum:</p></div></details>
+        </section>
+        <section id="l-reklamation"><h2>Reklamation</h2>
+          <p>Du har rätt att reklamera fel i en vara i tre år från att du fick den. Reklamera inom skälig tid efter att du upptäckt felet. Två månader räknas alltid som skälig tid.</p>
+          <p>Upptäcks felet inom två år från köpet antas det ha funnits när du fick varan, om vi inte kan visa något annat. Vid en godkänd reklamation står vi för returkostnaden.</p>
+        </section>
+        <section id="l-tvist"><h2>Om vi inte är överens</h2><p>Kontakta oss först, så försöker vi lösa det. Annars kan du vända dig till Allmänna reklamationsnämnden (ARN), www.arn.se. Vi följer ARN:s beslut.</p></section>
+        <section id="l-integritet"><h2>Integritet</h2>
+          <p>SKÅL &amp; CO AB är personuppgiftsansvarig. Vi samlar bara in det vi behöver.</p>
+          <table class="spectable legal-table"><tr><th>Vad</th><td><b>Varför och hur länge</b></td></tr>
+          <tr><th>Namn, adress, e-post, telefon vid köp</th><td>För att leverera och hantera ditt köp (avtal). Bokföringsunderlag sparas i sju år enligt bokföringslagen.</td></tr>
+          <tr><th>Leveransuppgifter till glasbruket</th><td>Glasbruket eller deras lager får namn och adress för att kunna skicka just din order.</td></tr>
+          <tr><th>Konto och Mitt glasskåp</th><td>Utan konto sparas favoriter, listor och val bara i din webbläsare. Med konto sparas namn, e-post och ditt glasskåp hos Google Firebase (servrar i EU) så länge du har kontot. Loggar du in med Google får vi ditt namn och din e-post från Google. Du kan radera kontot med en knapp i Mitt glasskåp.</td></tr>
+          <tr><th>Frågor till glassommelieren och foton</th><td>Skickas till en AI-tjänst för att ge dig ett svar. Vi sparar inte foton du laddar upp.</td></tr>
+          <tr><th>Nyhetsbrev</th><td>Bara om du anmäler dig (samtycke). Du kan avsluta när du vill.</td></tr>
+          <tr><th>Statistik</th><td>Bara om du tillåter det (samtycke). Se Cookies nedan.</td></tr></table>
+          <p>Du har rätt att få veta vilka uppgifter vi har om dig, att få dem rättade eller raderade och att invända mot behandlingen. Kontakta hej@skalochco.se. Du kan också klaga hos Integritetsskyddsmyndigheten (IMY).</p>
+        </section>
+        <section id="l-cookies"><h2>Cookies och lagring</h2>
+          <p>Vi sparar bara det som behövs för att sidan ska fungera, plus statistik om du säger ja.</p>
+          <table class="spectable legal-table"><tr><th>Ljust eller mörkt läge</th><td>Nödvändig. Kommer ihåg ditt val.</td></tr><tr><th>Varukorg</th><td>Nödvändig. Behåller varorna tills du betalar.</td></tr><tr><th>Mitt glasskåp och inloggning</th><td>Nödvändig för funktionen du använder. Inloggningen sparar en nyckel hos Firebase så att du förblir inloggad.</td></tr><tr><th>Ditt samtycke</th><td>Nödvändig. Kommer ihåg vad du valt här.</td></tr><tr><th>Statistik</th><td>Bara med samtycke. Ingen statistiktjänst är kopplad i visningsversionen.</td></tr></table>
+          <button class="small-btn" data-consent-open>Ändra cookieinställningar</button>
+        </section>
+        <section id="l-sakerhet"><h2>Produktsäkerhet och material</h2>
+          <p>Alla glas vi säljer ska ha dokumentation för kontakt med livsmedel enligt EU:s regler. På varje produkt visar vi tillverkare, ansvarig person i EU, produktidentitet och eventuella varningar.</p>
+          <p>Har du upptäckt ett säkerhetsproblem med en produkt? Skriv till hej@skalochco.se, så svarar vi samma dag. Vi informerar alla köpare direkt om en produkt återkallas.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div><a class="logo" href="./">SKÅL <span>&amp;</span> CO</a><p style="margin-top:12px;max-width:34ch">Glas, koppar och karaffer för varje skål. Valda från Europas glasbruk och skickade med krossgaranti.</p><div class="pay"><span>Klarna</span><span>Swish</span><span>Visa</span><span>Mastercard</span><span>Apple Pay</span></div></div>
+      <div><h2 class="foot-h">Handla</h2><ul><li><a href="handla/vinglas/" data-go="dryck:vin">Vinglas</a></li><li><a href="handla/champagneglas/" data-go="dryck:champagne">Champagneglas</a></li><li><a href="handla/whiskyglas/" data-go="dryck:whisky">Whiskyglas</a></li><li><a href="handla/cocktailglas/" data-go="dryck:cocktail">Cocktailglas</a></li><li><a href="handla/kaffeglas/" data-go="dryck:kaffe">Kaffe och te</a></li><li><a href="present/">Presenter</a></li></ul></div>
+      <div><h2 class="foot-h">Verktyg</h2><ul><li><a href="glasguiden/">Glasguiden</a></li><li><a href="upptack/">Glas-swipe</a></li><li><a href="glasvaggen/">Glasväggen</a></li><li><a href="dukning/">Dukningsstudion</a></li><li><a href="barstudion/">Barstudion</a></li><li><a href="provladan/">Provlådan</a></li></ul></div>
+      <div><h2 class="foot-h">Hjälp</h2><ul><li><a href="glasskap/">Mitt glasskåp</a></li><li><a href="villkor/" data-lj="l-kop">Krossgaranti</a></li><li><a href="villkor/" data-lj="l-anger">Frakt och retur</a></li><li><a href="om/">Kontakt</a></li><li><a href="journal/">Glasjournalen</a></li><li><a href="varumarken/">Varumärken</a></li></ul></div>
+    </div>
+    <form class="news-form foot-news" data-news><label for="footMail">Nyhetsbrevet: ett glas i veckan</label><div class="news-row"><input id="footMail" type="email" autocomplete="email" placeholder="namn@exempel.se"><button class="btn btn-ghost">Prenumerera</button></div></form>
+    <div class="foot-legal"><a href="villkor/" data-lj="l-kop">Köpvillkor</a><a href="villkor/" data-lj="l-integritet">Integritet</a><a href="villkor/" data-lj="l-cookies">Cookies</a><button data-consent-open>Cookieinställningar</button><button class="anger-link" data-anger>Ångra avtalet här</button></div>
+    <div class="legal"><span>© 2026 SKÅL &amp; CO</span><span>Visningsversion. Produkter, priser, betyg och villkor är exempel. Alla bilder är AI-skapade.</span></div>
+  </div>
+</footer>
+
+<!-- Varukorg -->
+<div class="drawer" id="drawer" aria-hidden="true" inert>
+  <div class="shade" data-close></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-label="Varukorg">
+    <div class="phead"><h2 class="ph-h">Varukorg</h2><button class="icon-btn" data-close aria-label="Stäng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="ship" id="ship"></div>
+    <div class="lines" id="lines"></div>
+    <div class="pfoot"><div class="total"><span>Totalt</span><b id="total">0 kr</b></div><button class="btn btn-primary" id="checkout">Till kassan</button></div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal" id="modal" aria-hidden="true" inert><div class="shade" data-mclose></div><div class="box" role="dialog" aria-modal="true" aria-label="Produkt"><button class="icon-btn x" data-mclose aria-label="Stäng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div id="mbody"></div></div></div>
+<!-- Sök -->
+<div class="search" id="search" aria-hidden="true" inert><div class="shade" data-sclose></div>
+  <div class="sbox" role="dialog" aria-modal="true" aria-label="Sök">
+    <form id="sForm"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="sIn" autocomplete="off" placeholder="Sök eller beskriv: tunna vinglas under 300 kr" aria-label="Sök"><button type="button" class="icon-btn" data-sclose aria-label="Stäng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+    <div class="sres" id="sRes" aria-live="polite"></div>
+  </div>
+</div>
+<div class="cmpbar" id="cmpbar"><span id="cmpTxt"></span><button class="btn" id="cmpGo">Jämför</button></div>
+<!-- Glassommelieren -->
+<button class="conc-btn" id="concBtn" aria-label="Fråga glassommelieren"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Fråga glassommelieren</span></button>
+<aside class="conc" id="conc" aria-label="Glassommelieren" aria-hidden="true" inert>
+  <header><div><b>Glassommelieren</b><small id="concMode">Svarar utifrån vårt sortiment.</small></div><button class="icon-btn" id="concX" aria-label="Stäng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div class="msgs" id="msgs"></div>
+  <div class="sugg" id="sugg"></div>
+  <form id="concForm"><input id="concIn" autocomplete="off" placeholder="Till exempel: fyra tunna vinglas för 1 000 kr" aria-label="Din fråga"><button aria-label="Skicka"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+<div class="consent" id="consent" role="dialog" aria-labelledby="consentT">
+  <p id="consentT"><b>Får vi mäta hur sidan används?</b> Vi sparar alltid det som behövs för att sidan ska fungera. Statistik hjälper oss att se vilka verktyg som hjälper dig, men bara om du säger ja. <a href="villkor/" data-lj="l-cookies">Läs mer</a></p>
+  <div class="consent-btns"><button class="btn btn-ghost" data-consent="no">Bara nödvändiga</button><button class="btn btn-ghost" data-consent="yes">Tillåt statistik</button></div>
+</div>
+<script>try{if(localStorage.getItem("skal-consent"))document.getElementById("consent").hidden=true}catch(e){}</script>
+<input type="file" id="photoIn" accept="image/*" hidden>
+
+<script src="assets/site.js?v=11" defer></script>
+</body>
+</html>

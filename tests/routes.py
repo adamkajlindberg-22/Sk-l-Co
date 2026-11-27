@@ -75,6 +75,16 @@ with sync_playwright() as p:
     pg.goto("about:blank"); pg.goto(B + "#tillsammans", wait_until="networkidle"); pg.wait_for_timeout(300)
     check(pg.url == B + "#tillsammans" and visible_view(pg) == "upptack", "#tillsammans gav " + pg.url)
 
+    # Kategorisidor: filtret sätts av adressen och adressen följer filtret
+    pg.goto(B + "handla/vinglas/", wait_until="networkidle")
+    check(visible_view(pg) == "handla" and "Vinglas" in pg.title(), "kategorisidan: " + pg.title())
+    check("Vinglas" in pg.inner_text("#shopTitle"), pg.inner_text("#shopTitle"))
+    pg.click("#activeF [data-fx]"); pg.wait_for_timeout(300)
+    check(pg.url == B + "handla/", "filter bort gav " + pg.url)
+    pg.goto(B, wait_until="networkidle")
+    pg.click("#cats a[href='handla/whiskyglas/']"); pg.wait_for_timeout(400)
+    check(pg.url == B + "handla/whiskyglas/" and "Whisky" in pg.inner_text("#shopTitle"), "kategorikort gav " + pg.url)
+
     # Mobil: menyn byter sida
     m = b.new_page(viewport={"width": 390, "height": 844})
     m.on("pageerror", lambda e: errs.append(str(e)))

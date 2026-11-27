@@ -14,6 +14,19 @@ const start = core.indexOf("const P=[");
 const end = core.indexOf("\n];", start);
 const P = new Function("return " + core.slice(start + 8, end + 2))();
 
+// Kategorisidorna läses ur 02-pages.js, så att listan bara finns på ett ställe
+const pagesJs = readFileSync(new URL("../src/js/02-pages.js", import.meta.url), "utf8");
+const literal = (src, name, close) => {
+  const i = src.indexOf(`const ${name}=`);
+  if (i < 0) throw new Error(name + " saknas");
+  return new Function("return " + src.slice(i + name.length + 7, src.indexOf(close, i) + close.length - 1))();
+};
+const CATPAGE = literal(pagesJs, "CATPAGE", "};");
+const CATINTRO = literal(pagesJs, "CATINTRO", "\n};");
+const ld = o => `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", ...o }).replace(/</g, "\\u003c")}</script>`;
+const crumbs = list => ld({ "@type": "BreadcrumbList", itemListElement: list.map(([name, item], i) => ({ "@type": "ListItem", position: i + 1, name, item })) });
+const inCat = (p, [t, f]) => t === "dryck" ? [...p.drinks, p.cat].includes(f) : p.props.includes(f);
+
 const VIEWS = {
   handla: "Handla glas", glasguiden: "Glasguiden", upptack: "Glas-swipe", glasvaggen: "Glasväggen",
   dukning: "Dukningsstudion", barstudion: "Barstudion", provladan: "Provlådan", present: "Presentguiden",
@@ -74,23 +87,39 @@ function write(rel, html) {
 const urls = [SITE];
 for (const [v, name] of Object.entries(VIEWS)) {
   const url = SITE + v + "/";
-  write(v + "/index.html", page({ depth: 1, title: `SKÅL & CO · ${name}`, desc: lead(v) || DESC[v] || name, url, show: v }));
+  write(v + "/index.html", page({ depth: 1, title: `SKÅL & CO · ${name}`, desc: lead(v) || DESC[v] || name, url, show: v,
+    extraHead: crumbs([["Start", SITE], [name, url]]) }));
   if (!NOT_IN_SITEMAP.has(v)) urls.push(url);
 }
+
+for (const [slug, filter] of Object.entries(CATPAGE)) {
+  const [name, head, text] = CATINTRO[filter[1]];
+  const url = SITE + "handla/" + slug + "/";
+  const items = P.filter(p => inCat(p, filter));
+  write(`handla/${slug}/index.html`, page({
+    depth: 2, title: `${name} · SKÅL & CO`, desc: `${head} ${text}`, url, show: "handla",
+    extraHead: crumbs([["Start", SITE], ["Handla", SITE + "handla/"], [name, url]]) + "\n" +
+      ld({ "@type": "ItemList", name, itemListElement: items.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: SITE + "glas/" + p.id + "/", name: p.name })) }),
+  }));
+  urls.push(url);
+}
+
+const catOf = p => Object.entries(CATPAGE).find(([, f]) => f[0] === "dryck" && f[1] === p.cat);
 
 for (const p of P) {
   const url = SITE + "glas/" + p.id + "/";
   const image = SITE + "assets/p-" + p.img + ".webp";
   const desc = `${p.name}. ${p.mat}, ${p.vol} cl, ${p.pack === 1 ? "1 st" : p.pack + " st i förpackningen"}. ${p.why}`;
   // Samma uppgifter som produktsidan visar. Inga betyg i strukturerad data.
-  const ld = {
-    "@context": "https://schema.org", "@type": "Product", name: p.name, sku: p.id, url, image, description: p.why,
+  const product = {
+    "@type": "Product", name: p.name, sku: p.id, url, image, description: p.why,
     material: p.mat,
     offers: { "@type": "Offer", price: p.price, priceCurrency: "SEK", availability: "https://schema.org/InStock", url },
   };
   write(`glas/${p.id}/index.html`, page({
     depth: 2, title: `${p.name} · SKÅL & CO`, desc, url, image, show: "hem",
-    extraHead: `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>`,
+    extraHead: ld(product) + "\n" + crumbs([["Start", SITE], ["Handla", SITE + "handla/"],
+      ...(catOf(p) ? [[CATINTRO[p.cat][0], SITE + "handla/" + catOf(p)[0] + "/"]] : []), [p.name, url]]),
   }));
   urls.push(url);
 }
@@ -105,4 +134,4 @@ writeFileSync(new URL("sitemap.xml", docs),
   urls.map(u => `  <url><loc>${u}</loc></url>`).join("\n") + `\n</urlset>\n`);
 writeFileSync(new URL("robots.txt", docs), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}sitemap.xml\n`);
 
-console.log(`${Object.keys(VIEWS).length} sidor, ${P.length} produkter, sitemap med ${urls.length} adresser (${SITE})`);
+console.log(`${Object.keys(VIEWS).length} sidor, ${Object.keys(CATPAGE).length} kategorier, ${P.length} produkter, sitemap med ${urls.length} adresser (${SITE})`);
