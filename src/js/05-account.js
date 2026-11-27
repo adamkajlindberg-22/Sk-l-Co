@@ -391,6 +391,7 @@ setSkin(root.dataset.skin||"dark");
 renderSeason();renderJournal();renderFinder();renderKit();renderCart();refreshHearts();
 try{const ld=document.createElement("script");ld.type="application/ld+json";ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"Glas hos SKÅL & CO","itemListElement":P.map((p,i)=>({"@type":"ListItem","position":i+1,"item":{"@type":"Product","name":p.name,"image":new URL("assets/p-"+p.img+".webp",BASE).href,"url":urlFor("p-"+p.id),"description":p.why,"material":p.mat,"category":DRINKN[p.cat]||p.cat,"offers":{"@type":"Offer","price":p.price,"priceCurrency":"SEK","availability":"https://schema.org/InStock"}}}))}).replace(/</g,"\\u003c");document.head.appendChild(ld)}catch(e){}
 $$(".rv").forEach(el=>io.observe(el));
+loadGTM();
 route();
 connectCloud();
 initAuth();

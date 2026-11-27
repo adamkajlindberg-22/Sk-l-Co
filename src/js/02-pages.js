@@ -195,7 +195,7 @@ function renderShop(){
   const one=slug?CATINTRO[only[1]]:null;
   // Adressen följer en ensam kategori, så att länken går att dela
   if(curView==="handla"&&!modal.classList.contains("open")&&(keyOf(location.href)||"").startsWith("handla")){
-    const u=urlFor(slug?"handla/"+slug:"handla");if(location.href!==u)history.replaceState(null,"",u);
+    const u=urlFor(slug?"handla/"+slug:"handla");if(location.href!==u){history.replaceState(null,"",u);if(slug)track("view_item_list",{item_list_id:slug,item_list_name:one?one[0]:slug})}
     document.title=one?one[0]+" · SKÅL & CO":"SKÅL & CO · Handla glas";
   }
   $("#shopKicker").textContent=one?"Handla · "+one[0]:"Handla";

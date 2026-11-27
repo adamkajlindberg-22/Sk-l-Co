@@ -204,7 +204,7 @@ function addCart(id,q=1,quiet,opt={}){
 }
 document.addEventListener("click",e=>{
   const a=e.target.closest("[data-add]");if(a){e.preventDefault();addCart(a.dataset.add,+(a.dataset.qty||1),false);return}
-  const q=e.target.closest("[data-q]");if(q){const [k,d]=q.dataset.q.split("~");const L=cart.find(l=>l.key===k);if(L){L.q+=+d;if(L.q<=0)cart=cart.filter(x=>x!==L)}saveCart();renderCart()}
+  const q=e.target.closest("[data-q]");if(q){const [k,d]=q.dataset.q.split("~");const L=cart.find(l=>l.key===k);if(L){L.q+=+d;if(+d<0&&byId[L.id])track("remove_from_cart",{items:[itemOf(byId[L.id],1)]});if(L.q<=0)cart=cart.filter(x=>x!==L)}saveCart();renderCart()}
   if(e.target.closest("[data-close]"))openCart(false);
 });
 $("#cartBtn").addEventListener("click",()=>openCart(true));

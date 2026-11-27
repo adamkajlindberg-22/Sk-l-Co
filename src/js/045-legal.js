@@ -17,9 +17,21 @@ function track(name,params={}){
   TRACKLOG.unshift(ev);if(TRACKLOG.length>80)TRACKLOG.pop();
   if(consent==="yes"){window.dataLayer=window.dataLayer||[];window.dataLayer.push(ev)}
 }
+
+/* Google Tag Manager. Lämnas tomt tills ett konto finns. Fyll i till exempel "GTM-ABC1234".
+   GTM laddas bara efter ja i samtyckesrutan. Annonslagring är alltid nekad (Consent Mode v2). */
+const GTM_ID="";
+let gtmLoaded=false;
+function gtag(){window.dataLayer=window.dataLayer||[];window.dataLayer.push(arguments)}
+function loadGTM(){
+  if(gtmLoaded||!GTM_ID||consent!=="yes")return;gtmLoaded=true;
+  gtag("consent","default",{analytics_storage:"granted",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied"});
+  window.dataLayer.push({"gtm.start":Date.now(),event:"gtm.js"});
+  const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtm.js?id="+encodeURIComponent(GTM_ID);document.head.appendChild(s);
+}
 const itemOf=(p,q=1)=>({item_id:p.id,item_name:p.name,item_category:p.cat,price:p.price,quantity:q});
 function showConsent(on,focus=true){$("#consent").hidden=!on;if(on&&focus)setTimeout(()=>$("#consent [data-consent='no']").focus(),50)}
-function setConsent(v){consent=v;try{localStorage.setItem(CONSENT_KEY,v)}catch(e){}showConsent(false);toast(v==="yes"?"Tack! Statistik är tillåten.":"Okej, vi mäter ingenting.");if(v==="yes")track("consent_granted")}
+function setConsent(v){consent=v;try{localStorage.setItem(CONSENT_KEY,v)}catch(e){}showConsent(false);toast(v==="yes"?"Tack! Statistik är tillåten.":"Okej, vi mäter ingenting.");if(v==="yes"){loadGTM();track("consent_granted");track("page_view",{page:curView,page_location:location.href})}else if(gtmLoaded)gtag("consent","update",{analytics_storage:"denied"})}
 document.addEventListener("click",e=>{
   const c=e.target.closest("[data-consent]");if(c){setConsent(c.dataset.consent);return}
   if(e.target.closest("[data-consent-open]")){e.preventDefault();showConsent(true)}
