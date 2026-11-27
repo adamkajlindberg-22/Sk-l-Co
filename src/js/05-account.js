@@ -3,10 +3,36 @@
 const fmtDate=ts=>new Date(ts).toLocaleDateString("sv-SE",{day:"numeric",month:"short"});
 const silBox=sh=>`<span class="sil">${sil(sh,"currentColor",6)}</span>`;
 let photoState=null;
+const GSVG=`<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.6 2.3 2.3 6.6 2.3 12s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg>`;
+let gkTab="oversikt";
+let gkGuest=false;try{gkGuest=sessionStorage.getItem("skal-gk-guest")==="1"}catch(e){}
+const GKTABS=[["oversikt","Översikt"],["glas","Mina glas"],["sparat","Sparat"],["kop","Köp"],["konto","Konto"]];
+const gkGate=()=>authOn()&&!AUTH.user&&!gkGuest;
+function gkLanding(){
+  const local=S.favs.length+S.owned.length+S.saved.length+S.lists.reduce((n,l)=>n+l.items.length,0)+(S.profile?1:0)+S.orders.length;
+  const arch=["perla","bourgogne","whisky"].map(id=>byId[id]).filter(Boolean);
+  const perks=[["Din stil","Swipea eller svara på Glasguiden. Vi lär oss vad du gillar och visar glas som passar dig över hela sidan."],["Dina glas hemma","Lägg in glasen du har. Se vad som saknas i serien och ersätt ett trasigt glas på två klick."],["Favoriter och listor","Spara glas, gör en önskelista eller en bröllopslista och dela den med gästerna."],["Dukningar och barkit","Spara bordet du byggt i Dukningsstudion och kiten från Barstudion."],["Presentkalendern","Spara födelsedagar och bröllop. Vi påminner i god tid med förslag."],["Kvitton och skålpoäng","Alla köp, krossgarantier och poäng samlade på ett ställe."]];
+  const roman=["I","II","III","IV","V","VI"];
+  return `<section class="gkl">
+    <div class="gkl-copy">
+      <span class="mono">Mitt glasskåp</span>
+      <h1>Ditt eget glasskåp.<em>Alltid med dig.</em></h1>
+      <p class="lead">Logga in så lär vi oss din stil, sparar dina glas och listor och visar det som passar just dig. På alla dina enheter.</p>
+      <div class="gkl-cta"><button class="btn btn-google" data-login="google">${GSVG} Fortsätt med Google</button><button class="btn btn-ghost" data-login="in">Logga in med e-post</button></div>
+      <p class="gkl-small">Ny här? <button class="linkbtn" data-login="up">Skapa ett konto med e-post</button>. Gratis, och bara du ser ditt glasskåp.</p>
+      ${local?`<p class="gkl-local"><i></i>Du har ${local} ${local===1?"sak":"saker"} sparade i den här webbläsaren. De följer med in när du loggar in.</p>`:""}
+    </div>
+    <div class="gkl-art" aria-hidden="true">${arch.map((p,i)=>`<div class="arch a${i}"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""></div>`).join("")}<div class="shelf"></div></div>
+  </section>
+  <section class="gkl-perks"><div class="gkl-perks-head"><span class="mono">Det här finns i ditt glasskåp</span><h2>Allt som gör glasen till dina.</h2></div>
+    <ol>${perks.map((p,i)=>`<li><span class="num">${roman[i]}</span><h3>${p[0]}</h3><p>${p[1]}</p></li>`).join("")}</ol>
+  </section>
+  <p class="gkl-guest"><button class="linkbtn" data-guest>Fortsätt utan konto</button><span>Allt fungerar, men det du sparar stannar i den här webbläsaren.</span></p>`;
+}
 function renderGlasskap(){
   const el=$("#gk");if(!el)return;
-  $("#gkHello").textContent=cloud.name?"Hej "+cloud.name.split(" ")[0]+".":"Välkommen.";
-  const stEl=$("#gkStatus");stEl.classList.toggle("local",!cloud.on);stEl.lastChild.textContent=cloud.on?(cloud.provider==="firebase"?"Inloggad, sparas på ditt konto":"Inloggad via Claude, sparas på ditt konto"):"Sparas i den här webbläsaren";
+  el.classList.toggle("gk-gate",gkGate());
+  if(gkGate()){el.innerHTML=gkLanding();return}
   const prof=S.profile;
   const owned=S.owned;
   const ownedIds=new Set(owned.map(o=>o.id).filter(Boolean));
@@ -16,30 +42,44 @@ function renderGlasskap(){
   const readNext=ART.map((a,i)=>({a,i})).filter(x=>!S.read.includes(x.i)).sort((x,y)=>score(y.a)-score(x.a)).slice(0,3);
   function score(a){let s=0;if(S.finder&&a[0]===S.finder.drink)s+=2;if(owned.some(o=>byId[o.id]&&(byId[o.id].cat===a[0]||byId[o.id].drinks.includes(a[0]))))s+=1.5;if(a[0]==="skotsel"&&owned.length)s+=1;return s}
   const u=AUTH.user;
-  const acct=authOn()?(u?`<section class="gk wide acct"><div><span class="mono">Ditt konto</span><h2 class="gk-h">${esc(u.displayName||"Inloggad")}</h2><p style="color:var(--ink2)">${esc(u.email||"")}${u.email&&!u.emailVerified&&u.providerData[0]?.providerId==="password"?" · bekräfta e-posten via länken vi skickade":""}</p></div><div class="pdp-actions"><button class="small-btn" data-logout>Logga ut</button><button class="small-btn" data-delacc>Radera konto</button></div></section>`
-    :`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Spara ditt glasskåp på alla enheter.</h2><p style="color:var(--ink2)">Logga in med Google eller skapa ett konto med e-post. Det du redan sparat här följer med in på kontot.</p></div><div class="pdp-actions"><button class="btn btn-google" data-login="google"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.6 2.3 2.3 6.6 2.3 12s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg> Fortsätt med Google</button><button class="btn btn-ghost" data-login="in">Logga in med e-post</button><button class="btn btn-ghost" data-login="up">Skapa konto</button></div></section>`)
-    :(window.claude?"":`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Inloggning kommer snart.</h2><p style="color:var(--ink2)">Snart kan du logga in med Google eller e-post och nå ditt glasskåp på alla enheter. Tills dess sparas allt i den här webbläsaren.</p></div></section>`);
-  el.innerHTML=acct+`
-  <section class="gk"><span class="mono">Smakprofil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea fram din stil eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan.</p>`}
+  const name=cloud.name?cloud.name.split(" ")[0]:"";
+  const status=cloud.on?(cloud.provider==="firebase"?"Sparas på ditt konto":"Sparas på ditt Claude-konto"):"Sparas i den här webbläsaren";
+  const nGlas=owned.reduce((n,o)=>n+o.count,0);
+  const head=`<header class="gkd-head">
+    <div class="gkd-id"><span class="gkd-av" aria-hidden="true">${name?esc(name[0].toUpperCase()):`<svg viewBox="0 0 24 24"><path d="M5.5 21V10.5a6.5 6.5 0 0 1 13 0V21"/><path d="M3.5 21h17"/><path d="M9.8 9.5h4.4c0 2.4-1 3.6-2.2 3.6s-2.2-1.2-2.2-3.6z"/><path d="M12 13.1v3.6M10.4 16.7h3.2"/></svg>`}</span>
+      <div><span class="mono">Mitt glasskåp</span><h1>${name?"Hej "+esc(name)+".":"Välkommen."}</h1><p class="gkd-sub ${cloud.on?"on":""}"><i></i>${status}</p></div></div>
+    <dl class="gkd-stats"><div><dt>Favoriter</dt><dd>${S.favs.length}</dd></div><div><dt>Glas hemma</dt><dd>${nGlas}</dd></div><div><dt>Skålpoäng</dt><dd>${S.points||0}</dd></div></dl>
+  </header>`;
+  const guestBar=authOn()&&!u?`<div class="gkd-guest"><p><b>Du använder glasskåpet utan konto.</b> Logga in så sparas din stil och allt du sparat på kontot.</p><div class="pdp-actions"><button class="btn btn-google btn-sm" data-login="google">${GSVG} Fortsätt med Google</button><button class="small-btn" data-login="in">E-post</button></div></div>`:"";
+  const tabs=`<div class="gkd-tabs" role="group" aria-label="Delar av Mitt glasskåp">${GKTABS.map(([k,v])=>`<button type="button" data-gtab="${k}" aria-pressed="${gkTab===k}">${v}</button>`).join("")}</div>`;
+  const T={};
+  T.oversikt=`<section class="gk span8 gk-feature"><span class="mono">Din stil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea tio bilder eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan efter dig.</p>`}
     ${S.finder?`<p class="note">Glasguiden: ${esc(FQ[0].o.find(o=>o[0]===S.finder.drink||(S.finder.drink==="vin"&&o[0]==="vin"))?.[1]||"")}, ${esc(S.finder.count||"")} glas, ${esc(FQ[2].o.find(o=>o[0]===S.finder.style)?.[1]||"")}.</p>`:""}
     <div class="pdp-actions"><a class="small-btn" href="#upptack">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="#glasguiden">Glasguiden</a></div>
     ${recs.length&&(prof||S.finder||owned.length)?`<div class="gk-list">${recs.map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div>`:""}
   </section>
-  <section class="gk"><span class="mono">Skålpoäng</span><div class="points" style="margin:10px 0 6px">${S.points||0}</div><p style="color:var(--ink2)">500 poäng ger fri gravyr. 300 poäng ger presentinslagning.</p>
+  <section class="gk span4"><span class="mono">Skålpoäng</span><div class="points" style="margin:10px 0 6px">${S.points||0}</div><p style="color:var(--ink2)">500 poäng ger fri gravyr. 300 poäng ger presentinslagning.</p>
     <div class="gk-list">${S.pointsLog.slice(0,3).map(l=>`<div style="display:flex;justify-content:space-between;font-size:14px;color:var(--ink2)"><span>${esc(l.why)}</span><span>+${l.n}</span></div>`).join("")||'<p class="gk-empty">Du får poäng när du handlar, skriver recensioner och delar dukningar.</p>'}</div>
     <p class="note">Poängvärdet är ett exempel i visningsversionen.</p>
   </section>
-  <section class="gk wide"><span class="mono">Mina glas</span><h2 class="gk-h">Det du redan har.</h2><p style="color:var(--ink2)">Lägg till glasen du har hemma. Då ser du vad som saknas i serien, och om något går sönder ersätter du det på två klick.</p>
+  <section class="gk"><span class="mono">Kalender</span><h2 class="gk-h">Kommande presenter</h2>
+    <div class="gk-list">${upcoming.map(d=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="#present">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
+    <p class="note">I butiken får du en påminnelse två veckor innan.</p>
+  </section>
+  <section class="gk"><span class="mono">Läsning för dig</span><h2 class="gk-h">Utvalt utifrån dina glas</h2>
+    <div class="gk-list">${readNext.map(x=>`<button class="small-btn" data-art="${x.i}" style="justify-content:flex-start;text-align:left">${esc(x.a[2])}</button>`).join("")||'<p class="gk-empty">Du har läst allt. Snyggt.</p>'}</div>
+  </section>`;
+  T.glas=`<section class="gk span7"><span class="mono">Mina glas</span><h2 class="gk-h">Det du redan har.</h2><p style="color:var(--ink2)">Lägg till glasen du har hemma. Då ser du vad som saknas i serien, och om något går sönder ersätter du det på två klick.</p>
     <div class="gk-list">${owned.map((o,i)=>{const p=byId[o.id];return `<div class="gk-item">${p?`<img src="${img(p,true)}" data-pimg="${p.id}" alt="">`:silBox(o.shape)}<div><b>${esc(o.name)}</b><small>${o.count} st${p?" · serie "+esc(p.series):" · "+esc(SHNAME[o.shape]||"eget glas")}</small></div><div class="acts"><button class="small-btn" data-broke="${i}">Ett gick sönder</button><button class="small-btn" data-ocount="${i}~1" aria-label="En till">+</button><button class="small-btn" data-ocount="${i}~-1" aria-label="En färre">−</button></div></div>`}).join("")||'<p class="gk-empty">Inga glas än. Lägg till från vårt sortiment eller ett eget glas nedan.</p>'}</div>
-    <form class="inline-form" id="ownAdd"><select id="ownSel" aria-label="Välj glas"><option value="">Lägg till ett glas från sortimentet</option>${P.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select><input id="ownCnt" type="number" min="1" max="48" value="${2}" aria-label="Antal" style="max-width:90px"><button class="small-btn">Lägg till</button></form>
+    <form class="inline-form" id="ownAdd"><select id="ownSel" aria-label="Välj glas"><option value="">Lägg till ett glas från sortimentet</option>${P.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select><input id="ownCnt" type="number" min="1" max="48" value="2" aria-label="Antal" style="max-width:90px"><button class="small-btn">Lägg till</button></form>
     <form class="inline-form" id="ownCustom"><input id="ownName" placeholder="Eller ett eget glas, till exempel Mormors vinglas" aria-label="Namn på eget glas"><select id="ownShape" aria-label="Form">${Object.entries(SHNAME).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select><button class="small-btn">Lägg till eget</button></form>
     ${missing.length?`<div style="margin-top:20px"><span class="mono">Saknas i serien</span><div class="gk-list">${missing.map(p=>`<div class="gk-item" data-open="${p.id}" style="cursor:pointer"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><div><b>${esc(p.name)}</b><small>Samma serie som dina glas</small></div><span>${kr(p.price)}</span></div>`).join("")}</div></div>`:""}
   </section>
-  <section class="gk"><span class="mono">Fotografera ditt glas</span><h2 class="gk-h">Vilket glas är det här?</h2><p style="color:var(--ink2)">Ta en bild på ett glas du har. Vi känner igen formen och föreslår glas som matchar eller kompletterar.</p>
+  <section class="gk span5"><span class="mono">Fotografera ditt glas</span><h2 class="gk-h">Vilket glas är det här?</h2><p style="color:var(--ink2)">Ta en bild på ett glas du har. Vi känner igen formen och föreslår glas som matchar eller kompletterar.</p>
     <div class="photo-drop" id="photoDrop" tabindex="0" role="button">${photoState?.url?`<img src="${photoState.url}" alt="Ditt foto">`:`<span>Klicka för att välja eller ta en bild</span>`}</div>
     <div id="photoOut"></div>
-  </section>
-  <section class="gk"><span class="mono">Favoriter</span><h2 class="gk-h">${S.favs.length?S.favs.length+" sparade":"Inga favoriter än"}</h2>
+  </section>`;
+  T.sparat=`<section class="gk"><span class="mono">Favoriter</span><h2 class="gk-h">${S.favs.length?S.favs.length+" sparade":"Inga favoriter än"}</h2>
     <div class="gk-list">${S.favs.map(id=>byId[id]).filter(Boolean).map(p=>`<div class="gk-item"><img src="${img(p,true)}" data-pimg="${p.id}" alt="" data-open="${p.id}" style="cursor:pointer"><div><b>${esc(p.name)}</b><small>${kr(p.price)}</small></div><div class="acts"><button class="small-btn" data-add="${p.id}">Köp</button><button class="small-btn" data-fav="${p.id}" aria-pressed="true" aria-label="Ta bort favorit">${heartSvg}</button></div></div>`).join("")||'<p class="gk-empty">Tryck på hjärtat på ett glas, eller swipea uppåt i Glas-swipe.</p>'}</div>
   </section>
   <section class="gk"><span class="mono">Listor</span><h2 class="gk-h">Önskelistor och bröllopslistor.</h2>
@@ -50,20 +90,33 @@ function renderGlasskap(){
   <section class="gk"><span class="mono">Sparade val</span><h2 class="gk-h">Dukningar, kit och förslag.</h2>
     <div class="gk-list">${S.saved.slice(0,8).map((s,i)=>`<div class="gk-item"><span class="sil">${sil(s.type==="dukning"?"rott":s.type==="kit"?"whisky":s.type==="swipe"?"coupe":"vitt","currentColor",6)}</span><div><b>${esc(s.title)}</b><small>${fmtDate(s.ts)}</small></div><div class="acts"><button class="small-btn" data-sopen="${i}">Öppna</button><button class="small-btn" data-sdel="${i}" aria-label="Ta bort">×</button></div></div>`).join("")||'<p class="gk-empty">Spara en dukning, ett barkit eller dina förslag från Glasguiden.</p>'}</div>
   </section>
-  <section class="gk"><span class="mono">Kvitton</span><h2 class="gk-h">${S.orders.length?"Dina köp":"Inga köp än"}</h2>
-    <div class="gk-list">${S.orders.map(o=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px"><span><b>${esc(o.id)}</b> · ${fmtDate(o.ts)}<small style="display:block;color:var(--muted)">${o.lines.map(l=>l.id==="provlada"?"Provlåda":esc(byId[l.id]?.name||"")).join(", ")}</small></span><span style="text-align:right">${kr(o.total)}<br>${o.withdrawn?`<small style="color:var(--muted)">Ångrat ${fmtDate(o.withdrawn)}</small>`:Date.now()-o.ts<60*864e5?`<button class="small-btn" data-anger="${esc(o.id)}" style="margin-top:6px">Ångra köpet</button>`:""}</span></div>`).join("")||'<p class="gk-empty">Dina kvitton och krossgarantier samlas här.</p>'}</div>
-  </section>
-  <section class="gk third"><span class="mono">Bevakningar</span><h2 class="gk-h">Serier du följer</h2>
+  <section class="gk"><span class="mono">Bevakningar</span><h2 class="gk-h">Serier du följer</h2>
     <div class="gk-list">${S.watches.map((w,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(w.series)}<small style="display:block;color:var(--muted)">Nyheter och prisändringar</small></span><button class="small-btn" data-wdel="${i}">Sluta</button></div>`).join("")||'<p class="gk-empty">Bevaka en serie från produktsidan.</p>'}</div>
-  </section>
-  <section class="gk third"><span class="mono">Kalender</span><h2 class="gk-h">Kommande presenter</h2>
-    <div class="gk-list">${upcoming.map((d,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="#present">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
-    <p class="note">I butiken får du en påminnelse två veckor innan.</p>
-  </section>
-  <section class="gk third"><span class="mono">Läsning för dig</span><h2 class="gk-h">Utvalt utifrån dina glas</h2>
-    <div class="gk-list">${readNext.map(x=>`<button class="small-btn" data-art="${x.i}" style="justify-content:flex-start;text-align:left">${esc(x.a[2])}</button>`).join("")||'<p class="gk-empty">Du har läst allt. Snyggt.</p>'}</div>
-  </section>
-  <section class="gk wide" style="display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap"><div><span class="mono">Din data</span><p style="color:var(--ink2);margin-top:6px">${cloud.on?"Sparas privat på ditt konto. Bara du kan se den.":"Sparas bara i den här webbläsaren. Logga in för att spara på ditt konto."}</p></div><button class="small-btn" id="gkWipe">Radera all min data</button></section>`;
+  </section>`;
+  T.kop=`<section class="gk wide"><span class="mono">Kvitton</span><h2 class="gk-h">${S.orders.length?"Dina köp":"Inga köp än"}</h2>
+    <div class="gk-list">${S.orders.map(o=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px"><span><b>${esc(o.id)}</b> · ${fmtDate(o.ts)}<small style="display:block;color:var(--muted)">${o.lines.map(l=>l.id==="provlada"?"Provlåda":esc(byId[l.id]?.name||"")).join(", ")}</small></span><span style="text-align:right">${kr(o.total)}<br>${o.withdrawn?`<small style="color:var(--muted)">Ångrat ${fmtDate(o.withdrawn)}</small>`:Date.now()-o.ts<60*864e5?`<button class="small-btn" data-anger="${esc(o.id)}" style="margin-top:6px">Ångra köpet</button>`:""}</span></div>`).join("")||'<p class="gk-empty">Dina kvitton och krossgarantier samlas här.</p>'}</div>
+  </section>`;
+  const acct=authOn()?(u?`<section class="gk wide acct"><div><span class="mono">Ditt konto</span><h2 class="gk-h">${esc(u.displayName||"Inloggad")}</h2><p style="color:var(--ink2)">${esc(u.email||"")}${u.email&&!u.emailVerified&&u.providerData[0]?.providerId==="password"?" · bekräfta e-posten via länken vi skickade":""}</p></div><div class="pdp-actions"><button class="small-btn" data-logout>Logga ut</button><button class="small-btn" data-delacc>Radera konto</button></div></section>`
+    :`<section class="gk wide acct acct-out"><div><span class="mono">Konto</span><h2 class="gk-h">Spara ditt glasskåp på alla enheter.</h2><p style="color:var(--ink2)">Logga in med Google eller e-post. Det du redan sparat här följer med in på kontot.</p></div><div class="pdp-actions"><button class="btn btn-google" data-login="google">${GSVG} Fortsätt med Google</button><button class="btn btn-ghost" data-login="in">Logga in med e-post</button></div></section>`)
+    :`<section class="gk wide acct"><div><span class="mono">Ditt konto</span><h2 class="gk-h">${window.claude?"Inloggad via Claude":"Inloggning kommer snart"}</h2><p style="color:var(--ink2)">${window.claude?"Glasskåpet sparas på ditt Claude-konto.":"Tills dess sparas allt i den här webbläsaren."}</p></div></section>`;
+  T.konto=acct+`<section class="gk wide" style="display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap"><div><span class="mono">Din data</span><p style="color:var(--ink2);margin-top:6px">${cloud.on?"Sparas privat på ditt konto. Bara du kan se den.":"Sparas bara i den här webbläsaren. Logga in för att spara på ditt konto."}</p></div><button class="small-btn" id="gkWipe">Radera all min data</button></section>`;
+  el.innerHTML=head+guestBar+tabs+`<div class="gk-grid" id="gkPanel">${T[gkTab]||T.oversikt}</div>`;
+  if(gkTab==="glas")renderPhotoOut();
+}
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-gtab]");
+  if(g){gkTab=g.dataset.gtab;if(curView==="glasskap"&&!gkGate()){renderGlasskap();const t=$(`#gk [data-gtab="${gkTab}"]`);if(t&&g.closest("#gk"))t.focus()}}
+  if(e.target.closest("[data-guest]")){gkGuest=true;try{sessionStorage.setItem("skal-gk-guest","1")}catch(x){}renderGlasskap();scrollTo({top:0,behavior:"smooth"})}
+  const m=e.target.closest("[data-mm]");
+  if(m){closeMenu();if(m.dataset.mm==="search")setTimeout(()=>$("#searchBtn").click(),250);else $("#skinBtn").click()}
+});
+/* Mjuk påminnelse om inloggning när något sparas utan konto. Visas en gång per besök. */
+const NUDGE={stil:["Din stil är klar.","Logga in så sparas den på ditt konto och följer med dig. Då anpassas sidan efter dig på alla enheter."],fav:["Spara dina favoriter.","Logga in så finns favoriterna kvar i Mitt glasskåp, på alla dina enheter."],sparat:["Sparat i webbläsaren.","Logga in så följer det med dig till Mitt glasskåp på alla dina enheter."]};
+function nudgeLogin(kind){
+  if(!authOn()||AUTH.user||!AUTH.api)return;
+  try{if(sessionStorage.getItem("skal-nudge"))return;sessionStorage.setItem("skal-nudge","1")}catch(e){}
+  const [h,p]=NUDGE[kind]||NUDGE.sparat;
+  setTimeout(()=>{if(!modal.classList.contains("open"))openLogin("in",{h,p})},kind==="stil"?900:300);
 }
 onState(()=>{if(curView==="glasskap")renderGlasskap()});
 $("#gk").addEventListener("click",e=>{

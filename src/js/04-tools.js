@@ -55,7 +55,7 @@ $("#fq").addEventListener("click",e=>{
   if(a){fa[FQ[fs].k]=a.dataset.fa;if(fs===0)drawShape(...DRINKSHAPE[a.dataset.fa]);fs++;renderFinder();return}
   if(e.target.closest("#fBack")){fs--;renderFinder();return}
   if(e.target.closest("#fRestart")){fs=0;for(const k in fa)delete fa[k];renderFinder();return}
-  if(e.target.closest("#fSave")){S.saved.unshift({type:"guide",title:"Glasguiden: "+FQ[0].o.find(o=>o[0]===fa.drink)[1].toLowerCase()+", "+fa.count+" glas",data:{ids:finderRes.map(r=>r.p.id),count:+fa.count},ts:Date.now()});save();toast("Sparat i Mitt glasskåp");return}
+  if(e.target.closest("#fSave")){S.saved.unshift({type:"guide",title:"Glasguiden: "+FQ[0].o.find(o=>o[0]===fa.drink)[1].toLowerCase()+", "+fa.count+" glas",data:{ids:finderRes.map(r=>r.p.id),count:+fa.count},ts:Date.now()});save();nudgeLogin("sparat");toast("Sparat i Mitt glasskåp");return}
   if(e.target.closest("#fAll")){finderRes.forEach(r=>addCart(r.p.id,Math.ceil(+fa.count/r.p.pack),true));toast("Dina förslag ligger i varukorgen")}
 });
 
@@ -124,8 +124,8 @@ function renderProfile(done){
   }
 }
 function finishSwipe(){
-  $("#deck").innerHTML=`<div class="scard" style="cursor:default;display:grid;place-items:center;text-align:center;padding:30px"><img src="assets/s-tre-glas.webp" alt=""><div class="t" style="position:relative;inset:auto"><b>Klart!</b><span>Din stil är sparad i Mitt glasskåp.</span></div></div>`;
-  S.profile=buildProfile(swW);track("tool_complete",{tool:"glas-swipe",style:buildProfile(swW).name});S.saved.unshift({type:"swipe",title:"Glas-swipe: "+S.profile.name,data:{log:swLog.slice(-20)},ts:Date.now()});save();
+  $("#deck").innerHTML=`<div class="scard" style="cursor:default;display:grid;place-items:center;text-align:center;padding:30px"><img src="assets/s-tre-glas.webp" alt=""><div class="t" style="position:relative;inset:auto"><b>Klart!</b><span>${authOn()&&!AUTH.user?"Logga in för att spara din stil på kontot.":"Din stil är sparad i Mitt glasskåp."}</span></div></div>`;
+  S.profile=buildProfile(swW);track("tool_complete",{tool:"glas-swipe",style:buildProfile(swW).name});S.saved.unshift({type:"swipe",title:"Glas-swipe: "+S.profile.name,data:{log:swLog.slice(-20)},ts:Date.now()});save();nudgeLogin("stil");
   renderProfile(true);
 }
 async function copy(text,msg){track("share",{method:"kopiera"});try{await navigator.clipboard.writeText(text);toast(msg||"Kopierat")}catch(e){toast("Kunde inte kopiera här. Markera texten och kopiera själv.")}}
@@ -235,7 +235,7 @@ function topSvg(s,items){
   return svg;
 }
 $("#tAdd").addEventListener("click",()=>{track("tool_add_all",{tool:"dukning",guests:T.guests});tableOrder().forEach(x=>addCart(x.p.id,x.packs,true));toast("Hela dukningen ligger i varukorgen")});
-$("#tSave").addEventListener("click",()=>{S.saved.unshift({type:"dukning",title:`${SEASONS[T.season][0]} för ${T.guests}, ${STY[T.style][0].toLowerCase()}`,data:{season:T.season,style:T.style,guests:T.guests,on:[...T.on],pick:{...T.pick}},ts:Date.now()});save();toast("Dukningen är sparad i Mitt glasskåp")});
+$("#tSave").addEventListener("click",()=>{S.saved.unshift({type:"dukning",title:`${SEASONS[T.season][0]} för ${T.guests}, ${STY[T.style][0].toLowerCase()}`,data:{season:T.season,style:T.style,guests:T.guests,on:[...T.on],pick:{...T.pick}},ts:Date.now()});save();nudgeLogin("sparat");toast("Dukningen är sparad i Mitt glasskåp")});
 $("#tCopy").addEventListener("click",()=>{const it=tableOrder();if(!it.length)return;const txt=`Dukning från SKÅL & CO: ${SEASONS[T.season][0]} för ${T.guests}\n`+it.map(x=>`${x.packs} × ${x.p.name} (${packTxt(x.p)}) ${kr(x.packs*x.p.price)}`).join("\n")+`\nTotalt ${kr(it.reduce((a,x)=>a+x.packs*x.p.price,0))}`;
   if(!S.pointsLog.some(l=>l.why==="Delad dukning"&&Date.now()-l.ts<864e5)){addPoints(25,"Delad dukning");save(true)}
   copy(txt,"Inköpslistan är kopierad. 25 skålpoäng för att du delar.")});
@@ -278,7 +278,7 @@ function renderKit(){$$("[data-kit]").forEach(b=>b.setAttribute("aria-pressed",S
   const L=KITS[kit][1];const t=L.reduce((a,[id,q])=>a+q*byId[id].price,0);
   $("#kit").innerHTML=L.map(([id,q])=>{const p=byId[id];return `<div><span><b style="color:#eee5d6;font-weight:500">${esc(p.name)}</b> · ${q} × ${packTxt(p)}</span><span>${kr(q*p.price)}</span></div>`}).join("")+`<div><b style="color:#eee5d6">Totalt</b><b style="color:#eee5d6">${kr(t)}</b></div>`}
 $("#kitAdd").addEventListener("click",()=>{track("tool_add_all",{tool:"barstudion",kit});KITS[kit][1].forEach(([id,q])=>addCart(id,q,true));toast(KITS[kit][0]+" ligger i varukorgen")});
-$("#kitSave").addEventListener("click",()=>{S.saved.unshift({type:"kit",title:"Barstudion: "+KITS[kit][0],data:{kit},ts:Date.now()});save();toast("Kitet är sparat i Mitt glasskåp")});
+$("#kitSave").addEventListener("click",()=>{S.saved.unshift({type:"kit",title:"Barstudion: "+KITS[kit][0],data:{kit},ts:Date.now()});save();nudgeLogin("sparat");toast("Kitet är sparat i Mitt glasskåp")});
 
 /* ---------- Provlådan ---------- */
 const trialSel=new Set();
@@ -303,7 +303,7 @@ function renderGift(){
 ["gWho","gOcc","gBud"].forEach(id=>$("#"+id).addEventListener("change",renderGift));
 $("#dateForm").addEventListener("submit",e=>e.preventDefault());
 $("#dateForm button").addEventListener("click",e=>{e.preventDefault();const n=$("#dName").value.trim(),d=$("#dDate").value;if(!n||!d){toast("Fyll i namn och datum");return}
-  S.dates.push({name:n.slice(0,40),date:d,budget:+$("#gBud").value,who:$("#gWho").value});save();$("#dName").value="";$("#dDate").value="";toast("Datumet är sparat i Mitt glasskåp")});
+  S.dates.push({name:n.slice(0,40),date:d,budget:+$("#gBud").value,who:$("#gWho").value});save();$("#dName").value="";$("#dDate").value="";nudgeLogin("sparat");toast("Datumet är sparat i Mitt glasskåp")});
 
 /* ---------- Glasjournalen ---------- */
 const ART=[

@@ -110,7 +110,7 @@ async function connectCloud(){
 }
 function addPoints(n,why){S.points=(S.points||0)+n;S.pointsLog.unshift({n,why,ts:Date.now()});S.pointsLog=S.pointsLog.slice(0,30)}
 function isFav(id){return S.favs.includes(id)}
-function toggleFav(id){const i=S.favs.indexOf(id);if(i>=0)S.favs.splice(i,1);else{S.favs.unshift(id);toast(byId[id].name+" sparad i favoriter");track("add_to_wishlist",{items:[itemOf(byId[id])]})}save()}
+function toggleFav(id){const i=S.favs.indexOf(id);if(i>=0)S.favs.splice(i,1);else{S.favs.unshift(id);toast(byId[id].name+" sparad i favoriter");track("add_to_wishlist",{items:[itemOf(byId[id])]});nudgeLogin("fav")}save()}
 function pushRecent(id){S.recent=[id,...S.recent.filter(x=>x!==id)].slice(0,12);save(true);renderRecent()}
 
 /* ---------- Toast ---------- */

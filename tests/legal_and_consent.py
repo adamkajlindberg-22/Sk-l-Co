@@ -19,6 +19,8 @@ async def main():
             await pg.screenshot(path=O+name+"-checkout.png")
             await pg.click("#coForm .btn-primary");await pg.wait_for_timeout(300);await pg.keyboard.press("Escape")
             await pg.evaluate("location.hash='glasskap'");await pg.wait_for_timeout(400)
+            if await pg.query_selector("#gk [data-guest]"):await pg.click("#gk [data-guest]");await pg.wait_for_timeout(200)
+            await pg.click('#gk [data-gtab="kop"]');await pg.wait_for_timeout(200)
             await pg.click("#gk [data-anger]");await pg.wait_for_timeout(300)
             await pg.fill("#aName","Adam Test");await pg.click("[name=aForm][value=fil]");await pg.click("#angerForm .btn-primary");await pg.wait_for_timeout(200)
             await pg.screenshot(path=O+name+"-anger-confirm.png")
