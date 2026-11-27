@@ -3,7 +3,8 @@
    Fyll i FIREBASE_CONFIG från Firebase-konsolen (Projektinställningar, Dina appar).
    Nycklarna är offentliga. Firestore-reglerna gör att varje kund bara når sitt eget dokument: glasskap/{uid}.
    Inne i Claude används i stället claude.use("db") (se connectCloud i 01-core.js). */
-const FIREBASE_CONFIG=null;
+const FIREBASE_CONFIG={apiKey:"AIzaSyAZHd10YjyhuzHkjAfHWhEoL1AOw4N3TwQ",authDomain:"skal-co.firebaseapp.com",databaseURL:"https://skal-co-default-rtdb.europe-west1.firebasedatabase.app",projectId:"skal-co",storageBucket:"skal-co.firebasestorage.app",messagingSenderId:"6206948818",appId:"1:6206948818:web:9884bc2ba941fbece7740b"};
+const FIREBASE_DB="rtdb"; /* "firestore" eller "rtdb" */
 const FB_VER="13.4.0";
 const AUTH={user:null,ready:false,api:null,busy:false};
 const authOn=()=>!!FIREBASE_CONFIG&&!(window.claude&&typeof window.claude.use==="function");
@@ -11,21 +12,28 @@ async function initAuth(){
   if(!authOn()){AUTH.ready=true;renderUserBtn();return}
   try{
     const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
-    const [app,auth,fs]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-auth.js"),import(base+"firebase-firestore.js")]);
-    const a=app.initializeApp(FIREBASE_CONFIG),au=auth.getAuth(a),db=fs.getFirestore(a);
+    /* Firestore som standard. Har projektet Realtime Database (databaseURL i konfigurationen och FIREBASE_DB="rtdb") används den. */
+    const rt=FIREBASE_DB==="rtdb";
+    const [app,auth,dbm]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-auth.js"),import(base+(rt?"firebase-database.js":"firebase-firestore.js"))]);
+    const a=app.initializeApp(FIREBASE_CONFIG),au=auth.getAuth(a);
     au.languageCode="sv";
-    AUTH.api={auth,fs,au,db};
+    let store;
+    if(rt){const db=dbm.getDatabase(a);const r=uid=>dbm.ref(db,"glasskap/"+uid);
+      store={get:async uid=>{const s=await dbm.get(r(uid));return s.exists()?s.val():null},set:(uid,v)=>dbm.set(r(uid),v),del:uid=>dbm.remove(r(uid))};}
+    else{const db=dbm.getFirestore(a);const r=uid=>dbm.doc(db,"glasskap",uid);
+      store={get:async uid=>{const s=await dbm.getDoc(r(uid));return s.exists()?s.data():null},set:(uid,v)=>dbm.setDoc(r(uid),v),del:uid=>dbm.deleteDoc(r(uid))};}
+    AUTH.api={auth,au,store};
     auth.onAuthStateChanged(au,u=>onUser(u));
   }catch(e){console.warn("Inloggningen kunde inte laddas",e);AUTH.ready=true;AUTH.failed=true;renderUserBtn()}
 }
 async function onUser(u){
   AUTH.user=u;AUTH.ready=true;
   if(u){
-    const {fs,db}=AUTH.api,ref=fs.doc(db,"glasskap",u.uid);
+    const {store}=AUTH.api;
     try{
-      const snap=await fs.getDoc(ref);
-      if(snap.exists()){const d=snap.data();try{S=mergeState(S,JSON.parse(d.json||"{}"))}catch(e){}}
-      cloud.doc={set:obj=>fs.setDoc(ref,{json:JSON.stringify(obj),ts:Date.now()})};
+      const d=await store.get(u.uid);
+      if(d&&d.json){try{S=mergeState(S,JSON.parse(d.json))}catch(e){}}
+      cloud.doc={set:obj=>store.set(u.uid,{json:JSON.stringify(obj),ts:Date.now()})};
       cloud.on=true;cloud.name=u.displayName||(u.email||"").split("@")[0];cloud.provider="firebase";
       try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
       cloud.dirty=true;flush();
@@ -92,8 +100,8 @@ async function deleteAccount(){
   const u=AUTH.user;if(!u)return;
   openModal(`<div class="co"><span class="mono">Radera konto</span><h2 style="margin:8px 0 12px">Radera kontot och glasskåpet?</h2><p class="lead" style="font-size:17px">Kontot, favoriter, listor, glas, sparade val och poäng tas bort för gott. Kvitton för köp sparar vi ändå i sju år, eftersom bokföringslagen kräver det.</p><p class="login-err" id="dErr" role="alert"></p><div class="pdp-actions" style="margin-top:18px"><button class="btn btn-primary" id="dYes">Ja, radera kontot</button><button class="btn btn-ghost" data-mclose>Avbryt</button></div></div>`,"Radera konto","delacc");
   $("#dYes").addEventListener("click",async()=>{
-    const {fs,db,auth}=AUTH.api;
-    try{await fs.deleteDoc(fs.doc(db,"glasskap",u.uid));await auth.deleteUser(u);S=DEF();cloud.on=false;cloud.doc=null;save();closeModal();toast("Kontot är raderat.")}
+    const {store,auth}=AUTH.api;
+    try{await store.del(u.uid);await auth.deleteUser(u);S=DEF();cloud.on=false;cloud.doc=null;save();closeModal();toast("Kontot är raderat.")}
     catch(e){$("#dErr").textContent=authMsg(e)}
   });
 }
