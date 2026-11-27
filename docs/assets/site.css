@@ -832,21 +832,9 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line);font-size:15px;color
 [data-skin="light"] .login-err{color:#9b2c2c}
 .acct{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .acct-out{border-color:var(--accent)}
-/* ===== Version 6: ljus hjälte "Skålen" ===== */
-#hero.hero-light{color:#22201d}
-#hero.hero-light .hero-stage{background:#efe7da}
-#hero.hero-light .hero-media img,#hero.hero-light .hero-media video{object-position:62% 50%}
-#hero.hero-light .hero-scrim{background:linear-gradient(180deg,rgba(246,241,233,.75) 0%,rgba(246,241,233,0) 16%),linear-gradient(90deg,rgba(246,241,233,.94) 0%,rgba(246,241,233,.78) 28%,rgba(246,241,233,0) 52%),linear-gradient(0deg,rgba(246,241,233,.55) 0%,rgba(246,241,233,0) 18%)}
-#hero.hero-light .band h1,#hero.hero-light .band h2{text-shadow:none;color:#1f1c19}
-#hero.hero-light .band p{color:#3a3530;text-shadow:none}
-#hero.hero-light .band .mono,#hero.hero-light .logo-big{color:#765c2f}
-#hero.hero-light .btn-ghost{border-color:rgba(34,32,29,.3);color:#22201d}
-#hero.hero-light .scroll-cue{color:#5e564d}
-#hero.hero-light .scroll-cue i{background:linear-gradient(#765c2f,transparent)}
-#hero.hero-light .loader .track{stroke:rgba(34,32,29,.15)}
-body.view-home .nav:not(.solid){color:#22201d}
-@media (max-width:820px){
-  #hero.hero-light .hero-scrim{background:linear-gradient(180deg,rgba(246,241,233,.8) 0%,rgba(246,241,233,0) 14%),linear-gradient(0deg,rgba(246,241,233,.96) 0%,rgba(246,241,233,.85) 38%,rgba(246,241,233,0) 70%)}
-  #hero.hero-light .hero-media img,#hero.hero-light .hero-media video{object-position:70% 30%}
-}
+/* ===== Version 7: mörk hjälte "Svävet" ===== */
+#hero .hero-media img,#hero .hero-media video{object-position:64% 50%}
+#hero .hero-scrim{background:linear-gradient(180deg,rgba(20,17,16,.6) 0%,rgba(20,17,16,0) 14%),linear-gradient(90deg,rgba(20,17,16,.86) 0%,rgba(20,17,16,.55) 34%,rgba(20,17,16,0) 58%),linear-gradient(0deg,rgba(20,17,16,.7) 0%,rgba(20,17,16,0) 22%)}
+@media (max-width:820px){#hero .hero-scrim{background:linear-gradient(180deg,rgba(20,17,16,.6) 0%,rgba(20,17,16,0) 14%),linear-gradient(0deg,rgba(20,17,16,.95) 0%,rgba(20,17,16,.7) 38%,rgba(20,17,16,.05) 66%)}}
+@media (max-width:820px){#hero .hero-media img,#hero .hero-media video{object-position:62% 40%}}
 .consent{z-index:94}

@@ -45,7 +45,7 @@ tests/                Playwright och axe
 - **Claude-förmågor:** när sajten körs som Claude-artefakt finns `window.claude.use("db" | "user" | "sample")`. Då synkas Mitt glasskåp till kontot och AI-funktionerna går via Claude. Utanför Claude (GitHub Pages, Hostinger) är `window.claude` odefinierat och allt faller tillbaka: lagring i webbläsaren och regelbaserade svar. **Varje AI-funktion ska ha en reserv.** Inför lansering ersätts `getSample()` med ett eget API.
 - **Inloggning (Mitt glasskåp):** Firebase Authentication (Google och e-post med lösenord) laddas från gstatic när `FIREBASE_CONFIG` i `046-auth.js` är ifyllt. Projektet heter `skal-co` och använder Realtime Database (europe-west1, `FIREBASE_DB="rtdb"`). Glasskåpet sparas som JSON under `glasskap/{uid}`, och reglerna släpper bara in ägaren (`auth.uid === $uid`). Koden stödjer även Firestore. Lagt till domäner i Firebase: `adamkajlindberg-22.github.io` (lägg till egen domän vid lansering). Vid utloggning töms webbläsarens kopia. Inne i Claude används `claude.use("db")` i stället.
 - **3D** laddas först när fliken öppnas, från `cdn.jsdelivr.net/npm/three@0.160.0`. LatheGeometry från profilerna i `PROF`, inga tillägg.
-- **Hjältefilmen "Skålen"** (ljus, sju glas från sortimentet möts i en skål, `#hero.hero-light`) hämtas som Blob och scrubbas med `requestAnimationFrame`. Statiskt läge (bild som tonas) på mobil, med reducerad rörelse och vid sparat data-läge.
+- **Hjältefilmen "Svävet"** (mörk, åtta glasmodeller med dryck svävar i luften och en kupa häller ut bubbel på sten) hämtas som Blob och scrubbas med `requestAnimationFrame`. Statiskt läge (bild som tonas) på mobil, med reducerad rörelse och vid sparat data-läge.
 
 ## Produktdata (`P` i 01-core.js)
 
