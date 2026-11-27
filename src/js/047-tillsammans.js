@@ -8,7 +8,7 @@ try{gPending=sessionStorage.getItem("skal-rum")||null}catch(e){}
 const gOn=()=>authOn()&&FIREBASE_DB==="rtdb";
 const gCodeOk=c=>/^[A-Z0-9]{6}$/.test(c||"");
 const gMe=()=>AUTH.user?(AUTH.user.displayName||(AUTH.user.email||"").split("@")[0]||"Gäst").slice(0,30):"";
-const gLink=c=>location.origin+location.pathname+"#rum-"+c;
+const gLink=c=>urlFor("rum-"+c);
 function gErr(e){console.warn("Gruppen",e);toast(/permission/i.test(String(e&&(e.code||e.message)))?"Grupper är inte påslagna i databasen än. Reglerna behöver uppdateras.":"Något gick fel med gruppen. Prova igen.")}
 function setSwMode(m){
   swMode=m;$$("[data-swmode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.swmode===m)));
@@ -53,12 +53,12 @@ async function gOpen(code,isNew){
   const rt=AUTH.rt,uid=AUTH.user.uid;
   try{
     const m=await rt.get(rt.ref("rum/"+code+"/meta"));
-    if(!m.exists()){toast("Vi hittar ingen grupp med koden "+code+".");history.replaceState(null,"","#upptack");return}
+    if(!m.exists()){toast("Vi hittar ingen grupp med koden "+code+".");history.replaceState(null,"",urlFor("upptack"));return}
     await rt.update(rt.ref("rum/"+code+"/folk/"+uid),{name:gMe(),ts:Date.now()});
     const meta=m.val();
     G={code,meta,folk:{},deck:(meta.deck||[]).map(id=>byId[id]).filter(Boolean).map(p=>({p})),i:0,ready:false};
     S.rooms=[{code,name:meta.name,theme:meta.theme,ts:Date.now()},...(S.rooms||[]).filter(r=>r.code!==code)].slice(0,10);save();
-    history.replaceState(null,"","#rum-"+code);
+    history.replaceState(null,"",urlFor("rum-"+code));
     G.off=rt.onValue(rt.ref("rum/"+code),snap=>{
       if(!G||G.code!==code)return;const v=snap.val()||{};G.meta=v.meta||G.meta;G.folk=v.folk||{};
       if(!G.ready){const mv=(G.folk[uid]&&G.folk[uid].votes)||{};G.i=G.deck.findIndex(c=>mv[c.p.id]==null);if(G.i<0)G.i=G.deck.length;G.ready=true;setSwMode("group")}
@@ -67,7 +67,7 @@ async function gOpen(code,isNew){
     if(isNew)setTimeout(gInvite,400);
   }catch(e){gErr(e)}
 }
-function gLeave(quiet){if(G&&G.off)try{G.off()}catch(e){}G=null;if(!quiet){history.replaceState(null,"","#upptack");setSwMode("group")}}
+function gLeave(quiet){if(G&&G.off)try{G.off()}catch(e){}G=null;if(!quiet){history.replaceState(null,"",urlFor("upptack"));setSwMode("group")}}
 function gSwipe(kind){
   const rt=AUTH.rt,uid=AUTH.user&&AUTH.user.uid;if(!rt||!uid)return;
   const path=p=>rt.ref("rum/"+G.code+"/folk/"+uid+"/votes/"+p.id);
@@ -116,7 +116,7 @@ async function gInvite(){
   copy(text+"\n"+url,"Länken är kopierad. Klistra in den i sms, WhatsApp eller mejl.");
 }
 document.addEventListener("click",e=>{
-  const m=e.target.closest("[data-swmode]");if(m){if(m.dataset.swmode==="solo"&&G)history.replaceState(null,"","#upptack");setSwMode(m.dataset.swmode);return}
+  const m=e.target.closest("[data-swmode]");if(m){if(m.dataset.swmode==="solo"&&G)history.replaceState(null,"",urlFor("upptack"));setSwMode(m.dataset.swmode);return}
   const t=e.target.closest("[data-gtheme]");if(t){gTheme=t.dataset.gtheme;$$("[data-gtheme]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return}
   if(e.target.closest("[data-ginvite]")){gInvite();return}
   if(e.target.closest("[data-gleave]")){gLeave();return}

@@ -131,47 +131,89 @@ document.addEventListener("click",e=>{const h=e.target.closest("[data-fav]");if(
 onState(refreshHearts);
 
 /* ---------- Sidor och adresser ---------- */
+// Varje sida har en riktig adress: handla/, glas/bourgogne/. Bygget skapar en HTML-fil per adress (scripts/pages.mjs).
+// Privata länkar (grupper, delade listor, röstning) har kvar #-formen och syns inte för sökmotorer.
+// Gamla #-adresser (#handla, #p-bourgogne) flyttas till den riktiga adressen.
 const VIEWS=$$("[data-view]").map(v=>v.dataset.view);
 const nav=$("#nav");
 let curView="hem", openedByUs=false;
 const viewHooks={};
+const BASE=new URL(".",document.baseURI).href;
+const PRIVATE=/^(rum-[A-Za-z0-9]{6}|lista-[A-Za-z0-9]{10}|bord-[A-Za-z0-9]{10}|tillsammans)$/;
+function urlFor(k){
+  if(!k||k==="hem"||k==="top")return BASE;
+  if(PRIVATE.test(k))return BASE+"#"+k;
+  if(k.startsWith("p-"))return BASE+"glas/"+encodeURIComponent(k.slice(2))+"/";
+  return BASE+k+"/";
+}
+// Ger vyn (eller "p-id") för en adress inom sajten, "" för en okänd sida och null utanför sajten
+function keyOf(u){
+  const url=new URL(u,BASE),bp=new URL(BASE).pathname;
+  if(url.origin!==location.origin||!url.pathname.startsWith(bp))return null;
+  const rel=decodeURIComponent(url.pathname.slice(bp.length)).replace(/(^|\/)index\.html$/,"").replace(/\/$/,"");
+  if(rel==="")return "hem";
+  if(/\.[a-z0-9]+$/i.test(rel))return null;
+  const m=rel.match(/^glas\/([a-z]+)$/);if(m)return byId[m[1]]?"p-"+m[1]:"";
+  return VIEWS.includes(rel)&&rel!=="lista"?rel:"";
+}
 function route(){
   const h=decodeURIComponent(location.hash.slice(1));
   if(/^rum-[A-Za-z0-9]{6}$/.test(h)){showView("upptack");gOpen(h.slice(4).toUpperCase());return}
   if(/^lista-[A-Za-z0-9]{10}$/.test(h)){showView("lista");openList(h.slice(6));return}
   if(/^bord-[A-Za-z0-9]{10}$/.test(h)){showView("dukning");openBord(h.slice(5));return}
   if(h==="tillsammans"){showView("upptack");setSwMode("group");return}
-  if(h.startsWith("p-")&&byId[h.slice(2)]){
+  if(h==="top"||VIEWS.includes(h)||(h.startsWith("p-")&&byId[h.slice(2)]))history.replaceState(null,"",urlFor(h));
+  const k=keyOf(location.href);
+  if(k&&k.startsWith("p-")){
     if(!$("[data-view]:not([hidden])"))showView("hem");
-    openProduct(h.slice(2));return;
+    openProduct(k.slice(2));return;
   }
   if(modal.classList.contains("open")&&modal.dataset.kind==="product")closeModal(true);
-  const v=VIEWS.includes(h)?h:(h===""||h==="top"?"hem":null);
-  if(!v){showView(curView||"hem");return}
-  showView(v);
+  if(!k){
+    history.replaceState(null,"",BASE);showView("hem");
+    toast("Sidan finns inte längre. Här är startsidan.");return;
+  }
+  showView(k);
 }
 function showView(v){
   const changed=v!==curView||!$(`[data-view="${v}"]:not([hidden])`);
   $$("[data-view]").forEach(el=>el.hidden=el.dataset.view!==v);
   curView=v;
   document.body.classList.toggle("view-home",v==="hem");
-  $$(".nav-links a,.mmenu a").forEach(a=>a.toggleAttribute("aria-current",a.getAttribute("href")==="#"+v)&&a.setAttribute("aria-current","page"));
-  const titles={hem:"Rätt glas för varje skål",handla:"Handla glas",glasguiden:"Glasguiden",upptack:"Glas-swipe",glasvaggen:"Glasväggen",dukning:"Dukningsstudion",barstudion:"Barstudion",provladan:"Provlådan",present:"Presentguiden",glasskap:"Mitt glasskåp",journal:"Glasjournalen",om:"Om oss och kontakt",varumarken:"Varumärken A till Ö",lista:"Önskelista"};
+  $$(".nav-links a,.mmenu a").forEach(a=>{if(keyOf(a.href)===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  const titles={hem:"Rätt glas för varje skål",handla:"Handla glas",glasguiden:"Glasguiden",upptack:"Glas-swipe",glasvaggen:"Glasväggen",dukning:"Dukningsstudion",barstudion:"Barstudion",provladan:"Provlådan",present:"Presentguiden",glasskap:"Mitt glasskåp",journal:"Glasjournalen",om:"Om oss och kontakt",varumarken:"Varumärken A till Ö",lista:"Önskelista",villkor:"Villkor och integritet"};
   document.title="SKÅL & CO · "+(titles[v]||"");
   if(changed)window.scrollTo(0,0);
   if(viewHooks[v])viewHooks[v]();
-  if(changed)track("page_view",{page:v});
+  if(changed)track("page_view",{page:v,page_location:location.href});
   closeMenu();closeMega();onScroll();
 }
 addEventListener("hashchange",route);
-function goto(v){if(location.hash==="#"+v)route();else location.hash=v}
+addEventListener("popstate",route);
+function goto(k){const u=urlFor(k);if(location.href!==u)history.pushState(null,"",u);route()}
+// Länkar inom sajten byter sida utan att ladda om
+addEventListener("click",e=>{
+  if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  const a=e.target.closest("a[href]");if(!a||a.target||a.hasAttribute("download"))return;
+  const href=a.getAttribute("href");
+  if(href.startsWith("#")){
+    const k=decodeURIComponent(href.slice(1));e.preventDefault();
+    if(PRIVATE.test(k)||k==="top"||VIEWS.includes(k)||k.startsWith("p-")){goto(k);return}
+    // Ankare på samma sida. <base> skulle annars skicka länken till startsidan.
+    const t=document.getElementById(k);if(!t)return;
+    if(!t.hasAttribute("tabindex"))t.setAttribute("tabindex","-1");
+    t.scrollIntoView();t.focus({preventScroll:true});return;
+  }
+  const k=keyOf(a.href);if(!k)return;
+  e.preventDefault();goto(k);
+});
 
 /* ---------- Kategorier, kollektioner, verktyg ---------- */
 const CATS=[["vin","Vinglas","Bourgogne, Bordeaux, vitt","assets/l-middag-800.webp"],["whisky","Whisky och sprit","Provglas, tumbler, cognac","assets/l-bar-800.webp"],["champagne","Champagneglas","Flöjt, coupe, tulpan","assets/p-coupe.webp"],["cocktail","Cocktail och drink","Nick & Nora, highball","assets/p-nicknora.webp"],["vatten","Vardagsglas","Vatten, tumbler, färgat","assets/p-gron.webp"],["kaffe","Kaffe","Espresso, latte, koppar","assets/l-kaffe-800.webp"],["te","Te","Teglas, koppar och fat","assets/p-te.webp"],["dessert","Dessertglas","Skålar och coupes","assets/p-dessert.webp"],["ol","Ölglas","IPA, provning, pilsner","assets/p-ol.webp"],["karaff","Karaffer","Vin och vatten","assets/p-karaff.webp"]];
-$("#cats").innerHTML=CATS.map((c,i)=>`<a class="cat rv d${i%3}" href="#handla" data-go="dryck:${c[0]}"><img src="${c[3]}" alt="" loading="lazy"><span class="t"><b>${c[1]}</b><small>${c[2]}</small></span></a>`).join("");
-$("#miniCats").innerHTML=[["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"],["tillfalle:present","Presenter"],["stil:vintage","Vintage"]].map(c=>`<a class="chip" href="#handla" data-go="${c[0]}" style="text-decoration:none">${c[1]}</a>`).join("");
+$("#cats").innerHTML=CATS.map((c,i)=>`<a class="cat rv d${i%3}" href="handla/" data-go="dryck:${c[0]}"><img src="${c[3]}" alt="" loading="lazy"><span class="t"><b>${c[1]}</b><small>${c[2]}</small></span></a>`).join("");
+$("#miniCats").innerHTML=[["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"],["tillfalle:present","Presenter"],["stil:vintage","Vintage"]].map(c=>`<a class="chip" href="handla/" data-go="${c[0]}" style="text-decoration:none">${c[1]}</a>`).join("");
 const COLL=[["Whiskysamlingen","Hemmabar","assets/l-bar-800.webp","dryck:whisky"],["Skandinavisk glasdesign","Stil","assets/s-tre-glas-800.webp","stil:skandinavisk"],["Konsten att dricka vin","Vin","assets/l-middag-800.webp","dryck:vin"],["Vardagsfavoriter","Vardag","assets/p-gron.webp","tillfalle:vardag"],["Modern cocktailkultur","Cocktail","assets/p-nicknora.webp","dryck:cocktail"],["Kristallurvalet","Egenskap","assets/p-karaff.webp","egenskap:kristall"]];
-$("#collections").innerHTML=COLL.map((c,i)=>`<a class="coll rv d${i%3}" href="#handla" data-go="${c[3]}"><img src="${c[2]}" alt="" loading="lazy"><span class="t"><span class="mono">${c[1]}</span><b>${c[0]}</b></span></a>`).join("");
+$("#collections").innerHTML=COLL.map((c,i)=>`<a class="coll rv d${i%3}" href="handla/" data-go="${c[3]}"><img src="${c[2]}" alt="" loading="lazy"><span class="t"><span class="mono">${c[1]}</span><b>${c[0]}</b></span></a>`).join("");
 const I={
  guide:'<svg viewBox="0 0 48 48"><path d="M16 44h16M24 44V30M24 30c-8 0-11-6-11-12 0-5 1-9 2-12h18c1 3 2 7 2 12 0 6-3 12-11 12z"/><path d="M14 20h20"/></svg>',
  swipe:'<svg viewBox="0 0 48 48"><rect x="12" y="8" width="20" height="30" rx="4" transform="rotate(-8 22 23)"/><rect x="18" y="10" width="20" height="30" rx="4" transform="rotate(8 28 25)"/></svg>',
@@ -183,7 +225,7 @@ const I={
  home:'<svg viewBox="0 0 48 48"><path d="M8 40V18L24 8l16 10v22zM18 40V28h12v12"/></svg>'
 };
 const TOOLS=[["glasguiden","guide","Glasguiden","Flera drycker och stilar. Ett glas för varje."],["upptack","swipe","Glas-swipe","Swipea själv eller tillsammans med vänner."],["glasvaggen","wall","Glasväggen","Alla glas i skala, mot hand, flaska och hylla."],["dukning","table","Dukningsstudion","Bygg bordet, från sidan eller ovanifrån."],["barstudion","bar","Barstudion","Färdiga kit för hemmabaren."],["provladan","box","Provlådan","Tre glas hem att känna på först."],["present","gift","Presentguiden","Rätt present, och en påminnelse i tid."],["glasskap","home","Mitt glasskåp","Dina glas, listor och ersättningar."]];
-$("#tools").innerHTML=TOOLS.map(t=>`<a class="tool" href="#${t[0]}">${I[t[1]]}<b>${t[2]}</b><span>${t[3]}</span><span class="go">Öppna →</span></a>`).join("");
+$("#tools").innerHTML=TOOLS.map(t=>`<a class="tool" href="${t[0]}/">${I[t[1]]}<b>${t[2]}</b><span>${t[3]}</span><span class="go">Öppna →</span></a>`).join("");
 
 /* ---------- Dagens glas, för dig, senast visade ---------- */
 function dayOfYear(){const d=new Date();return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)}
@@ -238,7 +280,7 @@ function seasonName(){return {julbord:"Julbord",middag:"Vårmiddag",midsommar:"M
 function renderSeason(){
   const m=new Date().getMonth();
   const s=m>=10||m===0?["Julbord","julbord","Ett julbord för tolv","Vin, bubbel och vatten per kuvert, och karaffen mitt på bordet. Öppna dukningen och byt det du vill.","assets/l-middag.webp"]:m<5?["Påsk och vår","middag","Vårens middagar","Ljusa viner och färgade vattenglas.","assets/s-tre-glas.webp"]:m<8?["Midsommar","midsommar","Midsommarbordet","Tumblers i färg, bubbel och snapsglas.","assets/p-gron.webp"]:["Kräftskiva","krafta","Kräftskivan","Öl, snaps och vatten i tåliga glas.","assets/l-bar.webp"];
-  $("#season").innerHTML=`<div class="ph"><img src="${s[4]}" alt="" loading="lazy"></div><div class="txt"><span class="mono">Säsongen · ${s[0]}</span><h2>${s[2]}.</h2><p class="lead">${s[3]}</p><div><a class="btn btn-primary" href="#dukning" data-season="${s[1]}">Öppna dukningen</a></div></div>`;
+  $("#season").innerHTML=`<div class="ph"><img src="${s[4]}" alt="" loading="lazy"></div><div class="txt"><span class="mono">Säsongen · ${s[0]}</span><h2>${s[2]}.</h2><p class="lead">${s[3]}</p><div><a class="btn btn-primary" href="dukning/" data-season="${s[1]}">Öppna dukningen</a></div></div>`;
 }
 document.addEventListener("click",e=>{const s=e.target.closest("[data-season]");if(s)pendingSeason=s.dataset.season});
 let pendingSeason=null;
@@ -277,7 +319,7 @@ function renderShop(){
   $("#shopLead").textContent=one?one[2]:"Kombinera dryck, tillfälle, stil, egenskaper, prisnivå och storlek. Eller beskriv vad du letar efter i sökfältet.";
   $("#facets").innerHTML=FACETS.map(([k,label,opts,get])=>{
     return `<details ${F[k].size||["dryck","tillfalle","niva"].includes(k)?"open":""}><summary>${label}${F[k].size?` · ${F[k].size}`:""}</summary><div class="fl">${opts.map(([v,l])=>{const n=P.filter(p=>matchF(p,k)&&get(p).includes(v)).length;return `<button data-fk="${k}" data-fv="${v}" aria-pressed="${F[k].has(v)}" ${!n&&!F[k].has(v)?"disabled":""}><span>${esc(l)}</span><small>${n}</small></button>`}).join("")}</div></details>`}).join("")
-    +`<p class="note" style="margin-top:16px">Varumärken hittar du under <a href="#varumarken">Varumärken A till Ö</a>.</p>`;
+    +`<p class="note" style="margin-top:16px">Varumärken hittar du under <a href="varumarken/">Varumärken A till Ö</a>.</p>`;
   $("#facets").classList.toggle("open",facetsOpen);
   const act=[];FACETS.forEach(([k,,opts])=>F[k].forEach(v=>act.push([k,v,(opts.find(o=>o[0]===v)||[,v])[1]])));
   $("#activeF").innerHTML=act.map(([k,v,l])=>`<span class="ichip">${esc(l.split(",")[0])}<button data-fx="${k}~${v}" aria-label="Ta bort filtret ${esc(l)}">×</button></span>`).join("")+(act.length>1?`<button class="small-btn" data-fclear>Rensa alla</button>`:"");
@@ -301,7 +343,7 @@ document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(!
 const BRANDS=[["Baccarat","Frankrike","Lyx och dramatisk kristall sedan 1764."],["Bormioli Rocco","Italien","Tåliga vardagsglas för hem och restaurang."],["Broste Copenhagen","Danmark","Nordisk form med jordnära färger."],["Eva Solo","Danmark","Funktionell skandinavisk design."],["Ferm Living","Danmark","Mjuka former och dova färger."],["Frederik Bagger","Danmark","Munblåst kristall med modern profil."],["Georg Jensen","Danmark","Dansk design med lång historia."],["Holmegaard","Danmark","Klassiskt danskt glas sedan 1825."],["Iittala","Finland","Sammanhängande serier för vardagen."],["Kosta Boda","Sverige","Konstglas och färg från Småland."],["Libbey","USA","Bar- och vardagsglas i stor bredd."],["LSA International","Storbritannien","Munblåst glas med fin materialkänsla."],["Luigi Bormioli","Italien","Hållbart kristallin för vin och bar."],["Magnor","Norge","Norskt glas med enkla linjer."],["Maison Balzac","Australien","Färg, personlighet och lekfulla former."],["Nachtmann","Tyskland","Slipad kristall och mönster."],["Nude","Turkiet","Modern minimalistisk kristall."],["Orrefors","Sverige","Hantverk och designhistoria sedan 1898."],["Pasabahçe","Turkiet","Brett sortiment till bra pris."],["RCR Cristalleria Italiana","Italien","Kristall för vardag och fest."],["Riedel","Österrike","Glas formade efter druvan."],["Serax","Belgien","Konstnärliga samarbeten och ovanliga former."],["Spiegelau","Tyskland","Tunt och tåligt, även för öl."],["Waterford","Irland","Slipad kristall och exklusiva presenter."],["Zwiesel Glas","Tyskland","Slagtåligt glas för proffs och hem."]];
 function renderBrands(){
   const letters=[...new Set(BRANDS.map(b=>b[0][0].toUpperCase()))];
-  $("#brandIdx").innerHTML="ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ".split("").map(l=>letters.includes(l)?`<a href="#varumarken" data-letter="${l}">${l}</a>`:`<span>${l}</span>`).join("");
+  $("#brandIdx").innerHTML="ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ".split("").map(l=>letters.includes(l)?`<a href="varumarken/" data-letter="${l}">${l}</a>`:`<span>${l}</span>`).join("");
   $("#brandList").innerHTML=letters.map(l=>`<section class="bgroup" id="b-${l}"><h2 class="bg-h">${l}</h2><div class="bgrid">${BRANDS.filter(b=>b[0][0].toUpperCase()===l).map(b=>{const w=S.watches.some(x=>x.series===b[0]);return `<div class="bcard"><b>${esc(b[0])}</b><span class="mono" style="font-size:11px">${esc(b[1])}</span><p>${esc(b[2])}</p><button class="small-btn" data-bwatch="${esc(b[0])}" aria-pressed="${w}">${w?"Bevakas":"Bevaka"}</button></div>`}).join("")}</div></section>`).join("");
 }
 document.addEventListener("click",e=>{
@@ -314,11 +356,11 @@ const mega=$("#mega"),megaBtn=$("#megaBtn");let megaT=0;
 function renderMega(){
   const trend=[...P].sort((a,b)=>b.pop-a.pop).slice(0,2);
   mega.innerHTML=`<div class="mega-in">
-  <div><span class="mono">Kategorier</span><ul>${CATS.map(c=>`<li><a href="#handla" data-go="dryck:${c[0]}">${c[1]}</a></li>`).join("")}</ul></div>
-  <div><span class="mono">Handla efter</span><ul>${[["tillfalle:middag","Middagsbjudning"],["tillfalle:hemmabar","Hemmabar"],["tillfalle:present","Presenter"],["stil:skandinavisk","Skandinavisk stil"],["stil:lyx","Modern lyx"],["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"]].map(x=>`<li><a href="#handla" data-go="${x[0]}">${x[1]}</a></li>`).join("")}</ul></div>
-  <div><span class="mono">Kollektioner</span><ul>${COLL.map(c=>`<li><a href="#handla" data-go="${c[3]}">${c[0]}</a></li>`).join("")}<li><a href="#varumarken">Varumärken A till Ö</a></li></ul></div>
-  <div class="mega-feat"><a class="mega-card" href="#dukning" data-season="${seasonKey()}"><img src="assets/l-middag-800.webp" alt="" loading="lazy"><span><span class="mono">Säsongen</span><b>Duka ${seasonName().toLowerCase()} på tio minuter</b></span></a>
-   <span class="mono" style="display:block;margin:16px 0 8px">Trendar nu</span>${trend.map(p=>`<a class="mega-p" href="#p-${p.id}" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><span><b>${esc(p.name)}</b><small>${kr(p.price)}</small></span></a>`).join("")}</div></div>`;
+  <div><span class="mono">Kategorier</span><ul>${CATS.map(c=>`<li><a href="handla/" data-go="dryck:${c[0]}">${c[1]}</a></li>`).join("")}</ul></div>
+  <div><span class="mono">Handla efter</span><ul>${[["tillfalle:middag","Middagsbjudning"],["tillfalle:hemmabar","Hemmabar"],["tillfalle:present","Presenter"],["stil:skandinavisk","Skandinavisk stil"],["stil:lyx","Modern lyx"],["egenskap:kristall","Kristallglas"],["egenskap:munblast","Handgjort glas"],["egenskap:fargat","Färgat glas"],["antal:4","Glas i set"]].map(x=>`<li><a href="handla/" data-go="${x[0]}">${x[1]}</a></li>`).join("")}</ul></div>
+  <div><span class="mono">Kollektioner</span><ul>${COLL.map(c=>`<li><a href="handla/" data-go="${c[3]}">${c[0]}</a></li>`).join("")}<li><a href="varumarken/">Varumärken A till Ö</a></li></ul></div>
+  <div class="mega-feat"><a class="mega-card" href="dukning/" data-season="${seasonKey()}"><img src="assets/l-middag-800.webp" alt="" loading="lazy"><span><span class="mono">Säsongen</span><b>Duka ${seasonName().toLowerCase()} på tio minuter</b></span></a>
+   <span class="mono" style="display:block;margin:16px 0 8px">Trendar nu</span>${trend.map(p=>`<a class="mega-p" href="glas/${p.id}/" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><span><b>${esc(p.name)}</b><small>${kr(p.price)}</small></span></a>`).join("")}</div></div>`;
 }
 function openMega(on){mega.hidden=!on;megaBtn.setAttribute("aria-expanded",String(on));nav.classList.toggle("mega-open",on);if(on)renderMega();onScroll()}
 function closeMega(){if(!mega.hidden)openMega(false)}
@@ -372,8 +414,8 @@ function closeModal(fromRoute){
   if(!modal.classList.contains("open"))return;
   const wasProduct=modal.dataset.kind==="product";
   modal.classList.remove("open");modal.setAttribute("aria-hidden","true");modal.inert=true;stop3d();
-  if(wasProduct&&!fromRoute&&location.hash.startsWith("#p-")){
-    if(openedByUs){openedByUs=false;history.back()}else history.replaceState(null,"","#"+curView);
+  if(wasProduct&&!fromRoute&&(keyOf(location.href)||"").startsWith("p-")){
+    if(openedByUs){openedByUs=false;history.back()}else history.replaceState(null,"",urlFor(curView));
   }
   if(lastFocus&&document.contains(lastFocus))lastFocus.focus();
 }
@@ -572,7 +614,7 @@ function openProduct(id){
   let qty=1;const setQ=n=>{qty=Math.max(1,Math.min(24,n));$("#qN",mb).textContent=qty};
   $("#qMinus",mb).addEventListener("click",()=>setQ(qty-1));$("#qPlus",mb).addEventListener("click",()=>setQ(qty+1));
   const buy=()=>{const g=$("#oGrav",mb)?.checked,txt=($("#oGravTxt",mb)?.value||"").trim();if(g&&!txt){toast("Skriv texten för gravyren");$("#oGravTxt",mb).focus();return}addCart(p.id,qty,true,{grav:g?txt:"",wrap:$("#oWrap",mb).checked});toast(`${qty} × ${p.name} ligger i varukorgen`)};
-  $("#pTable",mb).addEventListener("click",()=>{const role=ROLEOF[p.cat];if(role){T.pick[role]=p.id;T.on.add(role)}pendingSeason=null;closeModal();location.hash="dukning"});
+  $("#pTable",mb).addEventListener("click",()=>{const role=ROLEOF[p.cat];if(role){T.pick[role]=p.id;T.on.add(role)}pendingSeason=null;closeModal();goto("dukning")});
   $("#pQ",mb).addEventListener("click",()=>openConc(`Jag har en fråga om ${p.name}: `));
   $("#pSeries",mb)?.addEventListener("click",()=>{[p,...series].forEach(x=>addCart(x.id,1,true));toast("Hela serien "+p.series+" ligger i varukorgen")});
   $("#pPairs",mb)?.addEventListener("click",()=>{addCart(p.id,qty,true);$$("[data-pair]",mb).filter(c=>c.checked).forEach(c=>addCart(c.dataset.pair,1,true));toast("Allt ligger i varukorgen")});
@@ -721,7 +763,7 @@ $("#checkout").addEventListener("click",()=>{
     ${cart.map(l=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px"><span>${l.q} × ${l.id==="provlada"?"Provlåda":esc(byId[l.id].name)}</span><span>${kr(unit(l)*l.q)}</span></div>`).join("")}
     <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:18px"><b>Totalt</b><b>${kr(t)}</b></div>
     ${sups.size>1?`<p class="split" style="margin:0 0 12px">Kommer i ${sups.size} paket, med spårning för varje.</p>`:""}
-    <p class="note">Du får ${Math.floor(t/10)} skålpoäng för köpet.</p><p class="note">Du kan ångra köpet i 60 dagar med knappen Ångra avtalet här i sidfoten eller vid köpet i Mitt glasskåp. Läs <a href="#villkor" data-lj="l-kop">köpvillkoren</a>.</p>
+    <p class="note">Du får ${Math.floor(t/10)} skålpoäng för köpet.</p><p class="note">Du kan ångra köpet i 60 dagar med knappen Ångra avtalet här i sidfoten eller vid köpet i Mitt glasskåp. Läs <a href="villkor/" data-lj="l-kop">köpvillkoren</a>.</p>
     <button class="btn btn-primary" style="width:100%;margin-top:10px">Slutför köp (visning)</button>
   </div></form></div>`,"Kassa","co");
   $("#coForm").addEventListener("submit",e=>{e.preventDefault();
@@ -730,14 +772,14 @@ $("#checkout").addEventListener("click",()=>{
     cart.forEach(l=>{if(l.id==="provlada")return;const p=byId[l.id],o=S.owned.find(x=>x.id===p.id);if(o)o.count+=p.pack*l.q;else S.owned.push({id:p.id,name:p.name,shape:p.shape,count:p.pack*l.q})});
     addPoints(Math.floor(t/10),"Köp "+order.id);track("purchase",{transaction_id:order.id,value:t,currency:"SEK"});
     cart=[];saveCart();renderCart();save();
-    $("#mbody").innerHTML=`<div class="co" style="text-align:center;padding:clamp(40px,6vw,80px)"><span class="mono">Order ${order.id} · visning</span><h2 style="margin:12px 0">Tack! Glasen är på väg.</h2><p class="lead" style="margin:0 auto">Glasen finns nu i Mitt glasskåp. Där kan du ersätta ett trasigt glas med två klick och se vad som saknas i serien.</p><div class="ctas" style="justify-content:center;margin-top:24px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="#glasskap" data-mclose>Öppna Mitt glasskåp</a><button class="btn btn-ghost" data-mclose>Fortsätt handla</button></div></div>`;
+    $("#mbody").innerHTML=`<div class="co" style="text-align:center;padding:clamp(40px,6vw,80px)"><span class="mono">Order ${order.id} · visning</span><h2 style="margin:12px 0">Tack! Glasen är på väg.</h2><p class="lead" style="margin:0 auto">Glasen finns nu i Mitt glasskåp. Där kan du ersätta ett trasigt glas med två klick och se vad som saknas i serien.</p><div class="ctas" style="justify-content:center;margin-top:24px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="glasskap/" data-mclose>Öppna Mitt glasskåp</a><button class="btn btn-ghost" data-mclose>Fortsätt handla</button></div></div>`;
   });
 });
 
 /* ---------- Öppna produkt via adress ---------- */
 function showProduct(id){
-  if(modal.classList.contains("open")&&modal.dataset.kind==="product"){history.replaceState(null,"","#p-"+id);openProduct(id)}
-  else{openedByUs=true;location.hash="p-"+id}
+  if(modal.classList.contains("open")&&modal.dataset.kind==="product"){history.replaceState(null,"",urlFor("p-"+id));openProduct(id)}
+  else{openedByUs=true;history.pushState(null,"",urlFor("p-"+id));route()}
 }
 document.addEventListener("click",e=>{const o=e.target.closest("[data-open]");if(!o||e.target.closest("[data-add],.cmp,[data-fav]"))return;e.preventDefault();showProduct(o.dataset.open)});
 
@@ -837,7 +879,7 @@ $("#fq").addEventListener("click",e=>{
     fSwap={};renderFinder();return}
   if(e.target.closest("#fRestart")){fs=0;fa.drinks=[];fa.occ=[];fa.styles=[];fa.must=[];delete fa.budget;delete fa.count;fSwap={};renderFinder();return}
   if(e.target.closest("#fSave")){S.saved.unshift({type:"guide",title:"Glasguiden: "+finderSummary(S.finder),data:{ids:finderRes.map(r=>r.p.id),count:+fa.count},ts:Date.now()});save();nudgeLogin("sparat");toast("Sparat i Mitt glasskåp");return}
-  if(e.target.closest("#fShare")){copy(`Mitt glasskåp från SKÅL & CO (${finderSummary(S.finder)}):\n`+finderRes.map(r=>`${r.p.name}, ${kr(per(r.p))} per glas`).join("\n")+`\n${location.origin+location.pathname}#glasguiden`,"Förslagen är kopierade. Klistra in dem var du vill.");return}
+  if(e.target.closest("#fShare")){copy(`Mitt glasskåp från SKÅL & CO (${finderSummary(S.finder)}):\n`+finderRes.map(r=>`${r.p.name}, ${kr(per(r.p))} per glas`).join("\n")+`\n${urlFor("glasguiden")}`,"Förslagen är kopierade. Klistra in dem var du vill.");return}
   if(e.target.closest("#fAll")){finderRes.forEach(r=>addCart(r.p.id,Math.ceil(+fa.count/r.p.pack),true));toast("Hela setet ligger i varukorgen")}
 });
 
@@ -903,7 +945,7 @@ function renderProfile(done){
   const max=Math.max(1,...keys.map(k=>w[k]));
   const label=k=>k.startsWith("s:")?STYLEN[k.slice(2)]:DRINKN[k.slice(2)];
   const prof=done?buildProfile(w):null;
-  $("#profile").innerHTML=done?`<span class="mono">Din stil</span><h2 class="pc-h">${esc(prof.name)}</h2><p class="lead" style="font-size:17px">Du gillar ${esc(prof.summary)}.</p><div class="bars">${keys.map(k=>`<div>${esc(label(k))}<i style="--w:${Math.round(w[k]/max*100)}%"></i></div>`).join("")}</div><span class="mono">Tre glas för dig</span><div class="gk-list">${recommend(3).map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div><div class="pdp-actions" style="margin-top:16px"><button class="small-btn" id="swShare">Kopiera min stil</button><button class="small-btn" id="swAgain">Swipea igen</button><a class="small-btn" href="#glasskap">Mitt glasskåp</a></div>`
+  $("#profile").innerHTML=done?`<span class="mono">Din stil</span><h2 class="pc-h">${esc(prof.name)}</h2><p class="lead" style="font-size:17px">Du gillar ${esc(prof.summary)}.</p><div class="bars">${keys.map(k=>`<div>${esc(label(k))}<i style="--w:${Math.round(w[k]/max*100)}%"></i></div>`).join("")}</div><span class="mono">Tre glas för dig</span><div class="gk-list">${recommend(3).map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div><div class="pdp-actions" style="margin-top:16px"><button class="small-btn" id="swShare">Kopiera min stil</button><button class="small-btn" id="swAgain">Swipea igen</button><a class="small-btn" href="glasskap/">Mitt glasskåp</a></div>`
   :`<span class="mono">Din smak hittills</span><h2 class="pc-h">${swI?"Vi lär oss.":"Börja swipea."}</h2>${keys.length?`<div class="bars">${keys.map(k=>`<div>${esc(label(k))}<i style="--w:${Math.round(w[k]/max*100)}%"></i></div>`).join("")}</div>`:`<p class="note">Varje bild säger något om din stil. Efter ${SWDECK.length} bilder får du ett namn på din stil och tre glas som passar.</p>`}<p class="note">${swI} av ${SWDECK.length} bilder</p>`;
   if(done){
     $("#swAgain").addEventListener("click",()=>{swI=0;swW={};swLog=[];renderDeck()});
@@ -1120,7 +1162,7 @@ $("#faqHome").innerHTML=faqHtml(FAQ.slice(0,4));$("#faqAll").innerHTML=faqHtml(F
 document.addEventListener("click",e=>{
   const j=e.target.closest("[data-lj]");if(!j)return;e.preventDefault();
   const go=()=>{const t=$("#"+j.dataset.lj);if(t)t.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})};
-  if(curView!=="villkor"){location.hash="villkor";setTimeout(go,60)}else go();
+  if(curView!=="villkor"){goto("villkor");setTimeout(go,60)}else go();
 });
 
 /* ---------- Samtycke och mätpunkter ---------- */
@@ -1254,7 +1296,7 @@ function openLogin(mode="in",ctx){
     ${mode==="up"?"":`<button type="button" class="small-btn" id="lReset" style="justify-self:start">Glömt lösenordet?</button>`}
   </form>
   ${ctx?`<button type="button" class="linkbtn" data-mclose style="margin-top:14px">Inte nu, fortsätt utan konto</button>`:""}
-  <p class="note" style="margin-top:14px">Genom att skapa ett konto godkänner du att vi sparar ditt glasskåp enligt <a href="#villkor" data-lj="l-integritet" data-mclose>integritetspolicyn</a>.</p></div>`,"Logga in","login");
+  <p class="note" style="margin-top:14px">Genom att skapa ett konto godkänner du att vi sparar ditt glasskåp enligt <a href="villkor/" data-lj="l-integritet" data-mclose>integritetspolicyn</a>.</p></div>`,"Logga in","login");
   const mb=$("#mbody"),err=m=>{$("#lErr",mb).textContent=m||""};
   $$("[data-lm]",mb).forEach(b=>b.addEventListener("click",()=>openLogin(b.dataset.lm,ctx)));
   $("#gLogin",mb).addEventListener("click",()=>googleLogin(err));
@@ -1308,7 +1350,7 @@ try{gPending=sessionStorage.getItem("skal-rum")||null}catch(e){}
 const gOn=()=>authOn()&&FIREBASE_DB==="rtdb";
 const gCodeOk=c=>/^[A-Z0-9]{6}$/.test(c||"");
 const gMe=()=>AUTH.user?(AUTH.user.displayName||(AUTH.user.email||"").split("@")[0]||"Gäst").slice(0,30):"";
-const gLink=c=>location.origin+location.pathname+"#rum-"+c;
+const gLink=c=>urlFor("rum-"+c);
 function gErr(e){console.warn("Gruppen",e);toast(/permission/i.test(String(e&&(e.code||e.message)))?"Grupper är inte påslagna i databasen än. Reglerna behöver uppdateras.":"Något gick fel med gruppen. Prova igen.")}
 function setSwMode(m){
   swMode=m;$$("[data-swmode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.swmode===m)));
@@ -1353,12 +1395,12 @@ async function gOpen(code,isNew){
   const rt=AUTH.rt,uid=AUTH.user.uid;
   try{
     const m=await rt.get(rt.ref("rum/"+code+"/meta"));
-    if(!m.exists()){toast("Vi hittar ingen grupp med koden "+code+".");history.replaceState(null,"","#upptack");return}
+    if(!m.exists()){toast("Vi hittar ingen grupp med koden "+code+".");history.replaceState(null,"",urlFor("upptack"));return}
     await rt.update(rt.ref("rum/"+code+"/folk/"+uid),{name:gMe(),ts:Date.now()});
     const meta=m.val();
     G={code,meta,folk:{},deck:(meta.deck||[]).map(id=>byId[id]).filter(Boolean).map(p=>({p})),i:0,ready:false};
     S.rooms=[{code,name:meta.name,theme:meta.theme,ts:Date.now()},...(S.rooms||[]).filter(r=>r.code!==code)].slice(0,10);save();
-    history.replaceState(null,"","#rum-"+code);
+    history.replaceState(null,"",urlFor("rum-"+code));
     G.off=rt.onValue(rt.ref("rum/"+code),snap=>{
       if(!G||G.code!==code)return;const v=snap.val()||{};G.meta=v.meta||G.meta;G.folk=v.folk||{};
       if(!G.ready){const mv=(G.folk[uid]&&G.folk[uid].votes)||{};G.i=G.deck.findIndex(c=>mv[c.p.id]==null);if(G.i<0)G.i=G.deck.length;G.ready=true;setSwMode("group")}
@@ -1367,7 +1409,7 @@ async function gOpen(code,isNew){
     if(isNew)setTimeout(gInvite,400);
   }catch(e){gErr(e)}
 }
-function gLeave(quiet){if(G&&G.off)try{G.off()}catch(e){}G=null;if(!quiet){history.replaceState(null,"","#upptack");setSwMode("group")}}
+function gLeave(quiet){if(G&&G.off)try{G.off()}catch(e){}G=null;if(!quiet){history.replaceState(null,"",urlFor("upptack"));setSwMode("group")}}
 function gSwipe(kind){
   const rt=AUTH.rt,uid=AUTH.user&&AUTH.user.uid;if(!rt||!uid)return;
   const path=p=>rt.ref("rum/"+G.code+"/folk/"+uid+"/votes/"+p.id);
@@ -1416,7 +1458,7 @@ async function gInvite(){
   copy(text+"\n"+url,"Länken är kopierad. Klistra in den i sms, WhatsApp eller mejl.");
 }
 document.addEventListener("click",e=>{
-  const m=e.target.closest("[data-swmode]");if(m){if(m.dataset.swmode==="solo"&&G)history.replaceState(null,"","#upptack");setSwMode(m.dataset.swmode);return}
+  const m=e.target.closest("[data-swmode]");if(m){if(m.dataset.swmode==="solo"&&G)history.replaceState(null,"",urlFor("upptack"));setSwMode(m.dataset.swmode);return}
   const t=e.target.closest("[data-gtheme]");if(t){gTheme=t.dataset.gtheme;$$("[data-gtheme]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return}
   if(e.target.closest("[data-ginvite]")){gInvite();return}
   if(e.target.closest("[data-gleave]")){gLeave();return}
@@ -1437,7 +1479,7 @@ onState(()=>{if(gPending&&AUTH.user&&AUTH.rt){const c=gPending;gPending=null;gOp
    rum/{KOD}/paminn/{uid} tidpunkt                                    den som skapade gruppen kan påminna. */
 const id10=()=>{const A="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";let s="";for(let i=0;i<10;i++)s+=A[Math.floor(Math.random()*A.length)];return s};
 const idOk=s=>/^[A-Za-z0-9]{10}$/.test(s||"");
-const shareLink=h=>location.origin+location.pathname+"#"+h;
+const shareLink=h=>urlFor(h);
 const firstName=()=>gMe().split(" ")[0];
 async function shareOut(title,text,url,msg){
   if(navigator.share){try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
@@ -1471,7 +1513,7 @@ function openList(id){
   if(!authOn()){el.innerHTML=`<div class="lv-empty"><h1>Listan kan inte visas här.</h1><p class="lead">Öppna länken på den publicerade sajten.</p></div>`;return}
   if(!AUTH.rt){listPending=id;el.innerHTML=`<p class="ai-note" style="padding:40px 0"><i class="spin"></i>Hämtar listan</p>`;return}
   listPending=null;LV={id,meta:null,kopt:{}};
-  LV.off=AUTH.rt.onValue(AUTH.rt.ref("listor/"+id),s=>{if(!LV||LV.id!==id)return;const v=s.val();if(!v||!v.meta){el.innerHTML=`<div class="lv-empty"><span class="mono">Önskelista</span><h1>Vi hittar inte listan.</h1><p class="lead">Länken kan vara fel, eller så har listan tagits bort.</p><a class="btn btn-ghost" href="#handla">Titta på glasen</a></div>`;return}
+  LV.off=AUTH.rt.onValue(AUTH.rt.ref("listor/"+id),s=>{if(!LV||LV.id!==id)return;const v=s.val();if(!v||!v.meta){el.innerHTML=`<div class="lv-empty"><span class="mono">Önskelista</span><h1>Vi hittar inte listan.</h1><p class="lead">Länken kan vara fel, eller så har listan tagits bort.</p><a class="btn btn-ghost" href="handla/">Titta på glasen</a></div>`;return}
     LV.meta=v.meta;LV.kopt=v.kopt||{};renderListView()},e=>{el.innerHTML=`<div class="lv-empty"><h1>Listan kunde inte hämtas.</h1><p class="lead">Prova att ladda om sidan.</p></div>`;console.warn(e)});
 }
 function renderListView(){
@@ -1480,7 +1522,7 @@ function renderListView(){
   const items=(m.items||[]).map(id=>byId[id]).filter(Boolean),n=items.filter(p=>k[p.id]).length;
   el.innerHTML=`<header class="page-head lv-head"><span class="mono">${m.type==="brollop"?"Bröllopslista":"Önskelista"}</span><h1>${esc(m.name)}</h1><p class="lead">${mine?"Det här är din lista. Dela länken, så ser gästerna vad som redan är köpt.":esc(m.ownerName||"Någon")+" önskar sig de här glasen. Köp ett och markera det, så köper ingen annan samma."}</p>
     <div class="lv-prog"><span><b>${n}</b> av ${items.length} köpta</span><i style="--w:${items.length?Math.round(n/items.length*100):0}%"></i></div>
-    ${mine?`<div class="pdp-actions"><button class="btn btn-primary" data-lvshare>Dela listan</button><a class="btn btn-ghost" href="#glasskap" data-gtab="sparat">Ändra i Mitt glasskåp</a></div>`:""}</header>
+    ${mine?`<div class="pdp-actions"><button class="btn btn-primary" data-lvshare>Dela listan</button><a class="btn btn-ghost" href="glasskap/" data-gtab="sparat">Ändra i Mitt glasskåp</a></div>`:""}</header>
   <div class="lv-grid">${items.map(p=>{const b=k[p.id];return `<article class="lv-item${b?" bought":""}"><div class="lv-img" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt="${esc(p.name)}" loading="lazy">${b?`<span class="lv-tag">${mine?"Köpt av "+esc(b.name):"Redan köpt"}</span>`:""}</div>
     <div class="lv-body"><b>${esc(p.name)}</b><small>${esc(p.mat)} · ${packTxt(p)} · ${kr(p.price)}</small>
     <div class="pdp-actions">${b?(mine?`<button class="small-btn" data-lvundo="${p.id}">Ångra köpt</button>`:`<span class="note" style="margin:0">Tack, den är redan köpt.</span>`):`<button class="small-btn" data-add="${p.id}">Lägg i varukorgen</button><button class="small-btn" data-lvbuy="${p.id}">Jag har köpt den</button>`}</div></div></article>`}).join("")||'<p class="lead">Listan är tom än så länge.</p>'}</div>
@@ -1503,7 +1545,7 @@ async function shareBord(){
   try{await AUTH.rt.set(AUTH.rt.ref("bord/"+id+"/meta"),{owner:AUTH.user.uid,ownerName:firstName(),title,data,ts:Date.now()});
     S.saved.unshift({type:"dukning",title,data,bord:id,ts:Date.now()});save();
     track("share",{method:"lank",content_type:"dukning"});
-    history.replaceState(null,"","#bord-"+id);openBord(id);
+    history.replaceState(null,"",urlFor("bord-"+id));openBord(id);
     shareOut("Vad tycker du om dukningen?",`Vad tycker du om dukningen till ${title.toLowerCase()}? Rösta och kommentera hos SKÅL & CO.`,shareLink("bord-"+id));
   }catch(e){gErr(e)}
 }
@@ -1538,7 +1580,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest("#tShare")){shareBord();return}
   const v=e.target.closest("[data-bvv]");if(v){bvPick=+v.dataset.bvv;$$("[data-bvv]").forEach(b=>b.setAttribute("aria-pressed",String(b===v)));return}
   if(e.target.closest("[data-bvshare]")&&BV){shareOut("Vad tycker du om dukningen?",`Vad tycker du om dukningen till ${BV.meta.title.toLowerCase()}? Rösta hos SKÅL & CO.`,shareLink("bord-"+BV.id));return}
-  if(e.target.closest("[data-bvclose]")){if(BV&&BV.off)try{BV.off()}catch(x){}BV=null;$("#bordVote").hidden=true;$("#bordVote").innerHTML="";history.replaceState(null,"","#dukning");return}
+  if(e.target.closest("[data-bvclose]")){if(BV&&BV.off)try{BV.off()}catch(x){}BV=null;$("#bordVote").hidden=true;$("#bordVote").innerHTML="";history.replaceState(null,"",urlFor("dukning"));return}
   if(e.target.closest("[data-lvshare]")&&LV){const L=S.lists.find(l=>l.pub===LV.id);if(L)pubList(L);else shareOut(LV.meta.name,LV.meta.name+" hos SKÅL & CO",shareLink("lista-"+LV.id));return}
   const lb=e.target.closest("[data-lvbuy]");if(lb){markBought(lb.dataset.lvbuy);return}
   const lu=e.target.closest("[data-lvundo]");if(lu&&LV){AUTH.rt.remove(AUTH.rt.ref("listor/"+LV.id+"/kopt/"+lu.dataset.lvundo)).catch(gErr);return}
@@ -1643,8 +1685,8 @@ function renderGlasskap(){
   const tabs=`<div class="gkd-tabs" role="group" aria-label="Delar av Mitt glasskåp">${GKTABS.map(([k,v])=>`<button type="button" data-gtab="${k}" aria-pressed="${gkTab===k}">${v}</button>`).join("")}</div>`;
   const T={};
   T.oversikt=`<section class="gk span8 gk-feature"><span class="mono">Din stil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea tio bilder eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan efter dig.</p>`}
-    ${S.finder?`<p class="note">Glasguiden: ${esc(finderSummary(S.finder))}. <a href="#glasguiden">Se förslagen</a></p>`:""}
-    <div class="pdp-actions"><a class="small-btn" href="#upptack">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="#glasguiden">Glasguiden</a></div>
+    ${S.finder?`<p class="note">Glasguiden: ${esc(finderSummary(S.finder))}. <a href="glasguiden/">Se förslagen</a></p>`:""}
+    <div class="pdp-actions"><a class="small-btn" href="upptack/">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="glasguiden/">Glasguiden</a></div>
     ${recs.length&&(prof||S.finder||owned.length)?`<div class="gk-list">${recs.map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div>`:""}
   </section>
   <section class="gk span4"><span class="mono">Skålpoäng</span><div class="points" style="margin:10px 0 6px">${S.points||0}</div><p style="color:var(--ink2)">500 poäng ger fri gravyr. 300 poäng ger presentinslagning.</p>
@@ -1653,7 +1695,7 @@ function renderGlasskap(){
   </section>
   <section class="gk wide g-gk"><div><span class="mono">Swipea tillsammans</span><h2 class="gk-h">${(S.rooms||[]).length?"Dina grupper":"Välj glas ihop med andra."}</h2>${(S.rooms||[]).length?`<div class="g-mine">${S.rooms.slice(0,4).map(r=>`<a class="g-room" href="#rum-${esc(r.code)}"><span><b>${esc(r.name)}</b><small>Kod ${esc(r.code)}</small></span><span aria-hidden="true">→</span></a>`).join("")}</div>`:`<p style="color:var(--ink2)">Bjud in familj eller vänner, swipea samma glas och se vilka ni alla gillar. Perfekt inför bröllop, flytt eller julbord.</p>`}</div><a class="btn btn-ghost" href="#tillsammans">${(S.rooms||[]).length?"Ny grupp":"Starta en grupp"}</a></section>
   <section class="gk"><span class="mono">Kalender</span><h2 class="gk-h">Kommande presenter</h2>
-    <div class="gk-list">${upcoming.map(d=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="#present">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
+    <div class="gk-list">${upcoming.map(d=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="present/">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
     <p class="note">I butiken får du en påminnelse två veckor innan.</p>
   </section>
   <section class="gk"><span class="mono">Läsning för dig</span><h2 class="gk-h">Utvalt utifrån dina glas</h2>
@@ -1717,11 +1759,11 @@ $("#gk").addEventListener("click",e=>{
   const ld=t.closest("[data-ldel]");if(ld){S.lists=S.lists.filter(l=>l.id!==ld.dataset.ldel);save();return}
   const lr=t.closest("[data-lrm]");if(lr){const [lid,pid]=lr.dataset.lrm.split("~");const L=S.lists.find(l=>l.id===lid);L.items=L.items.filter(x=>x!==pid);save();return}
   const so=t.closest("[data-sopen]");if(so){const s=S.saved[+so.dataset.sopen];
-    if(s.type==="dukning"){location.hash="dukning";setTimeout(()=>loadDukning(s.data),0)}
-    else if(s.type==="kit"){kit=s.data.kit;renderKit();location.hash="barstudion"}
+    if(s.type==="dukning"){goto("dukning");setTimeout(()=>loadDukning(s.data),0)}
+    else if(s.type==="kit"){kit=s.data.kit;renderKit();goto("barstudion")}
     else if(s.type==="guide"){openModal(`<div class="co"><span class="mono">Sparade förslag</span><h2 style="margin:8px 0 16px">${esc(s.title)}</h2><div class="gk-list">${s.data.ids.map(id=>byId[id]).filter(Boolean).map(p=>{const packs=Math.ceil(s.data.count/p.pack);return `<div class="gk-item"><img src="${img(p,true)}" alt=""><div><b>${esc(p.name)}</b><small>${packs} × ${packTxt(p)}</small></div><button class="small-btn" data-add="${p.id}" data-qty="${packs}">Köp</button></div>`}).join("")}</div></div>`,"Sparade förslag","saved")}
-    else if(s.type==="grupp"&&s.data&&s.data.code)location.hash="rum-"+s.data.code;
-    else location.hash="upptack";
+    else if(s.type==="grupp"&&s.data&&s.data.code)goto("rum-"+s.data.code);
+    else goto("upptack");
     return}
   const sd=t.closest("[data-sdel]");if(sd){S.saved.splice(+sd.dataset.sdel,1);save();return}
   const wd=t.closest("[data-wdel]");if(wd){S.watches.splice(+wd.dataset.wdel,1);save();return}
@@ -1978,7 +2020,7 @@ viewHooks.varumarken=renderBrands;
 onState(()=>{if(curView==="hem"){renderForDig()}});
 setSkin(root.dataset.skin||"dark");
 renderSeason();renderJournal();renderFinder();renderKit();renderCart();refreshHearts();
-try{const ld=document.createElement("script");ld.type="application/ld+json";ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"Glas hos SKÅL & CO","itemListElement":P.map((p,i)=>({"@type":"ListItem","position":i+1,"item":{"@type":"Product","name":p.name,"image":"assets/p-"+p.img+".webp","description":p.why,"material":p.mat,"category":DRINKN[p.cat]||p.cat,"offers":{"@type":"Offer","price":p.price,"priceCurrency":"SEK","availability":"https://schema.org/InStock"}}}))}).replace(/</g,"\\u003c");document.head.appendChild(ld)}catch(e){}
+try{const ld=document.createElement("script");ld.type="application/ld+json";ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"Glas hos SKÅL & CO","itemListElement":P.map((p,i)=>({"@type":"ListItem","position":i+1,"item":{"@type":"Product","name":p.name,"image":new URL("assets/p-"+p.img+".webp",BASE).href,"url":urlFor("p-"+p.id),"description":p.why,"material":p.mat,"category":DRINKN[p.cat]||p.cat,"offers":{"@type":"Offer","price":p.price,"priceCurrency":"SEK","availability":"https://schema.org/InStock"}}}))}).replace(/</g,"\\u003c");document.head.appendChild(ld)}catch(e){}
 $$(".rv").forEach(el=>io.observe(el));
 route();
 connectCloud();

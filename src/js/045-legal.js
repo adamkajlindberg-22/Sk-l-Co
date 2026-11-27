@@ -3,7 +3,7 @@
 document.addEventListener("click",e=>{
   const j=e.target.closest("[data-lj]");if(!j)return;e.preventDefault();
   const go=()=>{const t=$("#"+j.dataset.lj);if(t)t.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})};
-  if(curView!=="villkor"){location.hash="villkor";setTimeout(go,60)}else go();
+  if(curView!=="villkor"){goto("villkor");setTimeout(go,60)}else go();
 });
 
 /* ---------- Samtycke och mätpunkter ---------- */

@@ -92,7 +92,7 @@ function openProduct(id){
   let qty=1;const setQ=n=>{qty=Math.max(1,Math.min(24,n));$("#qN",mb).textContent=qty};
   $("#qMinus",mb).addEventListener("click",()=>setQ(qty-1));$("#qPlus",mb).addEventListener("click",()=>setQ(qty+1));
   const buy=()=>{const g=$("#oGrav",mb)?.checked,txt=($("#oGravTxt",mb)?.value||"").trim();if(g&&!txt){toast("Skriv texten för gravyren");$("#oGravTxt",mb).focus();return}addCart(p.id,qty,true,{grav:g?txt:"",wrap:$("#oWrap",mb).checked});toast(`${qty} × ${p.name} ligger i varukorgen`)};
-  $("#pTable",mb).addEventListener("click",()=>{const role=ROLEOF[p.cat];if(role){T.pick[role]=p.id;T.on.add(role)}pendingSeason=null;closeModal();location.hash="dukning"});
+  $("#pTable",mb).addEventListener("click",()=>{const role=ROLEOF[p.cat];if(role){T.pick[role]=p.id;T.on.add(role)}pendingSeason=null;closeModal();goto("dukning")});
   $("#pQ",mb).addEventListener("click",()=>openConc(`Jag har en fråga om ${p.name}: `));
   $("#pSeries",mb)?.addEventListener("click",()=>{[p,...series].forEach(x=>addCart(x.id,1,true));toast("Hela serien "+p.series+" ligger i varukorgen")});
   $("#pPairs",mb)?.addEventListener("click",()=>{addCart(p.id,qty,true);$$("[data-pair]",mb).filter(c=>c.checked).forEach(c=>addCart(c.dataset.pair,1,true));toast("Allt ligger i varukorgen")});
@@ -241,7 +241,7 @@ $("#checkout").addEventListener("click",()=>{
     ${cart.map(l=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px"><span>${l.q} × ${l.id==="provlada"?"Provlåda":esc(byId[l.id].name)}</span><span>${kr(unit(l)*l.q)}</span></div>`).join("")}
     <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:18px"><b>Totalt</b><b>${kr(t)}</b></div>
     ${sups.size>1?`<p class="split" style="margin:0 0 12px">Kommer i ${sups.size} paket, med spårning för varje.</p>`:""}
-    <p class="note">Du får ${Math.floor(t/10)} skålpoäng för köpet.</p><p class="note">Du kan ångra köpet i 60 dagar med knappen Ångra avtalet här i sidfoten eller vid köpet i Mitt glasskåp. Läs <a href="#villkor" data-lj="l-kop">köpvillkoren</a>.</p>
+    <p class="note">Du får ${Math.floor(t/10)} skålpoäng för köpet.</p><p class="note">Du kan ångra köpet i 60 dagar med knappen Ångra avtalet här i sidfoten eller vid köpet i Mitt glasskåp. Läs <a href="villkor/" data-lj="l-kop">köpvillkoren</a>.</p>
     <button class="btn btn-primary" style="width:100%;margin-top:10px">Slutför köp (visning)</button>
   </div></form></div>`,"Kassa","co");
   $("#coForm").addEventListener("submit",e=>{e.preventDefault();
@@ -250,6 +250,6 @@ $("#checkout").addEventListener("click",()=>{
     cart.forEach(l=>{if(l.id==="provlada")return;const p=byId[l.id],o=S.owned.find(x=>x.id===p.id);if(o)o.count+=p.pack*l.q;else S.owned.push({id:p.id,name:p.name,shape:p.shape,count:p.pack*l.q})});
     addPoints(Math.floor(t/10),"Köp "+order.id);track("purchase",{transaction_id:order.id,value:t,currency:"SEK"});
     cart=[];saveCart();renderCart();save();
-    $("#mbody").innerHTML=`<div class="co" style="text-align:center;padding:clamp(40px,6vw,80px)"><span class="mono">Order ${order.id} · visning</span><h2 style="margin:12px 0">Tack! Glasen är på väg.</h2><p class="lead" style="margin:0 auto">Glasen finns nu i Mitt glasskåp. Där kan du ersätta ett trasigt glas med två klick och se vad som saknas i serien.</p><div class="ctas" style="justify-content:center;margin-top:24px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="#glasskap" data-mclose>Öppna Mitt glasskåp</a><button class="btn btn-ghost" data-mclose>Fortsätt handla</button></div></div>`;
+    $("#mbody").innerHTML=`<div class="co" style="text-align:center;padding:clamp(40px,6vw,80px)"><span class="mono">Order ${order.id} · visning</span><h2 style="margin:12px 0">Tack! Glasen är på väg.</h2><p class="lead" style="margin:0 auto">Glasen finns nu i Mitt glasskåp. Där kan du ersätta ett trasigt glas med två klick och se vad som saknas i serien.</p><div class="ctas" style="justify-content:center;margin-top:24px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="glasskap/" data-mclose>Öppna Mitt glasskåp</a><button class="btn btn-ghost" data-mclose>Fortsätt handla</button></div></div>`;
   });
 });

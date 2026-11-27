@@ -4,3 +4,4 @@ const parts = ["01-core.js", "02-pages.js", "03-product.js", "04-tools.js", "045
 const out = parts.map(p => readFileSync(new URL(`../src/js/${p}`, import.meta.url), "utf8")).join("");
 writeFileSync(new URL("../docs/assets/site.js", import.meta.url), out);
 console.log(`docs/assets/site.js byggd (${(out.length / 1024).toFixed(0)} kB)`);
+await import("./pages.mjs");

@@ -1,8 +1,8 @@
 
 /* ---------- Öppna produkt via adress ---------- */
 function showProduct(id){
-  if(modal.classList.contains("open")&&modal.dataset.kind==="product"){history.replaceState(null,"","#p-"+id);openProduct(id)}
-  else{openedByUs=true;location.hash="p-"+id}
+  if(modal.classList.contains("open")&&modal.dataset.kind==="product"){history.replaceState(null,"",urlFor("p-"+id));openProduct(id)}
+  else{openedByUs=true;history.pushState(null,"",urlFor("p-"+id));route()}
 }
 document.addEventListener("click",e=>{const o=e.target.closest("[data-open]");if(!o||e.target.closest("[data-add],.cmp,[data-fav]"))return;e.preventDefault();showProduct(o.dataset.open)});
 
@@ -102,7 +102,7 @@ $("#fq").addEventListener("click",e=>{
     fSwap={};renderFinder();return}
   if(e.target.closest("#fRestart")){fs=0;fa.drinks=[];fa.occ=[];fa.styles=[];fa.must=[];delete fa.budget;delete fa.count;fSwap={};renderFinder();return}
   if(e.target.closest("#fSave")){S.saved.unshift({type:"guide",title:"Glasguiden: "+finderSummary(S.finder),data:{ids:finderRes.map(r=>r.p.id),count:+fa.count},ts:Date.now()});save();nudgeLogin("sparat");toast("Sparat i Mitt glasskåp");return}
-  if(e.target.closest("#fShare")){copy(`Mitt glasskåp från SKÅL & CO (${finderSummary(S.finder)}):\n`+finderRes.map(r=>`${r.p.name}, ${kr(per(r.p))} per glas`).join("\n")+`\n${location.origin+location.pathname}#glasguiden`,"Förslagen är kopierade. Klistra in dem var du vill.");return}
+  if(e.target.closest("#fShare")){copy(`Mitt glasskåp från SKÅL & CO (${finderSummary(S.finder)}):\n`+finderRes.map(r=>`${r.p.name}, ${kr(per(r.p))} per glas`).join("\n")+`\n${urlFor("glasguiden")}`,"Förslagen är kopierade. Klistra in dem var du vill.");return}
   if(e.target.closest("#fAll")){finderRes.forEach(r=>addCart(r.p.id,Math.ceil(+fa.count/r.p.pack),true));toast("Hela setet ligger i varukorgen")}
 });
 
@@ -168,7 +168,7 @@ function renderProfile(done){
   const max=Math.max(1,...keys.map(k=>w[k]));
   const label=k=>k.startsWith("s:")?STYLEN[k.slice(2)]:DRINKN[k.slice(2)];
   const prof=done?buildProfile(w):null;
-  $("#profile").innerHTML=done?`<span class="mono">Din stil</span><h2 class="pc-h">${esc(prof.name)}</h2><p class="lead" style="font-size:17px">Du gillar ${esc(prof.summary)}.</p><div class="bars">${keys.map(k=>`<div>${esc(label(k))}<i style="--w:${Math.round(w[k]/max*100)}%"></i></div>`).join("")}</div><span class="mono">Tre glas för dig</span><div class="gk-list">${recommend(3).map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div><div class="pdp-actions" style="margin-top:16px"><button class="small-btn" id="swShare">Kopiera min stil</button><button class="small-btn" id="swAgain">Swipea igen</button><a class="small-btn" href="#glasskap">Mitt glasskåp</a></div>`
+  $("#profile").innerHTML=done?`<span class="mono">Din stil</span><h2 class="pc-h">${esc(prof.name)}</h2><p class="lead" style="font-size:17px">Du gillar ${esc(prof.summary)}.</p><div class="bars">${keys.map(k=>`<div>${esc(label(k))}<i style="--w:${Math.round(w[k]/max*100)}%"></i></div>`).join("")}</div><span class="mono">Tre glas för dig</span><div class="gk-list">${recommend(3).map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div><div class="pdp-actions" style="margin-top:16px"><button class="small-btn" id="swShare">Kopiera min stil</button><button class="small-btn" id="swAgain">Swipea igen</button><a class="small-btn" href="glasskap/">Mitt glasskåp</a></div>`
   :`<span class="mono">Din smak hittills</span><h2 class="pc-h">${swI?"Vi lär oss.":"Börja swipea."}</h2>${keys.length?`<div class="bars">${keys.map(k=>`<div>${esc(label(k))}<i style="--w:${Math.round(w[k]/max*100)}%"></i></div>`).join("")}</div>`:`<p class="note">Varje bild säger något om din stil. Efter ${SWDECK.length} bilder får du ett namn på din stil och tre glas som passar.</p>`}<p class="note">${swI} av ${SWDECK.length} bilder</p>`;
   if(done){
     $("#swAgain").addEventListener("click",()=>{swI=0;swW={};swLog=[];renderDeck()});

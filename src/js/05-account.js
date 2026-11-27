@@ -54,8 +54,8 @@ function renderGlasskap(){
   const tabs=`<div class="gkd-tabs" role="group" aria-label="Delar av Mitt glasskåp">${GKTABS.map(([k,v])=>`<button type="button" data-gtab="${k}" aria-pressed="${gkTab===k}">${v}</button>`).join("")}</div>`;
   const T={};
   T.oversikt=`<section class="gk span8 gk-feature"><span class="mono">Din stil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea tio bilder eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan efter dig.</p>`}
-    ${S.finder?`<p class="note">Glasguiden: ${esc(finderSummary(S.finder))}. <a href="#glasguiden">Se förslagen</a></p>`:""}
-    <div class="pdp-actions"><a class="small-btn" href="#upptack">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="#glasguiden">Glasguiden</a></div>
+    ${S.finder?`<p class="note">Glasguiden: ${esc(finderSummary(S.finder))}. <a href="glasguiden/">Se förslagen</a></p>`:""}
+    <div class="pdp-actions"><a class="small-btn" href="upptack/">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="glasguiden/">Glasguiden</a></div>
     ${recs.length&&(prof||S.finder||owned.length)?`<div class="gk-list">${recs.map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div>`:""}
   </section>
   <section class="gk span4"><span class="mono">Skålpoäng</span><div class="points" style="margin:10px 0 6px">${S.points||0}</div><p style="color:var(--ink2)">500 poäng ger fri gravyr. 300 poäng ger presentinslagning.</p>
@@ -64,7 +64,7 @@ function renderGlasskap(){
   </section>
   <section class="gk wide g-gk"><div><span class="mono">Swipea tillsammans</span><h2 class="gk-h">${(S.rooms||[]).length?"Dina grupper":"Välj glas ihop med andra."}</h2>${(S.rooms||[]).length?`<div class="g-mine">${S.rooms.slice(0,4).map(r=>`<a class="g-room" href="#rum-${esc(r.code)}"><span><b>${esc(r.name)}</b><small>Kod ${esc(r.code)}</small></span><span aria-hidden="true">→</span></a>`).join("")}</div>`:`<p style="color:var(--ink2)">Bjud in familj eller vänner, swipea samma glas och se vilka ni alla gillar. Perfekt inför bröllop, flytt eller julbord.</p>`}</div><a class="btn btn-ghost" href="#tillsammans">${(S.rooms||[]).length?"Ny grupp":"Starta en grupp"}</a></section>
   <section class="gk"><span class="mono">Kalender</span><h2 class="gk-h">Kommande presenter</h2>
-    <div class="gk-list">${upcoming.map(d=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="#present">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
+    <div class="gk-list">${upcoming.map(d=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="present/">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
     <p class="note">I butiken får du en påminnelse två veckor innan.</p>
   </section>
   <section class="gk"><span class="mono">Läsning för dig</span><h2 class="gk-h">Utvalt utifrån dina glas</h2>
@@ -128,11 +128,11 @@ $("#gk").addEventListener("click",e=>{
   const ld=t.closest("[data-ldel]");if(ld){S.lists=S.lists.filter(l=>l.id!==ld.dataset.ldel);save();return}
   const lr=t.closest("[data-lrm]");if(lr){const [lid,pid]=lr.dataset.lrm.split("~");const L=S.lists.find(l=>l.id===lid);L.items=L.items.filter(x=>x!==pid);save();return}
   const so=t.closest("[data-sopen]");if(so){const s=S.saved[+so.dataset.sopen];
-    if(s.type==="dukning"){location.hash="dukning";setTimeout(()=>loadDukning(s.data),0)}
-    else if(s.type==="kit"){kit=s.data.kit;renderKit();location.hash="barstudion"}
+    if(s.type==="dukning"){goto("dukning");setTimeout(()=>loadDukning(s.data),0)}
+    else if(s.type==="kit"){kit=s.data.kit;renderKit();goto("barstudion")}
     else if(s.type==="guide"){openModal(`<div class="co"><span class="mono">Sparade förslag</span><h2 style="margin:8px 0 16px">${esc(s.title)}</h2><div class="gk-list">${s.data.ids.map(id=>byId[id]).filter(Boolean).map(p=>{const packs=Math.ceil(s.data.count/p.pack);return `<div class="gk-item"><img src="${img(p,true)}" alt=""><div><b>${esc(p.name)}</b><small>${packs} × ${packTxt(p)}</small></div><button class="small-btn" data-add="${p.id}" data-qty="${packs}">Köp</button></div>`}).join("")}</div></div>`,"Sparade förslag","saved")}
-    else if(s.type==="grupp"&&s.data&&s.data.code)location.hash="rum-"+s.data.code;
-    else location.hash="upptack";
+    else if(s.type==="grupp"&&s.data&&s.data.code)goto("rum-"+s.data.code);
+    else goto("upptack");
     return}
   const sd=t.closest("[data-sdel]");if(sd){S.saved.splice(+sd.dataset.sdel,1);save();return}
   const wd=t.closest("[data-wdel]");if(wd){S.watches.splice(+wd.dataset.wdel,1);save();return}
@@ -389,7 +389,7 @@ viewHooks.varumarken=renderBrands;
 onState(()=>{if(curView==="hem"){renderForDig()}});
 setSkin(root.dataset.skin||"dark");
 renderSeason();renderJournal();renderFinder();renderKit();renderCart();refreshHearts();
-try{const ld=document.createElement("script");ld.type="application/ld+json";ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"Glas hos SKÅL & CO","itemListElement":P.map((p,i)=>({"@type":"ListItem","position":i+1,"item":{"@type":"Product","name":p.name,"image":"assets/p-"+p.img+".webp","description":p.why,"material":p.mat,"category":DRINKN[p.cat]||p.cat,"offers":{"@type":"Offer","price":p.price,"priceCurrency":"SEK","availability":"https://schema.org/InStock"}}}))}).replace(/</g,"\\u003c");document.head.appendChild(ld)}catch(e){}
+try{const ld=document.createElement("script");ld.type="application/ld+json";ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList","name":"Glas hos SKÅL & CO","itemListElement":P.map((p,i)=>({"@type":"ListItem","position":i+1,"item":{"@type":"Product","name":p.name,"image":new URL("assets/p-"+p.img+".webp",BASE).href,"url":urlFor("p-"+p.id),"description":p.why,"material":p.mat,"category":DRINKN[p.cat]||p.cat,"offers":{"@type":"Offer","price":p.price,"priceCurrency":"SEK","availability":"https://schema.org/InStock"}}}))}).replace(/</g,"\\u003c");document.head.appendChild(ld)}catch(e){}
 $$(".rv").forEach(el=>io.observe(el));
 route();
 connectCloud();
