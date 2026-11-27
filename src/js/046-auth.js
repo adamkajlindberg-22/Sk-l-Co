@@ -19,7 +19,8 @@ async function initAuth(){
     au.languageCode="sv";
     let store;
     if(rt){const db=dbm.getDatabase(a);const r=uid=>dbm.ref(db,"glasskap/"+uid);
-      store={get:async uid=>{const s=await dbm.get(r(uid));return s.exists()?s.val():null},set:(uid,v)=>dbm.set(r(uid),v),del:uid=>dbm.remove(r(uid))};}
+      store={get:async uid=>{const s=await dbm.get(r(uid));return s.exists()?s.val():null},set:(uid,v)=>dbm.set(r(uid),v),del:uid=>dbm.remove(r(uid))};
+      AUTH.rt={ref:path=>dbm.ref(db,path),get:dbm.get,set:dbm.set,update:dbm.update,remove:dbm.remove,onValue:dbm.onValue};}
     else{const db=dbm.getFirestore(a);const r=uid=>dbm.doc(db,"glasskap",uid);
       store={get:async uid=>{const s=await dbm.getDoc(r(uid));return s.exists()?s.data():null},set:(uid,v)=>dbm.setDoc(r(uid),v),del:uid=>dbm.deleteDoc(r(uid))};}
     AUTH.api={auth,au,store};

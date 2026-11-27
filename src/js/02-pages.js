@@ -6,6 +6,8 @@ let curView="hem", openedByUs=false;
 const viewHooks={};
 function route(){
   const h=decodeURIComponent(location.hash.slice(1));
+  if(/^rum-[A-Za-z0-9]{6}$/.test(h)){showView("upptack");gOpen(h.slice(4).toUpperCase());return}
+  if(h==="tillsammans"){showView("upptack");setSwMode("group");return}
   if(h.startsWith("p-")&&byId[h.slice(2)]){
     if(!$("[data-view]:not([hidden])"))showView("hem");
     openProduct(h.slice(2));return;
@@ -47,7 +49,7 @@ const I={
  gift:'<svg viewBox="0 0 48 48"><rect x="8" y="18" width="32" height="24" rx="2"/><path d="M6 18h36M24 18v24M24 18c-4-8-12-8-12-3s8 3 12 3c4 0 12 2 12-3s-8-5-12 3"/></svg>',
  home:'<svg viewBox="0 0 48 48"><path d="M8 40V18L24 8l16 10v22zM18 40V28h12v12"/></svg>'
 };
-const TOOLS=[["glasguiden","guide","Glasguiden","Sex frågor, tre glas som passar dig."],["upptack","swipe","Glas-swipe","Dra höger eller vänster. Vi lär oss din stil."],["glasvaggen","wall","Glasväggen","Alla glas i skala, mot hand, flaska och hylla."],["dukning","table","Dukningsstudion","Bygg bordet, från sidan eller ovanifrån."],["barstudion","bar","Barstudion","Färdiga kit för hemmabaren."],["provladan","box","Provlådan","Tre glas hem att känna på först."],["present","gift","Presentguiden","Rätt present, och en påminnelse i tid."],["glasskap","home","Mitt glasskåp","Dina glas, listor och ersättningar."]];
+const TOOLS=[["glasguiden","guide","Glasguiden","Flera drycker och stilar. Ett glas för varje."],["upptack","swipe","Glas-swipe","Swipea själv eller tillsammans med vänner."],["glasvaggen","wall","Glasväggen","Alla glas i skala, mot hand, flaska och hylla."],["dukning","table","Dukningsstudion","Bygg bordet, från sidan eller ovanifrån."],["barstudion","bar","Barstudion","Färdiga kit för hemmabaren."],["provladan","box","Provlådan","Tre glas hem att känna på först."],["present","gift","Presentguiden","Rätt present, och en påminnelse i tid."],["glasskap","home","Mitt glasskåp","Dina glas, listor och ersättningar."]];
 $("#tools").innerHTML=TOOLS.map(t=>`<a class="tool" href="#${t[0]}">${I[t[1]]}<b>${t[2]}</b><span>${t[3]}</span><span class="go">Öppna →</span></a>`).join("");
 
 /* ---------- Dagens glas, för dig, senast visade ---------- */
@@ -90,7 +92,7 @@ function recommend(n=3,exclude=[]){
     if(topStyle)why.push("din "+STYLEADJ[topStyle]+" stil");
     if(favSet.has(p.id)){s-=1.5}
     if(ownedShapes.has(p.shape)){s-=2}else if(S.owned.length){why.push("saknas i ditt glasskåp")}
-    if(S.finder&&(p.drinks.includes(S.finder.drink)||p.cat===S.finder.drink)){s+=1.5;why.push("passar det du dricker")}
+    if(S.finder&&(S.finder.drinks||[S.finder.drink]).some(d=>p.drinks.includes(d)||p.cat===d||(d==="rott"||d==="vitt")&&p.cat==="vin")){s+=1.5;why.push("passar det du dricker")}
     return {p,s,why:why.length?"Passar "+why.slice(0,2).join(" och "):""};
   }).sort((a,b)=>b.s-a.s).slice(0,n);
 }

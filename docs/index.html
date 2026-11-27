@@ -179,7 +179,7 @@
 
 <section class="final">
   <img src="assets/hero-end.webp" alt="" aria-hidden="true" loading="lazy">
-  <div class="wrap rv"><span class="mono">Glasguiden</span><h2>Rätt glas finns. Vi hittar det med dig.</h2><p>Sex frågor, en halv minut, tre förslag.</p><div class="ctas"><a class="btn btn-primary" href="#glasguiden">Hitta ditt glas <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
+  <div class="wrap rv"><span class="mono">Glasguiden</span><h2>Rätt glas finns. Vi hittar det med dig.</h2><p>Välj drycker, stil och krav. Vi sätter ihop ett glas för varje.</p><div class="ctas"><a class="btn btn-primary" href="#glasguiden">Hitta ditt glas <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
 </section>
 </div>
 
@@ -213,7 +213,7 @@
 <!-- ================= GLASGUIDEN ================= -->
 <div class="view" data-view="glasguiden" hidden>
   <div class="wrap">
-    <header class="page-head"><span class="mono">Glasguiden</span><h1>Sex frågor. Tre glas som passar.</h1><p class="lead">Ditt svar sparas i Mitt glasskåp, så slipper du börja om nästa gång.</p></header>
+    <header class="page-head"><span class="mono">Glasguiden</span><h1>Hitta ditt glas. Eller ett helt glasskåp.</h1><p class="lead">Välj flera drycker, stilar och det som är viktigt för dig. Vi sätter ihop ett glas för varje dryck och förklarar varför. Svaren sparas i Mitt glasskåp.</p></header>
     <div class="finder">
       <div><div class="steps-dots" id="dots"></div><div id="fq" aria-live="polite"></div></div>
       <div><div class="g-stage" aria-hidden="true"><svg viewBox="0 0 200 300"><defs><linearGradient id="wine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a2a3a"/><stop offset="1" stop-color="#4a0f18"/></linearGradient></defs><path id="gFill" fill="url(#wine)" d=""/><path id="gLine" pathLength="1" d=""/></svg></div><p class="g-label" id="gLabel"></p></div>
@@ -224,17 +224,20 @@
 <!-- ================= UPPTÄCK (SWIPE) ================= -->
 <div class="view" data-view="upptack" hidden>
   <div class="wrap">
-    <header class="page-head"><span class="mono">Glas-swipe</span><h1>Hitta din stil på en minut.</h1><p class="lead">Dra höger på det du gillar, vänster på det du inte gillar, uppåt för att spara. Vi lär oss din smak och visar tre glas som passar.</p></header>
-    <div class="swipe-wrap">
+    <header class="page-head"><span class="mono">Glas-swipe</span><h1>Hitta din stil på en minut.</h1><p class="lead">Dra höger på det du gillar, vänster på det du inte gillar, uppåt för att spara. Swipea själv, eller bjud in familj och vänner och se vilka glas ni matchar på.</p></header>
+    <div class="sw-mode" role="group" aria-label="Swipea själv eller tillsammans"><button type="button" data-swmode="solo" aria-pressed="true">Själv</button><button type="button" data-swmode="group" aria-pressed="false">Tillsammans <span class="sw-new">Nytt</span></button></div>
+    <div id="swLobby" hidden></div>
+    <div class="swipe-wrap" id="swWrap">
       <div>
         <div class="sprog" aria-hidden="true"><i id="sprog" style="width:0"></i></div>
         <div class="deck" id="deck" aria-live="polite"></div>
         <div class="sbtns" id="sbtns">
+          <button class="sbtn undo" data-sw="undo" aria-label="Ångra senaste"><svg viewBox="0 0 24 24"><path d="M9 7H4V2"/><path d="M4.5 7.5A8 8 0 1 1 6 17"/></svg></button>
           <button class="sbtn no" data-sw="no" aria-label="Gillar inte"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
           <button class="sbtn save" data-sw="save" aria-label="Spara"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg></button>
           <button class="sbtn yes" data-sw="yes" aria-label="Gillar"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
         </div>
-        <p class="note" style="text-align:center">Tangenter: vänsterpil, högerpil och uppåtpil fungerar också.</p>
+        <p class="note" style="text-align:center">Tangenter: vänsterpil, högerpil och uppåtpil. Backsteg ångrar.</p>
       </div>
       <aside class="profile-card" id="profile"></aside>
     </div>

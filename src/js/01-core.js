@@ -67,7 +67,7 @@ const packTxt=p=>p.pack===1?"1 st":p.pack+"-pack";
 
 /* ---------- Lagring: webbläsaren först, sedan Claude-konto ---------- */
 const KEY="skal-glasskap-v1";
-const DEF=()=>({ts:0,favs:[],lists:[{id:"onske",name:"Önskelista",type:"onske",items:[]}],owned:[],saved:[],watches:[],dates:[],reviews:[],orders:[],points:0,pointsLog:[],profile:null,recent:[],finder:null,read:[]});
+const DEF=()=>({ts:0,favs:[],lists:[{id:"onske",name:"Önskelista",type:"onske",items:[]}],owned:[],saved:[],watches:[],dates:[],reviews:[],orders:[],points:0,pointsLog:[],profile:null,recent:[],finder:null,read:[],rooms:[]});
 let S=DEF();
 try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(DEF(),JSON.parse(raw))}catch(e){}
 const cloud={on:false,doc:null,name:"",writing:false,dirty:false,t:0};

@@ -48,8 +48,9 @@ async def main():
             await pg.click("[data-tt='marmor']");await pg.wait_for_timeout(300)
             await pg.screenshot(path=OUT+name+"-dukning.png")
             await pg.evaluate("location.hash='glasguiden'");await pg.wait_for_timeout(300)
-            for a in ["champagne","fest","klassisk","klart","9999","6"]:
-                await pg.click(f"[data-fa='{a}']");await pg.wait_for_timeout(150)
+            for a in ["champagne","whisky","#fNext","fest","#fNext","klassisk","#fNext","klart","#fNext","9999","6"]:
+                await pg.click(a if a.startswith("#") else f"[data-fa='{a}']");await pg.wait_for_timeout(150)
+            await pg.click("[data-fswap]");await pg.click("[data-fquick='disk']");await pg.wait_for_timeout(200)
             await pg.screenshot(path=OUT+name+"-guide.png")
             await pg.evaluate("location.hash='glasvaggen'");await pg.wait_for_timeout(400)
             await pg.screenshot(path=OUT+name+"-wall.png")

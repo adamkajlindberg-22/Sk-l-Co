@@ -6,17 +6,18 @@ function showProduct(id){
 }
 document.addEventListener("click",e=>{const o=e.target.closest("[data-open]");if(!o||e.target.closest("[data-add],.cmp,[data-fav]"))return;e.preventDefault();showProduct(o.dataset.open)});
 
-/* ---------- Glasguiden ---------- */
+/* ---------- Glasguiden: flera drycker, stilar och krav. Ett glas per dryck. ---------- */
 const FQ=[
- {k:"drink",q:"Vilken dryck ska glaset användas till?",o:[["vin","Rött vin"],["vitt","Vitt vin"],["champagne","Bubbel"],["whisky","Whisky"],["cocktail","Cocktail"],["vatten","Vatten"],["kaffe","Kaffe"],["te","Te"],["ol","Öl"],["dessert","Dessert"]]},
- {k:"occ",q:"Vad ska du främst använda dem till?",o:[["vardag","Vardag"],["middag","Middagsbjudning"],["fest","Fest"],["hemmabar","Hemmabar"],["present","Present"]]},
- {k:"style",q:"Vilken stil föredrar du?",o:[["skandinavisk","Skandinavisk"],["klassisk","Klassisk kristall"],["modern","Modern"],["lyx","Lyx"],["fargstark","Färgstarkt"]]},
- {k:"color",q:"Klart eller färgat glas?",o:[["klart","Klart"],["fargat","Färgat"],["spelar","Spelar ingen roll"]]},
- {k:"budget",q:"Vad får ett glas kosta?",o:[["150","Upp till 150 kr"],["300","150 till 300 kr"],["9999","Över 300 kr"]]},
- {k:"count",q:"Hur många glas behöver du?",o:[["2","2"],["4","4"],["6","6"],["12","12"]]}
+ {k:"drinks",multi:true,max:5,need:true,q:"Vad vill du dricka ur glasen?",hint:"Välj en eller flera. Vi sätter ihop ett glas för varje.",o:[["rott","Rött vin"],["vitt","Vitt vin"],["champagne","Bubbel"],["whisky","Whisky"],["cocktail","Cocktail"],["ol","Öl"],["vatten","Vatten"],["kaffe","Kaffe"],["te","Te"],["dessert","Dessert"]]},
+ {k:"occ",multi:true,q:"När ska glasen användas?",hint:"Välj allt som stämmer.",o:[["vardag","Vardag"],["frukost","Frukost"],["middag","Middagsbjudning"],["fest","Fest"],["hemmabar","Hemmabar"],["present","Som present"]]},
+ {k:"styles",multi:true,max:3,q:"Vilka stilar dras du till?",hint:"Välj upp till tre. Har du swipeat använder vi din stil om du hoppar över.",o:Object.entries(STYLEN)},
+ {k:"must",multi:true,q:"Vad är viktigt för dig?",hint:"Det du väljer här räknas som krav.",o:[["diskmaskin","Tål diskmaskin"],["munblast","Tunt och munblåst"],["kristall","Kristall"],["stapelbart","Stapelbart"],["fargat","Färgat glas"],["klart","Klart glas"]]},
+ {k:"budget",q:"Vad får ett glas kosta?",o:[["150","Upp till 150 kr"],["300","150 till 300 kr"],["9999","Över 300 kr"],["0","Spelar ingen roll"]]},
+ {k:"count",q:"Hur många glas av varje?",o:[["2","2"],["4","4"],["6","6"],["8","8"],["12","12"]]}
 ];
-const DRINKSHAPE={vin:["rott","Bourgogne"],vitt:["vitt","Tulpan"],champagne:["flojt","Flöjt, coupe eller tulpan"],whisky:["whisky","Provglas"],cocktail:["cocktail","Nick & Nora"],vatten:["tumbler","Tumbler"],kaffe:["dubbel","Dubbelväggat"],te:["te","Glaskopp"],ol:["ol","Tulpan för öl"],dessert:["dessert","Dessertskål"]};
-let fs=0; const fa={};
+const DRINKSHAPE={rott:["rott","Bourgogne"],vin:["rott","Bourgogne"],vitt:["vitt","Tulpan"],champagne:["flojt","Flöjt eller coupe"],whisky:["whisky","Provglas"],cocktail:["cocktail","Nick & Nora"],vatten:["tumbler","Tumbler"],kaffe:["dubbel","Dubbelväggat"],te:["te","Glaskopp"],ol:["ol","Tulpan för öl"],dessert:["dessert","Dessertskål"]};
+const FLAB=(k,v)=>(FQ.find(q=>q.k===k).o.find(o=>o[0]===v)||[])[1];
+let fs=0; const fa={drinks:[],occ:[],styles:[],must:[]}; let fSwap={};
 $("#dots").innerHTML=FQ.map(()=>"<i></i>").join("");
 function drawShape(key,label){
   const l=$("#gLine"),f=$("#gFill"),fl=FILL[key];
@@ -26,37 +27,83 @@ function drawShape(key,label){
   $("#gLabel").textContent=label||"";
 }
 function shade(h){const n=parseInt(h.slice(1),16);return"#"+[(n>>16)&255,(n>>8)&255,n&255].map(v=>Math.round(v*.45).toString(16).padStart(2,"0")).join("")}
+function finderSummary(f){if(!f)return"";const ds=(f.drinks||[f.drink]).filter(Boolean).map(d=>FLAB("drinks",d)||DRINKN[d]||d);
+  return [ds.join(", "),f.count?f.count+" av varje":"",(f.styles||[]).map(s=>STYLEN[s]).join(", ").toLowerCase()].filter(Boolean).join(" · ")}
+/* Poäng för ett glas och en dryck. Krav som inte uppfylls räknas som miss. */
+function scoreFor(p,d){
+  const prim=p.cat===d||((d==="rott"||d==="vitt")&&p.cat==="vin"&&p.drinks.includes(d));
+  if(!prim&&!p.drinks.includes(d))return null;
+  const w=[];let s=prim?50:34,max=50;
+  w.push((prim?DRINKSHAPE[d][1]+"-form, gjord för ":"Fungerar också till ")+FLAB("drinks",d).toLowerCase());
+  if(fa.occ.length){max+=14;const hit=fa.occ.filter(o=>p.occ.includes(o));s+=Math.min(14,hit.length*8);if(hit.length)w.push("passar "+hit.map(o=>FLAB("occ",o).toLowerCase()).join(" och "))}
+  const pw=(S.profile&&S.profile.w)||{};
+  if(fa.styles.length){max+=20;const hit=fa.styles.filter(x=>p.style.includes(x));s+=Math.min(20,hit.length*10);if(hit.length)w.push(hit.map(x=>STYLEN[x].toLowerCase()).join(" och ")+" stil")}
+  else if(S.profile){max+=12;const b=p.style.reduce((n,x)=>n+Math.max(0,pw["s:"+x]||0),0);s+=Math.min(12,b*4);if(b>.5)w.push("passar din stil "+S.profile.name)}
+  let miss=0;
+  fa.must.forEach(m=>{max+=6;const ok=m==="klart"?!p.props.includes("fargat"):p.props.includes(m);if(ok){s+=6;w.push(FLAB("must",m).toLowerCase())}else miss++});
+  const b=+fa.budget||0,pg=per(p),lo=b===300?150:b===9999?300:0;
+  if(b){max+=12;if(pg<=b&&pg>lo){s+=12;w.push(kr(pg)+" per glas, inom budget")}else if(pg<=b)s+=8;else if(pg<=b*1.25)s+=2;else{s-=10;miss++}}
+  return {p,s,pct:Math.max(40,Math.min(99,Math.round(s/max*100))),miss,why:w.join(", ").replace(/^./,c=>c.toUpperCase())+"."};
+}
+function finderSet(){
+  const used=new Set();
+  return fa.drinks.map(d=>{
+    const all=P.filter(p=>p.cat!=="karaff").map(p=>scoreFor(p,d)).filter(Boolean).sort((a,b)=>a.miss-b.miss||b.s-a.s);
+    if(!all.length)return {d,all:[]};
+    let i=all.findIndex(r=>!used.has(r.p.id)&&r.miss===all[0].miss&&r.s>=all[0].s-8);if(i<0)i=0;
+    const ordered=[all[i],...all.filter((_,k)=>k!==i)];
+    const pick=ordered[(fSwap[d]||0)%ordered.length];used.add(pick.p.id);
+    return {d,all:ordered,pick};
+  });
+}
 let finderRes=[];
 function renderFinder(){
   $$("#dots i").forEach((d,i)=>d.classList.toggle("on",i<=fs));
   if(fs<FQ.length){
-    const q=FQ[fs];
-    $("#fq").innerHTML=`<div class="fq"><span class="mono">Fråga ${fs+1} av ${FQ.length}</span><h2 class="fq-h" style="margin-top:8px">${q.q}</h2><div class="chips">${q.o.map(o=>`<button class="chip" data-fa="${o[0]}" aria-pressed="${fa[q.k]===o[0]}">${o[1]}</button>`).join("")}</div><div class="fnav">${fs?'<button class="btn btn-ghost" id="fBack">Tillbaka</button>':""}</div></div>`;
-  } else {
-    const res=scoreFinder(), n=+fa.count;
-    finderRes=res;
-    S.finder={...fa,drink:fa.drink==="vitt"?"vin":fa.drink,ts:Date.now()};save(true);track("tool_complete",{tool:"glasguiden",results:res.length});
-    $("#fq").innerHTML=`<div class="fq"><span class="mono">Dina förslag</span><h2 class="fq-h" style="margin-top:8px">${res.length?(res.length===1?"Ett glas passar dig.":res.length+" glas som passar dig."):"Inget passar exakt än."}</h2><div class="fres">${res.map(r=>{const packs=Math.ceil(n/r.p.pack);return `<div class="pick"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt="" data-open="${r.p.id}" style="cursor:pointer"><div><b>${esc(r.p.name)}</b><p>${esc(r.why)}</p><p>${packs} × ${packTxt(r.p)} = ${kr(packs*r.p.price)}</p><label class="note" style="display:inline-flex;gap:6px;align-items:center;margin:4px 0 0;cursor:pointer"><input type="checkbox" data-cmp="${r.p.id}" ${cmpSet.has(r.p.id)?"checked":""}> Jämför</label></div><button class="round" data-add="${r.p.id}" data-qty="${packs}" aria-label="Lägg ${esc(r.p.name)} i varukorgen">+</button></div>`}).join("")||'<p class="lead">Vi har inte det glaset i visningsversionen. Fråga glassommelieren, så får du närmaste alternativ.</p>'}</div><div class="fnav"><button class="btn btn-ghost" id="fRestart">Börja om</button>${res.length?'<button class="btn btn-ghost" id="fSave">Spara förslagen</button><button class="btn btn-primary" id="fAll">Lägg alla i varukorgen</button>':""}</div></div>`;
+    const q=FQ[fs],val=fa[q.k];
+    const on=o=>q.multi?val.includes(o):val===o;
+    $("#fq").innerHTML=`<div class="fq"><span class="mono">Fråga ${fs+1} av ${FQ.length}</span><h2 class="fq-h" style="margin-top:8px">${q.q}</h2>${q.hint?`<p class="note" style="margin:-8px 0 16px">${q.hint}</p>`:""}<div class="chips" ${q.multi?`role="group" aria-label="${esc(q.q)}"`:""}>${q.o.map(o=>`<button class="chip${q.multi?" multi":""}" data-fa="${o[0]}" aria-pressed="${on(o[0])}">${o[1]}</button>`).join("")}</div>
+    <div class="fnav">${fs?'<button class="btn btn-ghost" id="fBack">Tillbaka</button>':""}${q.multi?`${q.need?"":`<button class="btn btn-ghost" id="fSkip">${val.length?"Rensa och hoppa över":"Hoppa över"}</button>`}<button class="btn btn-primary" id="fNext" ${q.need&&!val.length?"disabled":""}>Nästa${val.length?" ("+val.length+")":""}</button>`:""}</div></div>`;
+    return;
   }
+  const set=finderSet(),n=+fa.count;finderRes=set.filter(r=>r.pick).map(r=>r.pick);
+  S.finder={drinks:[...fa.drinks],drink:fa.drinks[0]==="rott"||fa.drinks[0]==="vitt"?"vin":fa.drinks[0],occ:fa.occ[0]||"",style:fa.styles[0]||"",styles:[...fa.styles],must:[...fa.must],budget:fa.budget,count:fa.count,picks:finderRes.map(r=>r.p.id),ts:Date.now()};save(true);
+  track("tool_complete",{tool:"glasguiden",results:finderRes.length});
+  const total=set.reduce((t,r)=>t+(r.pick?Math.ceil(n/r.pick.p.pack)*r.pick.p.price:0),0);
+  const editChip=(k,i)=>{const q=FQ[i],v=fa[k];const t=q.multi?(v.length?v.map(x=>FLAB(k,x)).join(", "):"Inget valt"):FLAB(k,v);return `<button class="fsum-chip" data-fedit="${i}"><small>${esc(q.q.replace(/\?$/,""))}</small>${esc(t)}</button>`};
+  const nd=set.length;
+  $("#fq").innerHTML=`<div class="fq fres-wrap"><span class="mono">Dina förslag</span><h2 class="fq-h" style="margin-top:8px">${nd===1?"Ditt glas för "+esc(FLAB("drinks",set[0].d).toLowerCase())+".":["","","Två","Tre","Fyra","Fem"][nd]+" glas, ett för varje dryck."}</h2>
+  <div class="fsum">${FQ.map((q,i)=>editChip(q.k,i)).join("")}</div>
+  <div class="fquick" role="group" aria-label="Justera förslagen"><span class="note">Justera:</span>${[["billigare","Billigare"],["lyx","Mer lyx"],["disk","Bara diskmaskin"],["farg","Med färg"]].map(([k,t])=>`<button class="chip" data-fquick="${k}" aria-pressed="${k==="disk"?fa.must.includes("diskmaskin"):k==="farg"?fa.must.includes("fargat"):k==="lyx"?fa.styles.includes("lyx"):false}">${t}</button>`).join("")}</div>
+  <div class="fres">${set.map(r=>{if(!r.pick)return `<div class="pick none"><div><span class="mono">${esc(FLAB("drinks",r.d))}</span><p>Vi har inget sådant glas i visningsversionen än.</p></div></div>`;
+    const p=r.pick.p,packs=Math.ceil(n/p.pack);
+    return `<article class="pick"><img src="${img(p,true)}" data-pimg="${p.id}" alt="" data-open="${p.id}" style="cursor:pointer"><div><span class="mono">${esc(FLAB("drinks",r.d))}<em class="match">${r.pick.pct} % match</em></span><b>${esc(p.name)}</b><p>${esc(r.pick.why)}</p>${r.pick.miss?`<p class="fmiss">Uppfyller inte alla dina krav. Det här är närmast.</p>`:""}<p>${packs} × ${packTxt(p)} = ${kr(packs*p.price)}</p>
+      <div class="pick-acts">${r.all.length>1?`<button class="small-btn" data-fswap="${r.d}">Visa ett annat (${r.all.length-1})</button>`:""}<label class="note" style="display:inline-flex;gap:6px;align-items:center;margin:0;cursor:pointer"><input type="checkbox" data-cmp="${p.id}" ${cmpSet.has(p.id)?"checked":""}> Jämför</label></div></div><button class="round" data-add="${p.id}" data-qty="${packs}" aria-label="Lägg ${esc(p.name)} i varukorgen">+</button></article>`}).join("")}</div>
+  ${finderRes.length?`<div class="ftotal"><span>Hela setet, ${finderRes.length*n} glas</span><b>${kr(total)}</b></div>`:""}
+  <div class="fnav"><button class="btn btn-ghost" id="fRestart">Börja om</button>${finderRes.length?'<button class="btn btn-ghost" id="fShare">Dela</button><button class="btn btn-ghost" id="fSave">Spara</button><button class="btn btn-primary" id="fAll">Lägg hela setet i varukorgen</button>':""}</div></div>`;
 }
-function scoreFinder(){
-  const d=fa.drink==="vin"?"rott":fa.drink, budget=+fa.budget, lo=budget===300?150:budget===9999?300:0;
-  return P.map(p=>{let s=0;const w=[];
-    if(p.drinks.includes(d)||p.cat===d){s+=6;w.push(DRINKSHAPE[fa.drink][1]+"-form för "+FQ[0].o.find(o=>o[0]===fa.drink)[1].toLowerCase())}
-    if(p.occ.includes(fa.occ)){s+=2;w.push("passar "+FQ[1].o.find(o=>o[0]===fa.occ)[1].toLowerCase())}
-    if(p.style.includes(fa.style)){s+=2;w.push(FQ[2].o.find(o=>o[0]===fa.style)[1].toLowerCase()+" stil")}
-    const col=p.props.includes("fargat");if(fa.color==="spelar"||(fa.color==="fargat")===col)s+=1;
-    const pg=per(p);if(pg<=budget&&pg>lo){s+=2;w.push("inom budget, "+kr(pg)+" per glas")}else if(pg<=budget)s+=1;
-    return {p,s,why:w.length?w.join(", ").replace(/^./,c=>c.toUpperCase())+".":""};
-  }).filter(r=>r.s>=6&&r.p.cat!=="karaff").sort((a,b)=>b.s-a.s).slice(0,5);
-}
+/* Visa senaste förslagen direkt om de finns sparade */
+if(S.finder&&S.finder.drinks&&S.finder.count){fa.drinks=[...S.finder.drinks];fa.occ=[...(S.finder.occ?[S.finder.occ]:[])];fa.styles=[...(S.finder.styles||[])];fa.must=[...(S.finder.must||[])];fa.budget=S.finder.budget;fa.count=S.finder.count;fs=FQ.length}
 $("#fq").addEventListener("click",e=>{
   const a=e.target.closest("[data-fa]");
-  if(a){fa[FQ[fs].k]=a.dataset.fa;if(fs===0)drawShape(...DRINKSHAPE[a.dataset.fa]);fs++;renderFinder();return}
+  if(a){const q=FQ[fs],v=a.dataset.fa;
+    if(q.multi){const L=fa[q.k],i=L.indexOf(v);if(i>=0)L.splice(i,1);else{if(q.max&&L.length>=q.max){toast("Välj högst "+q.max);return}L.push(v)}
+      if(q.k==="drinks"&&L.length)drawShape(...DRINKSHAPE[L[L.length-1]]);renderFinder();return}
+    fa[q.k]=v;fs++;renderFinder();return}
+  if(e.target.closest("#fNext")){fs++;renderFinder();return}
+  if(e.target.closest("#fSkip")){fa[FQ[fs].k]=[];fs++;renderFinder();return}
   if(e.target.closest("#fBack")){fs--;renderFinder();return}
-  if(e.target.closest("#fRestart")){fs=0;for(const k in fa)delete fa[k];renderFinder();return}
-  if(e.target.closest("#fSave")){S.saved.unshift({type:"guide",title:"Glasguiden: "+FQ[0].o.find(o=>o[0]===fa.drink)[1].toLowerCase()+", "+fa.count+" glas",data:{ids:finderRes.map(r=>r.p.id),count:+fa.count},ts:Date.now()});save();nudgeLogin("sparat");toast("Sparat i Mitt glasskåp");return}
-  if(e.target.closest("#fAll")){finderRes.forEach(r=>addCart(r.p.id,Math.ceil(+fa.count/r.p.pack),true));toast("Dina förslag ligger i varukorgen")}
+  const ed=e.target.closest("[data-fedit]");if(ed){fs=+ed.dataset.fedit;renderFinder();return}
+  const sw=e.target.closest("[data-fswap]");if(sw){fSwap[sw.dataset.fswap]=(fSwap[sw.dataset.fswap]||0)+1;renderFinder();return}
+  const qk=e.target.closest("[data-fquick]");if(qk){const k=qk.dataset.fquick,tog=(L,v)=>{const i=L.indexOf(v);i>=0?L.splice(i,1):L.push(v)};
+    if(k==="billigare"){fa.budget=fa.budget==="9999"||fa.budget==="0"?"300":"150"}
+    if(k==="lyx")tog(fa.styles,"lyx");if(k==="disk")tog(fa.must,"diskmaskin");
+    if(k==="farg"){tog(fa.must,"fargat");fa.must=fa.must.filter(m=>m!=="klart")}
+    fSwap={};renderFinder();return}
+  if(e.target.closest("#fRestart")){fs=0;fa.drinks=[];fa.occ=[];fa.styles=[];fa.must=[];delete fa.budget;delete fa.count;fSwap={};renderFinder();return}
+  if(e.target.closest("#fSave")){S.saved.unshift({type:"guide",title:"Glasguiden: "+finderSummary(S.finder),data:{ids:finderRes.map(r=>r.p.id),count:+fa.count},ts:Date.now()});save();nudgeLogin("sparat");toast("Sparat i Mitt glasskåp");return}
+  if(e.target.closest("#fShare")){copy(`Mitt glasskåp från SKÅL & CO (${finderSummary(S.finder)}):\n`+finderRes.map(r=>`${r.p.name}, ${kr(per(r.p))} per glas`).join("\n")+`\n${location.origin+location.pathname}#glasguiden`,"Förslagen är kopierade. Klistra in dem var du vill.");return}
+  if(e.target.closest("#fAll")){finderRes.forEach(r=>addCart(r.p.id,Math.ceil(+fa.count/r.p.pack),true));toast("Hela setet ligger i varukorgen")}
 });
 
 /* ---------- Glas-swipe ---------- */
@@ -73,13 +120,14 @@ let swI=0,swW={},swLog=[];
 const PROFNAME={skandinavisk:["Nordiskt ljus","enkel nordisk form"],klassisk:["Klassisk kristall","tidlös kristall"],modern:["Ren modern","moderna linjer"],fargstark:["Färgglad vardag","glas med färg"],vintage:["Vintagesalongen","vintage och 1920-tal"],lyx:["Kvällslyx","lyx och tyngd"],rustik:["Rustik värme","hantverk och struktur"]};
 function tagsOf(c){if(c.t)return c.t;const p=c.p,t={};p.style.forEach(s=>t["s:"+s]=1);p.drinks.forEach(d=>t["d:"+d]=.8);t["t:"+tier(p)]=.7;t[p.props.includes("fargat")?"c:farg":"c:klar"]=.6;return t}
 function renderDeck(){
-  const deck=$("#deck");$("#sprog").style.width=(swI/SWDECK.length*100)+"%";
-  if(swI>=SWDECK.length){finishSwipe();return}
-  const show=SWDECK.slice(swI,swI+3).reverse();
+  const grp=swMode==="group"&&G&&G.deck,D=grp?G.deck:SWDECK,i=grp?G.i:swI;
+  const deck=$("#deck");$("#sprog").style.width=(i/Math.max(1,D.length)*100)+"%";
+  if(i>=D.length){grp?gDone():finishSwipe();return}
+  const show=D.slice(i,i+3).reverse();
   deck.innerHTML=show.map((c,k)=>{const top=k===show.length-1,depth=show.length-1-k;const src=c.p?img(c.p):"assets/"+c.mood+".webp";
     return `<div class="scard" data-top="${top}" style="transform:translateY(${depth*12}px) scale(${1-depth*.04});z-index:${k}" ${top?`tabindex="0" aria-label="${esc(c.p?c.p.name:c.title)}"`:"aria-hidden=\"true\""}><img src="${src}" alt=""><span class="stamp yes">GILLAR</span><span class="stamp no">NEJ</span><span class="stamp save">SPARA</span><div class="t"><b>${esc(c.p?c.p.name:c.title)}</b><span>${esc(c.p?c.p.mat+" · "+kr(per(c.p))+" per glas":c.sub)}</span></div></div>`}).join("");
   const el=$('.scard[data-top="true"]',deck);if(el)bindDrag(el);
-  renderProfile(false);
+  grp?renderGroupPanel():renderProfile(false);
 }
 function bindDrag(el){
   let sx=0,sy=0,dx=0,dy=0,on=false;
@@ -91,11 +139,15 @@ function bindDrag(el){
     else{el.style.transform="";$$(".stamp",el).forEach(s=>s.style.opacity=0)}dx=dy=0};
   el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
 }
+function flyCard(kind){const el=$('.scard[data-top="true"]');
+  if(el){const x=kind==="yes"?600:kind==="no"?-600:0,y=kind==="save"?-700:40;el.style.transform=`translate(${x}px,${y}px) rotate(${x/20}deg)`;el.style.opacity=0;}}
+const swK=kind=>kind==="yes"?1:kind==="save"?1.5:-.6;
 function swipe(kind){
+  if(swMode==="group"){if(G&&G.deck)gSwipe(kind);return}
+  if(kind==="undo"){if(!swLog.length)return;const l=swLog.pop();swI--;const t=tagsOf(SWDECK[swI]);for(const key in t)swW[key]-=t[key]*swK(l.kind);renderDeck();return}
   const c=SWDECK[swI];if(!c)return;
-  const el=$('.scard[data-top="true"]');
-  if(el){const x=kind==="yes"?600:kind==="no"?-600:0,y=kind==="save"?-700:40;el.style.transform=`translate(${x}px,${y}px) rotate(${x/20}deg)`;el.style.opacity=0;}
-  const k=kind==="yes"?1:kind==="save"?1.5:-.6,t=tagsOf(c);
+  flyCard(kind);
+  const k=swK(kind),t=tagsOf(c);
   for(const key in t)swW[key]=(swW[key]||0)+t[key]*k;
   swLog.push({kind,id:c.p?c.p.id:c.mood});
   if(kind==="save"&&c.p&&!isFav(c.p.id)){S.favs.unshift(c.p.id);save(true);refreshHearts()}
@@ -103,7 +155,7 @@ function swipe(kind){
 }
 $("#sbtns").addEventListener("click",e=>{const b=e.target.closest("[data-sw]");if(b)swipe(b.dataset.sw)});
 document.addEventListener("keydown",e=>{if(curView!=="upptack"||modal.classList.contains("open")||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
-  if(e.key==="ArrowRight"){e.preventDefault();swipe("yes")}else if(e.key==="ArrowLeft"){e.preventDefault();swipe("no")}else if(e.key==="ArrowUp"){e.preventDefault();swipe("save")}});
+  if(e.key==="ArrowRight"){e.preventDefault();swipe("yes")}else if(e.key==="ArrowLeft"){e.preventDefault();swipe("no")}else if(e.key==="ArrowUp"){e.preventDefault();swipe("save")}else if(e.key==="Backspace"){e.preventDefault();swipe("undo")}});
 function buildProfile(w){
   const styles=Object.keys(STYLEN).filter(s=>(w["s:"+s]||0)>0).sort((a,b)=>w["s:"+b]-w["s:"+a]);
   const drinks=Object.keys(DRINKN).filter(d=>(w["d:"+d]||0)>0).sort((a,b)=>w["d:"+b]-w["d:"+a]);

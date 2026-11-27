@@ -54,7 +54,7 @@ function renderGlasskap(){
   const tabs=`<div class="gkd-tabs" role="group" aria-label="Delar av Mitt glasskåp">${GKTABS.map(([k,v])=>`<button type="button" data-gtab="${k}" aria-pressed="${gkTab===k}">${v}</button>`).join("")}</div>`;
   const T={};
   T.oversikt=`<section class="gk span8 gk-feature"><span class="mono">Din stil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea tio bilder eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan efter dig.</p>`}
-    ${S.finder?`<p class="note">Glasguiden: ${esc(FQ[0].o.find(o=>o[0]===S.finder.drink||(S.finder.drink==="vin"&&o[0]==="vin"))?.[1]||"")}, ${esc(S.finder.count||"")} glas, ${esc(FQ[2].o.find(o=>o[0]===S.finder.style)?.[1]||"")}.</p>`:""}
+    ${S.finder?`<p class="note">Glasguiden: ${esc(finderSummary(S.finder))}. <a href="#glasguiden">Se förslagen</a></p>`:""}
     <div class="pdp-actions"><a class="small-btn" href="#upptack">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="#glasguiden">Glasguiden</a></div>
     ${recs.length&&(prof||S.finder||owned.length)?`<div class="gk-list">${recs.map(r=>`<div class="gk-item" data-open="${r.p.id}" style="cursor:pointer"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b><small>${esc(r.why||r.p.why)}</small></div><span>${kr(r.p.price)}</span></div>`).join("")}</div>`:""}
   </section>
@@ -62,6 +62,7 @@ function renderGlasskap(){
     <div class="gk-list">${S.pointsLog.slice(0,3).map(l=>`<div style="display:flex;justify-content:space-between;font-size:14px;color:var(--ink2)"><span>${esc(l.why)}</span><span>+${l.n}</span></div>`).join("")||'<p class="gk-empty">Du får poäng när du handlar, skriver recensioner och delar dukningar.</p>'}</div>
     <p class="note">Poängvärdet är ett exempel i visningsversionen.</p>
   </section>
+  <section class="gk wide g-gk"><div><span class="mono">Swipea tillsammans</span><h2 class="gk-h">${(S.rooms||[]).length?"Dina grupper":"Välj glas ihop med andra."}</h2>${(S.rooms||[]).length?`<div class="g-mine">${S.rooms.slice(0,4).map(r=>`<a class="g-room" href="#rum-${esc(r.code)}"><span><b>${esc(r.name)}</b><small>Kod ${esc(r.code)}</small></span><span aria-hidden="true">→</span></a>`).join("")}</div>`:`<p style="color:var(--ink2)">Bjud in familj eller vänner, swipea samma glas och se vilka ni alla gillar. Perfekt inför bröllop, flytt eller julbord.</p>`}</div><a class="btn btn-ghost" href="#tillsammans">${(S.rooms||[]).length?"Ny grupp":"Starta en grupp"}</a></section>
   <section class="gk"><span class="mono">Kalender</span><h2 class="gk-h">Kommande presenter</h2>
     <div class="gk-list">${upcoming.map(d=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(d.name)}<small style="display:block;color:var(--muted)">${d.days>=0?(d.days===0?"I dag":"Om "+d.days+" dagar"):"Har passerat"} · ${esc(d.date)}</small></span><span style="display:flex;gap:6px"><a class="small-btn" href="#present">Hitta present</a><button class="small-btn" data-ddel="${S.dates.indexOf(S.dates.find(x=>x.name===d.name&&x.date===d.date))}" aria-label="Ta bort">×</button></span></div>`).join("")||'<p class="gk-empty">Spara födelsedagar och bröllop i Presentguiden.</p>'}</div>
     <p class="note">I butiken får du en påminnelse två veckor innan.</p>
@@ -130,6 +131,7 @@ $("#gk").addEventListener("click",e=>{
     if(s.type==="dukning"){location.hash="dukning";setTimeout(()=>loadDukning(s.data),0)}
     else if(s.type==="kit"){kit=s.data.kit;renderKit();location.hash="barstudion"}
     else if(s.type==="guide"){openModal(`<div class="co"><span class="mono">Sparade förslag</span><h2 style="margin:8px 0 16px">${esc(s.title)}</h2><div class="gk-list">${s.data.ids.map(id=>byId[id]).filter(Boolean).map(p=>{const packs=Math.ceil(s.data.count/p.pack);return `<div class="gk-item"><img src="${img(p,true)}" alt=""><div><b>${esc(p.name)}</b><small>${packs} × ${packTxt(p)}</small></div><button class="small-btn" data-add="${p.id}" data-qty="${packs}">Köp</button></div>`}).join("")}</div></div>`,"Sparade förslag","saved")}
+    else if(s.type==="grupp"&&s.data&&s.data.code)location.hash="rum-"+s.data.code;
     else location.hash="upptack";
     return}
   const sd=t.closest("[data-sdel]");if(sd){S.saved.splice(+sd.dataset.sdel,1);save();return}
