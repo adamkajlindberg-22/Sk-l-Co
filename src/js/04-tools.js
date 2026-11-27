@@ -345,18 +345,70 @@ $("#trial").addEventListener("change",e=>{const c=e.target.closest("[data-trial]
 $("#trialAdd").addEventListener("click",()=>{addCart("provlada",1,false,{items:[...trialSel]});trialSel.clear();renderTrial()});
 
 /* ---------- Presentguiden ---------- */
-function renderGift(){
-  const who=$("#gWho").value, occ=$("#gOcc").value, bud=+$("#gBud").value;
-  const pref={par:["bourgogne","perla","karaff"],vinalskare:["bourgogne","karaff","coupe"],whisky:["whisky","nora","karaff"],kaffe:["svavar","kaffe","bolja"],vardag:["bolja","anga","boljahigh"]}[who];
-  let L=pref.map(id=>byId[id]).filter(p=>bud>=2000?p.price>400:p.price<=bud);
-  if(occ==="brollop"&&!L.includes(byId.karaff)&&bud>=2000)L.unshift(byId.karaff);
-  if(L.length<3)L=[...L,...P.filter(p=>!L.includes(p)&&(bud>=2000?p.price>400:p.price<=bud))].slice(0,3);
-  $("#gRes").innerHTML=L.slice(0,3).map(p=>`<div class="g" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt=""><div><b>${esc(p.name)}</b>${kr(p.price)}${p.props.includes("kristall")?'<small style="display:block;color:var(--muted)">Kan graveras</small>':""}</div></div>`).join("")||'<p class="lead">Höj budgeten lite, så hittar vi något.</p>';
+/* Presentguiden poängsätter alla glas mot svaren. Skälen som visas kommer från produktdatan. */
+const GINT={
+  vin:["vinälskaren",p=>p.drinks.includes("vin")||p.cat==="karaff"],
+  bubbel:["den som gillar bubbel",p=>p.drinks.includes("champagne")],
+  whisky:["whiskyvännen",p=>p.drinks.includes("whisky")],
+  cocktail:["cocktailblandaren",p=>p.drinks.includes("cocktail")],
+  kaffe:["kaffe- och tedrickaren",p=>p.drinks.includes("kaffe")||p.drinks.includes("te")],
+  vard:["den som bjuder",p=>p.occ.includes("middag")||p.occ.includes("fest")],
+  allt:["den som har allt",()=>true]
+};
+const GOCC={
+  brollop:["bröllop",{occ:["middag","fest","present"],props:["kristall"],style:["klassisk","lyx"]}],
+  forlovning:["förlovning",{occ:["fest","present"],drinks:["champagne"],style:["lyx"]}],
+  arsdag:["årsdag",{occ:["middag","present"],props:["kristall"],style:["lyx","klassisk"]}],
+  fodelsedag:["födelsedag",{occ:["present","fest"]}],
+  jul:["jul",{occ:["fest","middag"]}],
+  inflyttning:["inflyttning",{occ:["vardag","middag"],props:["diskmaskin"]}],
+  examen:["examen",{occ:["fest"],drinks:["champagne"]}],
+  foretag:["företagsgåva",{occ:["present"],props:["diskmaskin"]}],
+  tack:["tack",{occ:["present"]}]
+};
+function giftScore(p,a){
+  const int=GINT[a.who][1](p),o=GOCC[a.occ][1],why=[];
+  let sc=int?6:0;if(int&&a.who!=="allt")why.push("Till "+GINT[a.who][0]);
+  const occHit=(o.occ||[]).filter(x=>p.occ.includes(x)).length+(o.drinks||[]).filter(x=>p.drinks.includes(x)).length;
+  sc+=occHit*1.5;if(occHit)why.push("Passar till "+GOCC[a.occ][0]);
+  (o.props||[]).forEach(x=>{if(p.props.includes(x)){sc+=1.2;why.push(x==="kristall"?"Kristall, kan graveras":PROPS[x])}});
+  (o.style||[]).forEach(x=>{if(p.style.includes(x))sc+=.6});
+  if(a.style&&p.style.includes(a.style)){sc+=3;why.push(STYLEN[a.style])}
+  if(a.for==="par"&&p.pack>=2){sc+=1;why.push(p.pack+" st i förpackningen")}
+  if(a.for==="en"&&p.pack<=2)sc+=.5;
+  return {p,sc:sc+p.pop*.05,int,why:[...new Set(why)].slice(0,3)};
 }
-["gWho","gOcc","gBud"].forEach(id=>$("#"+id).addEventListener("change",renderGift));
+// Ett set: bästa glaset plus glas som kompletterar det, inom budget. Samma serie först.
+function giftSet(start,ranked,bud){
+  const set=[start.p];let sum=start.p.price;
+  // Kompletterar med glas för samma dryck, eller som används vid samma tillfälle (till exempel hemmabar)
+  const fits=r=>r.int||r.p.occ.some(o=>o!=="present"&&o!=="vardag"&&start.p.occ.includes(o));
+  const rest=ranked.filter(r=>r.p!==start.p&&fits(r)).sort((x,y)=>(y.int-x.int)||(y.p.series===start.p.series)-(x.p.series===start.p.series)||y.sc-x.sc);
+  let other=0;
+  for(const r of rest){if(set.length>=3)break;if(set.some(q=>q.shape===r.p.shape||q.cat===r.p.cat&&q.drinks.join()===r.p.drinks.join()))continue;if(sum+r.p.price>bud)continue;if(!r.int&&other)continue;if(!r.int)other++;set.push(r.p);sum+=r.p.price}
+  return set.length>1?{set,sum}:null;
+}
+function renderGift(){
+  const a={who:$("#gWho").value,for:$("#gFor").value,occ:$("#gOcc").value,style:$("#gStyle").value,set:$("#gSet").value};
+  const bud=+$("#gBud").value;
+  const all=P.filter(p=>p.avail!==false).map(p=>giftScore(p,a)).sort((x,y)=>y.sc-x.sc),ranked=all.filter(r=>r.int);
+  const card=r=>`<div class="g" data-open="${r.p.id}"><img src="${img(r.p,true)}" data-pimg="${r.p.id}" alt=""><div><b>${esc(r.p.name)}</b>${kr(r.p.price)}<small class="g-why">${r.why.map(esc).join(" · ")}</small></div></div>`;
+  let html="";
+  if(a.set==="set"){
+    const sets=[];
+    for(const r of ranked){if(r.p.price>bud)continue;const s=giftSet(r,all,bud),key=s&&s.set.map(q=>q.id).sort().join();if(s&&!sets.some(x=>x.key===key))sets.push({...s,key});if(sets.length>=2)break}
+    html=sets.map((s,i)=>`<div class="g-set"><span class="mono">${i?"Ett annat set":"Vårt förslag"}</span><div class="g-set-imgs">${s.set.map(p=>`<a href="glas/${p.id}/" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt="${esc(p.name)}"></a>`).join("")}</div><p>${s.set.map(p=>esc(p.name)).join(" + ")}</p><div class="g-set-foot"><b>${kr(s.sum)}</b><button class="btn btn-primary btn-sm" data-addall="${s.set.map(p=>p.id).join(",")}">Lägg setet i varukorgen</button></div></div>`).join("");
+    if(!html)html='<p class="lead">Ett helt set ryms inte i budgeten. Höj budgeten, eller välj en sak.</p>';
+  }else{
+    const L=ranked.filter(r=>r.p.price<=bud).slice(0,3);
+    html=L.map(card).join("")||'<p class="lead">Höj budgeten lite, så hittar vi något.</p>';
+  }
+  $("#gRes").innerHTML=html;
+}
+["gWho","gFor","gOcc","gBud","gStyle","gSet"].forEach(id=>$("#"+id).addEventListener("change",()=>{renderGift();track("tool_use",{tool:"presentguiden",who:$("#gWho").value,occasion:$("#gOcc").value,set:$("#gSet").value})}));
 $("#dateForm").addEventListener("submit",e=>e.preventDefault());
 $("#dateForm button").addEventListener("click",e=>{e.preventDefault();const n=$("#dName").value.trim(),d=$("#dDate").value;if(!n||!d){toast("Fyll i namn och datum");return}
-  S.dates.push({name:n.slice(0,40),date:d,budget:+$("#gBud").value,who:$("#gWho").value});save();$("#dName").value="";$("#dDate").value="";nudgeLogin("sparat");toast("Datumet är sparat i Mitt glasskåp")});
+  S.dates.push({name:n.slice(0,40),date:d,budget:+$("#gBud").value,who:$("#gWho").value,occ:$("#gOcc").value});save();$("#dName").value="";$("#dDate").value="";nudgeLogin("sparat");toast("Datumet är sparat i Mitt glasskåp")});
 
 /* ---------- Glasjournalen ---------- */
 const ART=[

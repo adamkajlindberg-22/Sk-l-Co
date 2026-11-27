@@ -274,18 +274,63 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-tre]");if(
 /* ---------- Nyhetsbrev ---------- */
 document.addEventListener("submit",e=>{const f=e.target.closest("[data-news]");if(!f)return;e.preventDefault();const em=$("input",f).value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast("Skriv en giltig e-postadress");return}S.newsletter=true;save(true);track("sign_up",{method:"nyhetsbrev"});$("input",f).value="";toast("Tack! Visningsversion, så inget utskick görs.")});
 
-/* ---------- Jämför ---------- */
+/* ---------- Glass Match: jämför upp till fyra glas ----------
+   Allt som visas räknas fram ur produktdatan. Saknas en uppgift står det så. */
+const MAXCMP=4;
+function cmpBar(){$("#cmpTxt").textContent=cmpSet.size+" av "+MAXCMP+" valda";$("#cmpbar").classList.toggle("on",cmpSet.size>0)}
 document.addEventListener("change",e=>{const c=e.target.closest("[data-cmp]");if(!c)return;
-  if(c.checked){if(cmpSet.size>=3){c.checked=false;toast("Du kan jämföra tre glas åt gången");return}cmpSet.add(c.dataset.cmp)}else cmpSet.delete(c.dataset.cmp);
+  if(c.checked){if(cmpSet.size>=MAXCMP){c.checked=false;toast(`Du kan jämföra ${MAXCMP} glas åt gången`);return}cmpSet.add(c.dataset.cmp)}else cmpSet.delete(c.dataset.cmp);
   $$(`[data-cmp="${c.dataset.cmp}"]`).forEach(x=>x.checked=c.checked);
-  $("#cmpTxt").textContent=cmpSet.size+" av 3 valda";$("#cmpbar").classList.toggle("on",cmpSet.size>0)});
-$("#cmpGo").addEventListener("click",()=>{
+  cmpBar()});
+$("#cmpClear").addEventListener("click",()=>{cmpSet.clear();$$("[data-cmp]").forEach(x=>x.checked=false);cmpBar()});
+// Dryckernas namn. "rott" och "vitt" ersätter det allmänna "vin".
+const drinkList=p=>{const sub={rott:"rött vin",vitt:"vitt vin"},d=p.drinks;return d.filter(x=>!(x==="vin"&&d.some(y=>sub[y]))).map(x=>sub[x]||(DRINKN[x]||x).toLowerCase())};
+const listJoin=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" och "+a[a.length-1];
+// Skillnader i ord, bara ur data
+function cmpNotes(L){
+  const out=[],nm=p=>p.name;
+  const most=(f,unit,word,least)=>{const s=[...L].sort((a,b)=>f(b)-f(a));if(f(s[0])===f(s[s.length-1]))return;out.push(`${nm(s[0])} ${word[0]} (${unit(f(s[0]))})${least?`, ${nm(s[s.length-1])} ${word[1]} (${unit(f(s[s.length-1]))})`:""}.`)};
+  most(p=>p.vol,v=>v+" cl",["rymmer mest","minst"],true);
+  most(p=>p.h,v=>cm(v),["är högst","lägst"],true);
+  most(p=>p.d,v=>cm(v),["är bredast","smalast"],false);
+  const cheap=[...L].sort((a,b)=>per(a)-per(b));if(per(cheap[0])!==per(cheap[cheap.length-1]))out.push(`${nm(cheap[0])} kostar minst per glas (${kr(per(cheap[0]))}).`);
+  const dish=L.filter(p=>p.props.includes("diskmaskin"));
+  if(dish.length&&dish.length<L.length)out.push(`${listJoin(dish.map(nm))} tål diskmaskin enligt tillverkaren. ${listJoin(L.filter(p=>!dish.includes(p)).map(nm))} ska diskas för hand.`);
+  else if(dish.length===L.length)out.push("Alla tål diskmaskin enligt tillverkaren.");
+  const common=Object.keys(DRINKN).filter(d=>L.every(p=>p.drinks.includes(d)));
+  if(common.length)out.push(`Alla passar till ${listJoin(common.map(d=>DRINKN[d].toLowerCase()))}.`);
+  else out.push(L.map(p=>`${nm(p)} är gjort för ${listJoin(drinkList(p))}`).join(". ")+".");
+  const series=[...new Set(L.map(p=>p.series))];if(series.length===1&&L.length>1)out.push(`Alla hör till serien ${series[0]} och passar ihop på bordet.`);
+  return out;
+}
+function openMatch(){
   if(cmpSet.size<2){toast("Välj minst två glas att jämföra");return}
-  const L=[...cmpSet].map(id=>byId[id]);
-  const rows=[["Material",p=>p.mat],["Volym",p=>p.vol+" cl"],["Höjd",p=>cm(p.h)],["Diameter",p=>cm(p.d)],["Förpackning",p=>p.pack===1?"1 st":p.pack+" st"],["Pris per glas",p=>kr(per(p))],["Diskmaskin",p=>p.props.includes("diskmaskin")?"Ja, enligt tillverkaren":"Handdisk"],["Passar till",p=>p.drinks.map(d=>DRINKN[d]||d).join(", ")]];
-  const maxH=Math.max(...L.map(p=>p.h));
-  openModal(`<div style="padding:clamp(20px,3vw,40px)"><span class="mono">Jämför glas</span><h2 style="margin:8px 0 22px;font-size:clamp(28px,3vw,40px)">Sida vid sida.</h2><div style="overflow-x:auto"><table class="cmptable"><thead><tr><th></th>${L.map(p=>`<td><img src="${img(p,true)}" alt=""><b style="font-family:var(--serif);font-weight:400;font-size:19px;display:block">${esc(p.name)}</b>${kr(p.price)}</td>`).join("")}</tr></thead><tbody><tr><th>Storlek i skala</th>${L.map(p=>`<td><div style="height:120px;display:flex;align-items:flex-end;color:var(--ink)"><div style="height:${p.h/maxH*120}px;width:${p.h/maxH*80}px">${sil(p.shape,"currentColor",5)}</div></div></td>`).join("")}</tr>${rows.map(([l,f])=>`<tr><th>${l}</th>${L.map(p=>`<td>${esc(f(p))}</td>`).join("")}</tr>`).join("")}<tr><th></th>${L.map(p=>`<td><button class="btn btn-ink" data-add="${p.id}">Lägg i varukorg</button></td>`).join("")}</tr></tbody></table></div></div>`,"Jämför glas","cmp");
-});
+  const L=[...cmpSet].map(id=>byId[id]).filter(Boolean);
+  const rows=[
+    ["Pris",p=>kr(p.price)],["Pris per glas",p=>kr(per(p))],["Förpackning",p=>p.pack===1?"1 st":p.pack+" st"],
+    ["Serie",p=>p.series||"Uppgift saknas"],["Form",p=>SHNAME[p.shape]||p.shape],["Material",p=>p.mat],
+    ["Tillverkning",p=>p.props.includes("munblast")?"Munblåst":"Uppgift saknas"],
+    ["Volym",p=>p.vol+" cl"],["Höjd",p=>cm(p.h)],["Diameter",p=>cm(p.d)],
+    ["Diskmaskin",p=>p.props.includes("diskmaskin")?"Ja, enligt tillverkaren":"Handdisk"],
+    ["Passar till",p=>{const t=drinkList(p).join(", ");return t[0].toUpperCase()+t.slice(1)}],
+    ["Tillfällen",p=>p.occ.map(o=>(FMAP.tillfalle[2].find(x=>x[0]===o)||[,o])[1]).join(", ")],
+    ["Stil",p=>p.style.map(x=>STYLEN[x]||x).join(", ")],
+    ["Lager",p=>stockTxt(p)]
+  ];
+  const maxH=Math.max(...L.map(p=>p.h)),sum=L.reduce((a,p)=>a+p.price,0);
+  track("compare_items",{items:L.map(p=>itemOf(p))});
+  openModal(`<div class="match"><span class="mono">Glass Match</span><h2>Sida vid sida.</h2>
+    <ul class="match-notes">${cmpNotes(L).map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+    <label class="note match-only"><input type="checkbox" id="cmpOnly"> Visa bara det som skiljer</label>
+    <div class="match-scroll"><table class="cmptable" style="--n:${L.length}"><thead><tr><th><span class="sr-only">Egenskap</span></th>${L.map(p=>`<td><a href="glas/${p.id}/" data-open="${p.id}"><img src="${img(p,true)}" alt=""><b>${esc(p.name)}</b></a></td>`).join("")}</tr></thead><tbody>
+    <tr><th>Storlek i skala</th>${L.map(p=>`<td><div class="match-sil"><div style="height:${p.h/maxH*120}px;width:${p.h/maxH*80}px">${sil(p.shape,"currentColor",5)}</div></div></td>`).join("")}</tr>
+    ${rows.map(([l,f])=>{const v=L.map(p=>f(p)),diff=new Set(v).size>1;return `<tr class="${diff?"diff":"same"}"><th>${l}</th>${v.map(x=>`<td>${esc(x)}</td>`).join("")}</tr>`}).join("")}
+    <tr><th><span class="sr-only">Köp</span></th>${L.map(p=>`<td><button class="btn btn-ink btn-sm" data-add="${p.id}">Lägg i varukorg</button></td>`).join("")}</tr></tbody></table></div>
+    <div class="match-foot"><span>Alla ${L.length}: <b>${kr(sum)}</b></span><button class="btn btn-primary" data-addall="${L.map(p=>p.id).join(",")}">Lägg alla i varukorgen</button></div></div>`,"Jämför glas","cmp");
+}
+$("#cmpGo").addEventListener("click",openMatch);
+document.addEventListener("change",e=>{if(e.target.id==="cmpOnly")$(".cmptable").classList.toggle("only-diff",e.target.checked)});
+document.addEventListener("click",e=>{const a=e.target.closest("[data-addall]");if(!a)return;const ids=a.dataset.addall.split(",").filter(id=>byId[id]);ids.forEach(id=>addCart(id,1,true));toast(ids.length+" glas ligger i varukorgen");track("tool_add_all",{tool:"glass-match",count:ids.length})});
 
 /* ---------- Modal med fokusfälla ---------- */
 const modal=$("#modal"); let lastFocus=null;

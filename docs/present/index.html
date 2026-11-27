@@ -7,9 +7,9 @@
 <script>(function(b){b.href=b.href})(document.querySelector("base"))</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SKÅL &amp; CO · Presentguiden</title>
-<meta name="description" content="Välj vem, tillfälle och budget. Spara datumet så påminner vi dig i Mitt glasskåp.">
+<meta name="description" content="Berätta lite om mottagaren och tillfället, så väljer vi bland glasen vi har. Spara datumet så påminner vi dig i Mitt glasskåp.">
 <meta property="og:title" content="SKÅL &amp; CO · Presentguiden">
-<meta property="og:description" content="Välj vem, tillfälle och budget. Spara datumet så påminner vi dig i Mitt glasskåp.">
+<meta property="og:description" content="Berätta lite om mottagaren och tillfället, så väljer vi bland glasen vi har. Spara datumet så påminner vi dig i Mitt glasskåp.">
 <meta property="og:image" content="https://adamkajlindberg-22.github.io/Sk-l-Co/assets/hero-end.jpg">
 <meta property="og:url" content="https://adamkajlindberg-22.github.io/Sk-l-Co/present/">
 <link rel="canonical" href="https://adamkajlindberg-22.github.io/Sk-l-Co/present/">
@@ -334,13 +334,16 @@
 <!-- ================= PRESENT ================= -->
 <div class="view" data-view="present">
   <div class="wrap">
-    <header class="page-head"><span class="mono">Presentguiden</span><h1>En present som används varje vecka.</h1><p class="lead">Välj vem, tillfälle och budget. Spara datumet så påminner vi dig i Mitt glasskåp.</p></header>
+    <header class="page-head"><span class="mono">Presentguiden</span><h1>En present som används varje vecka.</h1><p class="lead">Berätta lite om mottagaren och tillfället, så väljer vi bland glasen vi har. Spara datumet så påminner vi dig i Mitt glasskåp.</p></header>
     <div class="gift">
       <div>
         <div class="row">
-          <label>Till vem<select id="gWho"><option value="par">Ett par</option><option value="vinalskare">Vinälskaren</option><option value="whisky">Whiskyvännen</option><option value="kaffe">Kaffeälskaren</option><option value="vardag">Någon som har allt</option></select></label>
-          <label>Tillfälle<select id="gOcc"><option value="brollop">Bröllop</option><option value="inflyttning">Inflyttning</option><option value="fodelsedag">Födelsedag</option><option value="tack">Tack</option></select></label>
-          <label>Budget<select id="gBud"><option value="400">Upp till 400 kr</option><option value="700" selected>Upp till 700 kr</option><option value="2000">Över 700 kr</option></select></label>
+          <label>Mottagaren gillar<select id="gWho"><option value="vin">Vin</option><option value="bubbel">Bubbel</option><option value="whisky">Whisky</option><option value="cocktail">Cocktails</option><option value="kaffe">Kaffe och te</option><option value="vard">Att bjuda på middag</option><option value="allt">Har redan allt</option></select></label>
+          <label>För<select id="gFor"><option value="par">Ett par</option><option value="en">En person</option></select></label>
+          <label>Tillfälle<select id="gOcc"><option value="brollop">Bröllop</option><option value="forlovning">Förlovning</option><option value="arsdag">Årsdag</option><option value="fodelsedag">Födelsedag</option><option value="jul">Jul</option><option value="inflyttning">Inflyttning</option><option value="examen">Examen</option><option value="foretag">Företagsgåva</option><option value="tack">Tack</option></select></label>
+          <label>Budget<select id="gBud"><option value="400">Max 400 kr</option><option value="700" selected>Max 700 kr</option><option value="1500">Max 1 500 kr</option><option value="3000">Max 3 000 kr</option></select></label>
+          <label>Stil<select id="gStyle"><option value="">Vet inte</option><option value="skandinavisk">Skandinavisk</option><option value="klassisk">Klassisk kristall</option><option value="modern">Modern</option><option value="lyx">Lyx</option><option value="fargstark">Färgstark</option><option value="vintage">Vintage</option><option value="rustik">Rustik</option></select></label>
+          <label>Present<select id="gSet"><option value="en">En sak</option><option value="set">Ett helt set</option></select></label>
         </div>
         <p class="note">Gravyr, presentinslagning och hälsningskort väljer du på produktsidan.</p>
         <div class="inline-form" id="dateForm"><input id="dName" placeholder="Vems dag?" aria-label="Vems dag"><input id="dDate" type="date" aria-label="Datum"><button class="btn btn-ink" style="padding:10px 16px">Spara datum</button></div>
@@ -491,7 +494,7 @@
     <div class="sres" id="sRes" aria-live="polite"></div>
   </div>
 </div>
-<div class="cmpbar" id="cmpbar"><span id="cmpTxt"></span><button class="btn" id="cmpGo">Jämför</button></div>
+<div class="cmpbar" id="cmpbar"><span id="cmpTxt"></span><button class="btn" id="cmpGo">Jämför</button><button class="cmp-x" id="cmpClear" aria-label="Rensa jämförelsen">×</button></div>
 <!-- Glassommelieren -->
 <button class="conc-btn" id="concBtn" aria-label="Fråga glassommelieren"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Fråga glassommelieren</span></button>
 <aside class="conc" id="conc" aria-label="Glassommelieren" aria-hidden="true" inert>

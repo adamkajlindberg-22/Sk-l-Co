@@ -1050,3 +1050,34 @@ body:has(.modal.open,.drawer.open,.search.open,.mmenu.open) .conc-btn{opacity:0!
 /* Favoriter visas som en siffra på Mitt glasskåp-knappen */
 .gk-btn{position:relative}
 .gk-btn .badge{top:-5px;right:-5px}
+
+/* v11: Glass Match */
+.cmp-x{width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:inherit;font-size:20px;line-height:1;cursor:pointer}
+.cmp-x:hover{background:color-mix(in srgb,var(--bg) 15%,transparent)}
+.match{padding:clamp(20px,3vw,40px)}
+.match h2{margin:8px 0 14px;font-size:clamp(28px,3vw,40px)}
+.match-notes{margin:0 0 18px;padding:0;list-style:none;display:grid;gap:6px;max-width:60em}
+.match-notes li{padding-left:18px;position:relative;color:var(--ink2)}
+.match-notes li::before{content:"";position:absolute;left:0;top:.7em;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.match-only{display:inline-flex;gap:8px;align-items:center;margin:0 0 10px;cursor:pointer}
+.match-scroll{overflow-x:auto}
+.cmptable thead a{display:block;text-decoration:none;color:inherit}
+.cmptable thead b{font-family:var(--serif);font-weight:400;font-size:19px;display:block}
+.cmptable td{min-width:140px}
+.cmptable tbody th{position:sticky;left:0;z-index:1;background:var(--bg)}
+.cmptable tr.diff td{color:var(--ink)}
+.cmptable tr.diff th{color:var(--accent)}
+.cmptable.only-diff tr.same{display:none}
+.match-sil{height:120px;display:flex;align-items:flex-end;color:var(--ink)}
+.match-foot{display:flex;flex-wrap:wrap;gap:14px;justify-content:flex-end;align-items:center;margin-top:20px}
+
+/* v11: Presentguiden */
+.g-why{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.g-set{grid-column:1/-1;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--bg)}
+.g-set+.g-set{margin-top:12px}
+.g-set .g-set-imgs{display:flex;gap:8px;margin:10px 0}
+.g-set .g-set-imgs a{flex:1;max-width:120px}
+.g-set img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px;display:block}
+.g-set p{margin:0 0 10px;color:var(--ink2)}
+.g-set-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+@media(max-width:700px){.gift .row{grid-template-columns:1fr 1fr}}
