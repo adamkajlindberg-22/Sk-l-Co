@@ -856,7 +856,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line);font-size:15px;color
 .mm-tools>*{font-family:var(--sans)!important;font-size:15px!important;padding:10px 16px!important;border:1px solid var(--line)!important;border-radius:999px;background:none;color:inherit;cursor:pointer;text-decoration:none}
 @media (min-width:641px){.mm-tools{display:none}}
 @media (max-width:640px){
-  #searchBtn,#skinBtn,#favBtn{display:none}
+  #searchBtn,#skinBtn{display:none}
   .gk-btn{height:38px;padding:0 13px 0 4px;margin:0 4px;font-size:14.5px;gap:7px}
   .gk-ico{width:30px;height:30px}
   .gk-txt .l{display:none}.gk-txt .s{display:inline}
@@ -1042,3 +1042,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line);font-size:15px;color
 .g-folk .linkbtn{font-size:13px}
 @media (max-width:900px){.bv{grid-template-columns:1fr}}
 @media (max-width:600px){.notis{left:12px;right:12px;bottom:12px;max-width:none}}
+
+/* Favoriter visas som en siffra på Mitt glasskåp-knappen */
+.gk-btn{position:relative}
+.gk-btn .badge{top:-5px;right:-5px}

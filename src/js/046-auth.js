@@ -47,7 +47,8 @@ async function onUser(u){
 function renderUserBtn(){
   const b=$("#userBtn");if(!b)return;
   const u=AUTH.user;
-  b.setAttribute("aria-label",u?`Mitt glasskåp, inloggad som ${u.displayName||u.email}`:"Mitt glasskåp, logga in");
+  const nf=S.favs.length,fv=nf?`, ${nf} ${nf===1?"favorit":"favoriter"}`:"";
+  b.setAttribute("aria-label",(u?`Mitt glasskåp, inloggad som ${u.displayName||u.email}`:"Mitt glasskåp, logga in")+fv);
   b.classList.toggle("signed",!!u);
   $(".u-init",b).textContent=u?((u.displayName||u.email||"?").trim()[0]||"?").toUpperCase():"";
 }
