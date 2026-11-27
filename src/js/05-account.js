@@ -314,7 +314,8 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.targ
 
 /* ---------- Hjälte: film som följer scrollen ---------- */
 const hero=$("#hero"),video=$("#heroVideo"),bands=$$(".band"),cue=$("#cue"),loader=$("#loader"),bar=$("#loaderBar"),endImg=$(".hero-media img.end");
-let staticMode=reduce||matchMedia("(max-width: 820px), (pointer: coarse)").matches||(navigator.connection&&navigator.connection.saveData)||location.protocol==="file:";
+let staticMode=reduce||(navigator.connection&&navigator.connection.saveData)||location.protocol==="file:";
+const heroPortrait=()=>matchMedia("(max-aspect-ratio: 1/1)").matches;
 let duration=0,target=0,shown=0,ready=false,raf=0,heroStarted=false;
 const lastOp=new Map();
 function progress(){const r=hero.getBoundingClientRect();return Math.min(1,Math.max(0,-r.top/(hero.offsetHeight-innerHeight)))}
@@ -340,12 +341,16 @@ addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onS
 video.addEventListener("seeked",()=>{if(!raf&&Math.abs(target-shown)>.0005)raf=requestAnimationFrame(tick)});
 async function loadVideo(){
   loader.classList.add("on");
-  const res=await fetch((dw=>dw>=2200?"assets/hero-2560.mp4":dw>=1400?"assets/hero.mp4":"assets/hero-1280.mp4")(innerWidth*(devicePixelRatio||1))+"?v=4k");if(!res.ok)throw new Error("video "+res.status);
+  const res=await fetch((heroPortrait()?"assets/hero-m.mp4":(dw=>dw>=2200?"assets/hero-2560.mp4":dw>=1400?"assets/hero.mp4":"assets/hero-1280.mp4")(innerWidth*(devicePixelRatio||1)))+"?v=4k");if(!res.ok)throw new Error("video "+res.status);
   const len=+res.headers.get("content-length")||0;let blob;
   if(res.body&&len){const rd=res.body.getReader(),parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;bar.style.strokeDashoffset=113-113*got/len}blob=new Blob(parts,{type:"video/mp4"})}
   else blob=await res.blob();
   video.src=URL.createObjectURL(blob);
-  await new Promise((ok,no)=>{video.addEventListener("loadeddata",ok,{once:true});video.addEventListener("error",no,{once:true})});
+  video.muted=true;video.playsInline=true;video.preload="auto";video.load();
+  /* iOS visar inga bildrutor förrän filmen har spelats en gång. Spela och pausa direkt. */
+  const p=video.play();if(p&&p.then)p.then(()=>video.pause()).catch(()=>{});
+  await new Promise((ok,no)=>{if(video.readyState>=2)return ok();video.addEventListener("loadeddata",ok,{once:true});video.addEventListener("error",no,{once:true})});
+  video.pause();video.currentTime=0;
   duration=video.duration||6;ready=true;video.classList.add("ready");loader.classList.remove("on");onScroll();
 }
 function startHero(){if(heroStarted)return;heroStarted=true;

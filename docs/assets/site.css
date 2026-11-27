@@ -837,6 +837,7 @@ footer{padding:70px 0 40px;border-top:1px solid var(--line);font-size:15px;color
 #hero .hero-scrim{background:linear-gradient(180deg,rgba(20,17,16,.6) 0%,rgba(20,17,16,0) 14%),linear-gradient(90deg,rgba(20,17,16,.86) 0%,rgba(20,17,16,.55) 34%,rgba(20,17,16,0) 58%),linear-gradient(0deg,rgba(20,17,16,.7) 0%,rgba(20,17,16,0) 22%)}
 @media (max-width:820px){#hero .hero-scrim{background:linear-gradient(180deg,rgba(20,17,16,.6) 0%,rgba(20,17,16,0) 14%),linear-gradient(0deg,rgba(20,17,16,.95) 0%,rgba(20,17,16,.7) 38%,rgba(20,17,16,.05) 66%)}}
 @media (max-width:820px){#hero .hero-media img,#hero .hero-media video{object-position:62% 40%}}
+@media (max-aspect-ratio:1/1){#hero .hero-media img,#hero .hero-media video{object-position:50% 45%}}
 .consent{z-index:94}
 /* ===== Version 8: Mitt glasskåp ===== */
 .linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer}

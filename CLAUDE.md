@@ -24,7 +24,7 @@ docs/                 Publicerad sajt (GitHub Pages läser härifrån)
   assets/site.css     All CSS (bas + tillägg per version längst ner)
   assets/site.js      BYGGD fil, redigera inte
   assets/*.webp       Bilder. p-* kvällsljus, d-* dagsljus, -480 för kort, -800 för rutnät
-  assets/hero*.mp4    Hjältefilmen, uppskalad till 4K i Higgsfield (Topaz). hero-2560 från 2200 fysiska pixlar, hero (1920) från 1400, annars hero-1280
+  assets/hero*.mp4    Hjältefilmen, uppskalad till 4K i Higgsfield (Topaz). hero-2560 från 2200 fysiska pixlar, hero (1920) från 1400, annars hero-1280. Stående skärmar (mobil) får hero-m.mp4, ett stående utsnitt i 1080x1920, och egna stillbilder (hero-start-m, hero-end-m)
 src/js/               Källkod, sätts ihop i denna ordning:
   01-core.js          Hjälpfunktioner, glasformer (SH, FILL), produktdata (P), lagring (S), produktkort
   02-pages.js         Sidor och adresser, startsida, Handla med filter, varumärken, megameny, sök
@@ -80,7 +80,7 @@ tests/                Playwright och axe
   }}
   ```
 - **3D** laddas först när fliken öppnas, från `cdn.jsdelivr.net/npm/three@0.160.0`. LatheGeometry från profilerna i `PROF`, inga tillägg.
-- **Hjältefilmen "Svävet"** (mörk, åtta glasmodeller med dryck svävar i luften och en kupa häller ut bubbel på sten) hämtas som Blob och scrubbas med `requestAnimationFrame`. Statiskt läge (bild som tonas) på mobil, med reducerad rörelse och vid sparat data-läge.
+- **Hjältefilmen "Svävet"** (mörk, åtta glasmodeller med dryck svävar i luften och en kupa häller ut bubbel på sten) hämtas som Blob och scrubbas med `requestAnimationFrame`. Filmen scrubbas även på mobil. Statiskt läge (bild som tonas) bara vid reducerad rörelse och sparat data-läge.
 
 ## Produktdata (`P` i 01-core.js)
 
