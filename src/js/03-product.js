@@ -195,6 +195,7 @@ const unit=l=>l.id==="provlada"?149:byId[l.id].price+(l.grav?149:0)+(l.wrap?49:0
 const cartTotal=()=>cart.reduce((a,l)=>a+unit(l)*l.q,0);
 function saveCart(){try{localStorage.setItem("skal-cart",JSON.stringify(cart))}catch(e){}}
 function addCart(id,q=1,quiet,opt={}){
+  if(byId[id]&&byId[id].avail===false){toast(byId[id].name+" är slut just nu.");return}
   const key=id+"|"+(opt.grav||"")+"|"+(opt.wrap?1:0)+(opt.items?"|"+opt.items.join(","):"");
   const L=cart.find(l=>l.key===key);
   if(id!=="provlada")track("add_to_cart",{items:[itemOf(byId[id],q)]});else track("add_to_cart",{items:[{item_id:"provlada",item_name:"Provlåda",price:149,quantity:1}]});

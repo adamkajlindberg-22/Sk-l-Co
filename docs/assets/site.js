@@ -59,8 +59,13 @@ const img=(p,small)=>`assets/${light()?"d-":"p-"}${p.img}${small?"-480":""}.webp
 const altImg=p=>`assets/${light()?"p-":"d-"}${p.img}-480.webp`;
 const scene=p=>p.cat==="kaffe"?"assets/l-kaffe.webp":(p.cat==="whisky"||p.cat==="cocktail")?"assets/l-bar.webp":"assets/l-middag.webp";
 const SUP={A:[2,4],B:[3,5],C:[4,7]};
-const STOCK={nora:"Få kvar",svala:"Få kvar"};
-const stockTxt=p=>STOCK[p.id]||"I lager hos glasbruket";
+/* Shopify (Storefront API). Tomt = visningsversion med priserna i P.
+   Ifyllt = priser, lagerstatus och kassa kommer från Shopify (049-shopify.js).
+   Storefront-token är publik och får ligga i koden. Admin-nycklar får aldrig ligga här. */
+const SHOPIFY={domain:"",token:"",version:"2025-07"};
+const shopOn=()=>!!(SHOPIFY.domain&&SHOPIFY.token);
+const STOCK=shopOn()?{}:{nora:"Få kvar",svala:"Få kvar"};
+const stockTxt=p=>p.avail===false?"Slut just nu":STOCK[p.id]||"I lager hos glasbruket";
 const TIERN={low:"Vardag",mid:"Design",high:"Premium"};
 const care=p=>[p.props.includes("diskmaskin")?"Tål diskmaskin enligt tillverkaren. Ställ glasen så att de inte slår i varandra.":"Diska för hand i ljummet vatten med lite diskmedel.","Torka direkt med en luddfri linneduk, så blir glaset blankt.",p.shape==="rott"||p.shape==="vitt"||p.shape==="flojt"||p.shape==="coupe"||p.shape==="cocktail"?"Håll i foten, inte kupan, när du torkar.":"Undvik snabba temperaturskiften."];
 const packTxt=p=>p.pack===1?"1 st":p.pack+"-pack";
@@ -732,6 +737,7 @@ const unit=l=>l.id==="provlada"?149:byId[l.id].price+(l.grav?149:0)+(l.wrap?49:0
 const cartTotal=()=>cart.reduce((a,l)=>a+unit(l)*l.q,0);
 function saveCart(){try{localStorage.setItem("skal-cart",JSON.stringify(cart))}catch(e){}}
 function addCart(id,q=1,quiet,opt={}){
+  if(byId[id]&&byId[id].avail===false){toast(byId[id].name+" är slut just nu.");return}
   const key=id+"|"+(opt.grav||"")+"|"+(opt.wrap?1:0)+(opt.items?"|"+opt.items.join(","):"");
   const L=cart.find(l=>l.key===key);
   if(id!=="provlada")track("add_to_cart",{items:[itemOf(byId[id],q)]});else track("add_to_cart",{items:[{item_id:"provlada",item_name:"Provlåda",price:149,quantity:1}]});
@@ -1657,6 +1663,82 @@ onState(()=>{
   if(bordPending&&AUTH.user&&AUTH.rt)openBord(bordPending);else if(bordPending&&AUTH.ready&&AUTH.api&&!AUTH.user&&curView==="dukning")openBord(bordPending);
   if(AUTH.user&&AUTH.rt&&!roomsChecked)setTimeout(checkRooms,1500);
 });
+
+/* ---------- Shopify: priser, lager och kassa ----------
+   Används bara när SHOPIFY i 01-core.js är ifyllt. Annars är allt som förut (visningsversion).
+   Produkternas handle i Shopify = id i P (till exempel "bourgogne"). Skapa dem med npm run shopify:csv.
+   Tillägg säljs som egna produkter: "gravyr" och "presentinslagning". Provlådan heter "provlada".
+   Kassan är Shopifys egen. Vi tar aldrig emot kortuppgifter i den här koden. */
+const SHOP_ADDON={grav:"gravyr",wrap:"presentinslagning"};
+const shopVar={};      // handle -> variant-id
+let shopReady=false;
+
+async function sf(query,variables){
+  const r=await fetch(`https://${SHOPIFY.domain}/api/${SHOPIFY.version}/graphql.json`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-Shopify-Storefront-Access-Token":SHOPIFY.token},
+    body:JSON.stringify({query,variables})
+  });
+  if(!r.ok)throw new Error("Shopify svarade "+r.status);
+  const j=await r.json();
+  if(j.errors&&j.errors.length)throw new Error(j.errors.map(e=>e.message).join("; "));
+  return j.data;
+}
+
+// Hämtar pris, jämförpris och lagerstatus för alla produkter och skriver in dem i P
+async function syncShop(){
+  let after=null,n=0;
+  do{
+    const d=await sf(`query($after:String){products(first:100,after:$after){pageInfo{hasNextPage endCursor}nodes{handle availableForSale variants(first:1){nodes{id availableForSale price{amount currencyCode}compareAtPrice{amount}}}}}}`,{after});
+    for(const node of d.products.nodes){
+      const v=node.variants.nodes[0];if(!v)continue;
+      shopVar[node.handle]=v.id;
+      const p=byId[node.handle];if(!p)continue;
+      if(v.price.currencyCode!=="SEK")continue;
+      p.price=Math.round(+v.price.amount);
+      p.was=v.compareAtPrice&&+v.compareAtPrice.amount>+v.price.amount?Math.round(+v.compareAtPrice.amount):undefined;
+      p.avail=!!(node.availableForSale&&v.availableForSale);n++;
+    }
+    after=d.products.pageInfo.hasNextPage?d.products.pageInfo.endCursor:null;
+  }while(after);
+  // Glas som inte finns i Shopify går inte att köpa
+  P.forEach(p=>{if(!shopVar[p.id])p.avail=false});
+  shopReady=true;
+  renderCart();if(viewHooks[curView])viewHooks[curView]();
+  const k=keyOf(location.href)||"";
+  if(k.startsWith("p-")&&modal.classList.contains("open")&&modal.dataset.kind==="product")openProduct(k.slice(2));
+  return n;
+}
+
+// Skapar en Shopify-varukorg och skickar kunden till Shopifys kassa
+async function shopCheckout(){
+  const lines=[],missing=[];
+  const add=(handle,quantity,attributes)=>{const id=shopVar[handle];if(!id){missing.push(handle);return}lines.push({merchandiseId:id,quantity,...(attributes?{attributes}:{})})};
+  for(const l of cart){
+    if(l.id==="provlada"){add("provlada",l.q,[{key:"Glas",value:(l.items||[]).map(i=>byId[i]?.name).filter(Boolean).join(", ")}]);continue}
+    add(l.id,l.q,l.grav?[{key:"Gravyr",value:l.grav}]:null);
+    if(l.grav)add(SHOP_ADDON.grav,l.q,[{key:"Till",value:byId[l.id].name}]);
+    if(l.wrap)add(SHOP_ADDON.wrap,l.q,[{key:"Till",value:byId[l.id].name}]);
+  }
+  if(missing.length){toast("Det här går inte att beställa just nu: "+[...new Set(missing)].map(h=>byId[h]?.name||h).join(", ")+". Ta bort det ur varukorgen.");return}
+  const d=await sf(`mutation($input:CartInput!){cartCreate(input:$input){cart{checkoutUrl}userErrors{message}}}`,{input:{lines,buyerIdentity:{countryCode:"SE"}}});
+  const res=d.cartCreate;
+  if(res.userErrors&&res.userErrors.length)throw new Error(res.userErrors.map(e=>e.message).join("; "));
+  track("begin_checkout",{value:cartTotal(),currency:"SEK"});
+  location.href=res.cart.checkoutUrl;
+}
+
+if(shopOn()){
+  // Kassan går till Shopify i stället för visningskassan
+  $("#checkout").addEventListener("click",e=>{
+    e.stopImmediatePropagation();
+    if(!cart.length)return;
+    if(!shopReady){toast("Vi hämtar priserna. Försök igen om en sekund.");return}
+    const b=e.currentTarget;b.disabled=true;
+    shopCheckout().catch(err=>{console.warn(err);toast("Kassan svarar inte just nu. Din varukorg finns kvar.")}).finally(()=>{b.disabled=false});
+  },true);
+  syncShop().catch(err=>{console.warn("Shopify",err);toast("Priserna kunde inte hämtas. Det som visas kan vara inaktuellt.")});
+}
 
 /* ---------- Mitt glasskåp ---------- */
 const fmtDate=ts=>new Date(ts).toLocaleDateString("sv-SE",{day:"numeric",month:"short"});
