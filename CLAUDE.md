@@ -2,7 +2,7 @@
 
 Webbutik för glas, koppar och karaffer utan eget lager. Vi säljer andras glas på ett unikt sätt: guidning från dryck och tillfälle till rätt glas, över alla varumärken.
 
-**Status:** visningsversion 10 (27 nov 2026). Sajten ligger på https://adamkajlindberg-22.github.io/Sk-l-Co/ (GitHub Pages från `main`, mappen `docs`). 16 exempelglas med AI-bilder, påhittade priser och betyg. Kassan är inte kopplad och inget säljs. Inloggning, grupper, delade listor och röstning går mot en riktig Firebase-databas.
+**Status:** visningsversion 11 (27 nov 2026). Sajten ligger på https://adamkajlindberg-22.github.io/Sk-l-Co/ (GitHub Pages från `main`, mappen `docs`). 14 exempelglas med AI-bilder, påhittade priser och betyg. Kassan är inte kopplad och inget säljs. Shopify och Google Tag Manager är förberedda men inte påslagna (tomma `SHOPIFY` och `GTM_ID`). Inloggning, grupper, delade listor och röstning går mot en riktig Firebase-databas.
 
 ## Kom igång (Claude Code)
 
@@ -22,6 +22,8 @@ Kräver Node 18 eller senare, Python 3 och ffmpeg (bara för `npm run hero`).
 - **Firebase**, projekt `skal-co`: inloggning (Google, e-post) och Realtime Database. Reglerna finns längre ner och ska klistras in under Realtime Database, Rules när de ändras. Lägg till nya domäner under Authentication, Settings, Authorized domains.
 - **Higgsfield**: alla bilder och filmen. Original för hjältefilmen ligger i `media/` (se `media/README.md`).
 - **GitHub Pages**: Settings, Pages, Deploy from branch `main`, mappen `/docs`.
+- **Shopify** (förberett): fyll i `SHOPIFY` i `01-core.js`, se `shopify/README.md`. Bara den publika Storefront-token får ligga i repot.
+- **Google Tag Manager** (förberett): fyll i `GTM_ID` i `045-legal.js`. Uppdatera då cookietexten i villkoren, som i dag säger att ingen statistiktjänst är kopplad.
 - **Planeringsdokument** ligger privat i Claude-projektet "Glas", inte här, eftersom repot är publikt.
 
 ## Kommandon
@@ -34,9 +36,12 @@ npm test           # Playwright-tester (kräver: pip install playwright && playw
 npm run test:a11y  # axe-granskning av alla sidor (kräver npm install)
 npm run test:all   # allt ovan, med egen server
 npm run hero       # gör om hjältefilmens filer från media/ (kräver ffmpeg)
+npm run shopify:csv  # produktfil för Shopifys import (shopify/produkter.csv)
 ```
 
-Testerna kräver att `npm run dev` körs (utom `test:all`, som startar servern själv). `CHROME=/sökväg` väljer en egen webbläsare.
+Testerna kräver att `npm run dev` körs (utom `test:all`, som startar servern själv). `CHROME=/sökväg` väljer en egen webbläsare. `BROWSER=webkit python3 tests/routes.py` kör adresstestet i Safaris motor.
+
+Tester: `routes.py` (adresser), `flows.py`, `legal_and_consent.py`, `group.py` och `shared.py` (låtsas-Firebase), `shopify.py` (låtsasbutik), `tools.py` (Glass Match och Presentguiden), `a11y.py` (axe).
 
 Ändra alltid i `src/js/`, aldrig direkt i `docs/assets/site.js`. Kör `npm run build` efter varje ändring.
 
@@ -44,7 +49,9 @@ Testerna kräver att `npm run dev` körs (utom `test:all`, som startar servern s
 
 ```
 docs/                 Publicerad sajt (GitHub Pages läser härifrån)
-  index.html          All markup, en <div class="view" data-view="..."> per sida
+  index.html          All markup, en <div class="view" data-view="..."> per sida. Mallen för alla sidor
+  handla/, glas/ ...  BYGGDA kopior av index.html, en per adress (scripts/pages.mjs). Redigera inte
+  sitemap.xml, robots.txt, 404.html  Byggda
   assets/site.css     All CSS (bas + tillägg per version längst ner)
   assets/site.js      BYGGD fil, redigera inte
   assets/*.webp       Bilder. p-* kvällsljus, d-* dagsljus, -480 för kort, -800 för rutnät
@@ -58,8 +65,12 @@ src/js/               Källkod, sätts ihop i denna ordning:
   046-auth.js         Inloggning till Mitt glasskåp (Firebase: Google och e-post)
   047-tillsammans.js  Swipea tillsammans: grupper med kod och länk (#rum-KOD, #tillsammans)
   048-delat.js        Delade listor (#lista-ID), röstning på dukning (#bord-ID), påminnelser i grupper
+  049-shopify.js      Shopify Storefront API: priser, lager och kassa när SHOPIFY är ifyllt
   05-account.js       Mitt glasskåp, glassommelieren (AI), tema, meny, hjältefilm, start
-scripts/build.mjs     Byggskript
+scripts/build.mjs     Byggskript. Kör också pages.mjs
+scripts/pages.mjs     En HTML-fil per sida, kategori och produkt med egen titel, beskrivning, kanonisk adress och strukturerad data. SITE=https://... byter domän
+scripts/shopify-csv.mjs  Produktfil för Shopify, alla som utkast och märkta som exempel
+shopify/              Guide och importfil för Shopify
 scripts/hero.sh       Gör om hjältefilmens filer från media/
 scripts/test-all.sh   Bygger, startar server och kör alla tester
 media/                Original för hjältefilmen (4K-film och startbild), används inte av sajten
@@ -68,7 +79,8 @@ tests/                Playwright och axe. Skärmbilder hamnar i tests/out/ (igno
 
 ## Arkitektur
 
-- **En sida, flera vyer.** `route()` läser `location.hash` (`#handla`, `#glasskap`, `#p-bourgogne` för produkt). `showView()` visar en vy och kör `viewHooks[vy]`. Produktsidan är en modal.
+- **En sida, flera vyer, riktiga adresser.** Varje vy har en adress (`handla/`, `glasskap/`), kategorier `handla/vinglas/` (`CATPAGE` i 02-pages.js) och produkter `glas/bourgogne/`. `route()` läser adressen, `goto(nyckel)` byter sida med `pushState`, `urlFor()` och `keyOf()` översätter. Interna länkar skrivs som `href="handla/"` och fångas av en klicklyssnare, så sidan laddas inte om. `<base>` görs absolut i `<head>` så att `assets/` alltid pekar rätt. Gamla `#handla` och `#p-id` flyttas till den nya adressen. Privata länkar (`#rum-`, `#lista-`, `#bord-`, `#tillsammans`) har kvar `#`. `showView()` visar en vy och kör `viewHooks[vy]`. Produktsidan är en modal.
+- **Nya sidor eller kategorier** läggs till i `VIEWS` eller `CATPAGE` och `CATINTRO`. `npm run build` skapar HTML-filen och sitemapen.
 - **Allt i en IIFE**, ingen ramverk, ingen byggkedja utöver sammanslagning. Funktioner anropas mellan filerna, så ordningen i build.mjs spelar roll.
 - **Tillstånd:** objektet `S` (favoriter, listor, egna glas, sparade val, ordrar, poäng, profil, sökhistorik) sparas i `localStorage` under `skal-glasskap-v1`. Ändra via `save()`, som också meddelar lyssnare (`onState`).
 - **Claude-förmågor:** när sajten körs som Claude-artefakt finns `window.claude.use("db" | "user" | "sample")`. Då synkas Mitt glasskåp till kontot och AI-funktionerna går via Claude. Utanför Claude (GitHub Pages, Hostinger) är `window.claude` odefinierat och allt faller tillbaka: lagring i webbläsaren och regelbaserade svar. **Varje AI-funktion ska ha en reserv.** Inför lansering ersätts `getSample()` med ett eget API.
@@ -125,7 +137,7 @@ tests/                Playwright och axe. Skärmbilder hamnar i tests/out/ (igno
 - **Värden från användare, Claude eller lagring** sätts med `textContent` eller går genom `esc()` innan de hamnar i HTML.
 - **Tillgänglighet:** stängda paneler har `inert`. Rubriknivåer i ordning (h1 per sida, h2 för avsnitt). Kontrast minst 4,5:1 i båda lägena. Kör `npm run test:a11y` innan du publicerar.
 - **Prestanda:** bilder i WebP, kort använder `-480`, rutnät `-800`. Ladda tunga saker först när de behövs.
-- **Samtycke:** inget mäts utan ja i samtyckesrutan. Mätpunkter via `track(namn, data)` med GA4-namn (view_item, add_to_cart, begin_checkout, purchase, search, add_to_wishlist, refund_request). De hamnar i `window.dataLayer` först efter samtycke.
+- **Samtycke:** inget mäts utan ja i samtyckesrutan. Mätpunkter via `track(namn, data)` med GA4-namn (page_view, view_item, view_item_list, add_to_cart, remove_from_cart, begin_checkout, purchase, search, add_to_wishlist, sign_up, refund_request) och egna (compare_items, tool_use, tool_complete, tool_add_all, filter_apply). De hamnar i `window.dataLayer` först efter samtycke. GTM laddas bara efter samtycke, med annonslagring nekad.
 - **Ångerfunktionen** ("Ångra avtalet här") krävs enligt distansavtalslagen sedan 19 juni 2026. Den ska finnas i sidfoten och vid varje köp, kräva bekräftelse och ge kvitto med tidpunkt.
 
 ## Design
@@ -147,12 +159,15 @@ Exportera 880x1100 och 480x600 i WebP (kvalitet cirka 80).
 
 ## Nästa steg (i ordning)
 
-1. Riktiga produkter från leverantör (MYFUSION, Orrefors/Kosta Boda B2B, Barkonsult med flera), med verifierad produktdata.
-2. Shopify headless: produkter, priser, lager och kassa via Storefront API. Bygg inte om kassan själv.
-3. Eget API för AI-funktionerna och kundkonton (ersätter `claude.use`).
-4. Riktiga adresser per sida och filter (History API eller server) för SEO.
-5. Juristgranskning av villkoren, riktiga företagsuppgifter, test i Safari och på iPhone.
-6. Koppla statistik (till exempel Google Tag Manager som läser dataLayer).
+Företaget sätts upp först. Det som går utan företag är gjort i version 11: riktiga adresser, kategorisidor, sitemap, Shopify och GTM förberedda, Glass Match, Presentguiden.
+
+1. Riktiga produkter från leverantör (MYFUSION, Orrefors/Kosta Boda B2B, Barkonsult med flera), med verifierad produktdata. Lägg till märke (brand) i P.
+2. Shopify: skapa butiken, importera, fyll i `SHOPIFY` (se `shopify/README.md`). Bygg inte om kassan själv.
+3. Eget API för AI-funktionerna och kundkonton (ersätter `claude.use`). Glassommelieren ska söka i katalogen och aldrig hitta på pris, lager, leveranstid eller omdömen.
+4. Egen domän: `SITE=https://... npm run build`, lägg till domänen i Firebase och Search Console, skicka in sitemap.xml.
+5. Juristgranskning av villkoren, riktiga företagsuppgifter, test i Safari och på iPhone (WebKit kunde inte laddas ner i molnmiljön).
+6. Koppla statistik: fyll i `GTM_ID` och uppdatera cookietexten.
+7. Senare (kräver backend): leverantörsflöden och lagersynk, orderuppdelning per leverantör, adminpanel, skadeanmälan med bild, flera språk och valutor, AI-agenter med godkännande och logg.
 
 ## Dokument
 

@@ -24,15 +24,15 @@ with sync_playwright() as p:
     st=json.loads(pg.evaluate("localStorage.getItem('skal-glasskap-v1')"));L=[l for l in st['lists'] if l.get('pub')][0];print("lista",L)
     pg.evaluate(f"window.__fset('listor/{L['pub']}/kopt/vitvin',{{name:'Moster Eva',ts:1}})")
     pg.goto(f"http://localhost:8765/#lista-{L['pub']}");pg.wait_for_timeout(800);pg.screenshot(path='tests/out/shared-lista.png',full_page=True)
-    pg.goto('http://localhost:8765/#dukning');pg.wait_for_timeout(600);pg.click('#tShare');pg.wait_for_timeout(800)
+    pg.evaluate("location.hash='dukning'");pg.wait_for_timeout(600);pg.click('#tShare');pg.wait_for_timeout(800)
     bid=pg.evaluate("location.hash")[6:];print("bord",bid)
     pg.evaluate(f"window.__fset('bord/{bid}/rost/u2',{{name:'Sara',v:-1,c:'Ta coupe i stället för flöjt',ts:2}})");pg.wait_for_timeout(300)
     pg.screenshot(path='tests/out/shared-bord.png')
-    pg.goto('http://localhost:8765/#glasguiden');pg.wait_for_timeout(400)
+    pg.evaluate("location.hash='glasguiden'");pg.wait_for_timeout(400)
     for a in ["rott","whisky","#fNext","middag","#fNext","#fSkip","#fSkip","300","6"]:
         pg.click(a if a.startswith("#") else f"[data-fa='{a}']");pg.wait_for_timeout(120)
     pg.click('#concBtn');pg.wait_for_timeout(400);pg.click('#sugg button');pg.wait_for_timeout(900);pg.screenshot(path='tests/out/shared-somm.png')
-    pg.goto('http://localhost:8765/#glasskap');pg.wait_for_timeout(500);pg.click('#gk [data-gtab="sparat"]');pg.wait_for_timeout(600);pg.screenshot(path='tests/out/shared-gk.png',full_page=True)
+    pg.evaluate("location.hash='glasskap'");pg.wait_for_timeout(500);pg.click('#gk [data-gtab="sparat"]');pg.wait_for_timeout(600);pg.screenshot(path='tests/out/shared-gk.png',full_page=True)
     print("ägare",errs);assert not errs
     # gäst utan konto
     seed={"listor":{L['pub']:pg.evaluate(f"window.__fdb.data.listor['{L['pub']}']")}}

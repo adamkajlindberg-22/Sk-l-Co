@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adamkajlindberg-22.github.io/Sk-l-Co/sitemap.xml

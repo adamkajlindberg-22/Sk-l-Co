@@ -71,7 +71,7 @@ function openLogin(mode="in",ctx){
     ${mode==="up"?"":`<button type="button" class="small-btn" id="lReset" style="justify-self:start">Glömt lösenordet?</button>`}
   </form>
   ${ctx?`<button type="button" class="linkbtn" data-mclose style="margin-top:14px">Inte nu, fortsätt utan konto</button>`:""}
-  <p class="note" style="margin-top:14px">Genom att skapa ett konto godkänner du att vi sparar ditt glasskåp enligt <a href="#villkor" data-lj="l-integritet" data-mclose>integritetspolicyn</a>.</p></div>`,"Logga in","login");
+  <p class="note" style="margin-top:14px">Genom att skapa ett konto godkänner du att vi sparar ditt glasskåp enligt <a href="villkor/" data-lj="l-integritet" data-mclose>integritetspolicyn</a>.</p></div>`,"Logga in","login");
   const mb=$("#mbody"),err=m=>{$("#lErr",mb).textContent=m||""};
   $$("[data-lm]",mb).forEach(b=>b.addEventListener("click",()=>openLogin(b.dataset.lm,ctx)));
   $("#gLogin",mb).addEventListener("click",()=>googleLogin(err));

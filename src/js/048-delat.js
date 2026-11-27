@@ -6,7 +6,7 @@
    rum/{KOD}/paminn/{uid} tidpunkt                                    den som skapade gruppen kan påminna. */
 const id10=()=>{const A="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";let s="";for(let i=0;i<10;i++)s+=A[Math.floor(Math.random()*A.length)];return s};
 const idOk=s=>/^[A-Za-z0-9]{10}$/.test(s||"");
-const shareLink=h=>location.origin+location.pathname+"#"+h;
+const shareLink=h=>urlFor(h);
 const firstName=()=>gMe().split(" ")[0];
 async function shareOut(title,text,url,msg){
   if(navigator.share){try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
@@ -40,7 +40,7 @@ function openList(id){
   if(!authOn()){el.innerHTML=`<div class="lv-empty"><h1>Listan kan inte visas här.</h1><p class="lead">Öppna länken på den publicerade sajten.</p></div>`;return}
   if(!AUTH.rt){listPending=id;el.innerHTML=`<p class="ai-note" style="padding:40px 0"><i class="spin"></i>Hämtar listan</p>`;return}
   listPending=null;LV={id,meta:null,kopt:{}};
-  LV.off=AUTH.rt.onValue(AUTH.rt.ref("listor/"+id),s=>{if(!LV||LV.id!==id)return;const v=s.val();if(!v||!v.meta){el.innerHTML=`<div class="lv-empty"><span class="mono">Önskelista</span><h1>Vi hittar inte listan.</h1><p class="lead">Länken kan vara fel, eller så har listan tagits bort.</p><a class="btn btn-ghost" href="#handla">Titta på glasen</a></div>`;return}
+  LV.off=AUTH.rt.onValue(AUTH.rt.ref("listor/"+id),s=>{if(!LV||LV.id!==id)return;const v=s.val();if(!v||!v.meta){el.innerHTML=`<div class="lv-empty"><span class="mono">Önskelista</span><h1>Vi hittar inte listan.</h1><p class="lead">Länken kan vara fel, eller så har listan tagits bort.</p><a class="btn btn-ghost" href="handla/">Titta på glasen</a></div>`;return}
     LV.meta=v.meta;LV.kopt=v.kopt||{};renderListView()},e=>{el.innerHTML=`<div class="lv-empty"><h1>Listan kunde inte hämtas.</h1><p class="lead">Prova att ladda om sidan.</p></div>`;console.warn(e)});
 }
 function renderListView(){
@@ -49,7 +49,7 @@ function renderListView(){
   const items=(m.items||[]).map(id=>byId[id]).filter(Boolean),n=items.filter(p=>k[p.id]).length;
   el.innerHTML=`<header class="page-head lv-head"><span class="mono">${m.type==="brollop"?"Bröllopslista":"Önskelista"}</span><h1>${esc(m.name)}</h1><p class="lead">${mine?"Det här är din lista. Dela länken, så ser gästerna vad som redan är köpt.":esc(m.ownerName||"Någon")+" önskar sig de här glasen. Köp ett och markera det, så köper ingen annan samma."}</p>
     <div class="lv-prog"><span><b>${n}</b> av ${items.length} köpta</span><i style="--w:${items.length?Math.round(n/items.length*100):0}%"></i></div>
-    ${mine?`<div class="pdp-actions"><button class="btn btn-primary" data-lvshare>Dela listan</button><a class="btn btn-ghost" href="#glasskap" data-gtab="sparat">Ändra i Mitt glasskåp</a></div>`:""}</header>
+    ${mine?`<div class="pdp-actions"><button class="btn btn-primary" data-lvshare>Dela listan</button><a class="btn btn-ghost" href="glasskap/" data-gtab="sparat">Ändra i Mitt glasskåp</a></div>`:""}</header>
   <div class="lv-grid">${items.map(p=>{const b=k[p.id];return `<article class="lv-item${b?" bought":""}"><div class="lv-img" data-open="${p.id}"><img src="${img(p,true)}" data-pimg="${p.id}" alt="${esc(p.name)}" loading="lazy">${b?`<span class="lv-tag">${mine?"Köpt av "+esc(b.name):"Redan köpt"}</span>`:""}</div>
     <div class="lv-body"><b>${esc(p.name)}</b><small>${esc(p.mat)} · ${packTxt(p)} · ${kr(p.price)}</small>
     <div class="pdp-actions">${b?(mine?`<button class="small-btn" data-lvundo="${p.id}">Ångra köpt</button>`:`<span class="note" style="margin:0">Tack, den är redan köpt.</span>`):`<button class="small-btn" data-add="${p.id}">Lägg i varukorgen</button><button class="small-btn" data-lvbuy="${p.id}">Jag har köpt den</button>`}</div></div></article>`}).join("")||'<p class="lead">Listan är tom än så länge.</p>'}</div>
@@ -72,7 +72,7 @@ async function shareBord(){
   try{await AUTH.rt.set(AUTH.rt.ref("bord/"+id+"/meta"),{owner:AUTH.user.uid,ownerName:firstName(),title,data,ts:Date.now()});
     S.saved.unshift({type:"dukning",title,data,bord:id,ts:Date.now()});save();
     track("share",{method:"lank",content_type:"dukning"});
-    history.replaceState(null,"","#bord-"+id);openBord(id);
+    history.replaceState(null,"",urlFor("bord-"+id));openBord(id);
     shareOut("Vad tycker du om dukningen?",`Vad tycker du om dukningen till ${title.toLowerCase()}? Rösta och kommentera hos SKÅL & CO.`,shareLink("bord-"+id));
   }catch(e){gErr(e)}
 }
@@ -107,7 +107,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest("#tShare")){shareBord();return}
   const v=e.target.closest("[data-bvv]");if(v){bvPick=+v.dataset.bvv;$$("[data-bvv]").forEach(b=>b.setAttribute("aria-pressed",String(b===v)));return}
   if(e.target.closest("[data-bvshare]")&&BV){shareOut("Vad tycker du om dukningen?",`Vad tycker du om dukningen till ${BV.meta.title.toLowerCase()}? Rösta hos SKÅL & CO.`,shareLink("bord-"+BV.id));return}
-  if(e.target.closest("[data-bvclose]")){if(BV&&BV.off)try{BV.off()}catch(x){}BV=null;$("#bordVote").hidden=true;$("#bordVote").innerHTML="";history.replaceState(null,"","#dukning");return}
+  if(e.target.closest("[data-bvclose]")){if(BV&&BV.off)try{BV.off()}catch(x){}BV=null;$("#bordVote").hidden=true;$("#bordVote").innerHTML="";history.replaceState(null,"",urlFor("dukning"));return}
   if(e.target.closest("[data-lvshare]")&&LV){const L=S.lists.find(l=>l.pub===LV.id);if(L)pubList(L);else shareOut(LV.meta.name,LV.meta.name+" hos SKÅL & CO",shareLink("lista-"+LV.id));return}
   const lb=e.target.closest("[data-lvbuy]");if(lb){markBought(lb.dataset.lvbuy);return}
   const lu=e.target.closest("[data-lvundo]");if(lu&&LV){AUTH.rt.remove(AUTH.rt.ref("listor/"+LV.id+"/kopt/"+lu.dataset.lvundo)).catch(gErr);return}

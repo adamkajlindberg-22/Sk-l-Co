@@ -59,8 +59,13 @@ const img=(p,small)=>`assets/${light()?"d-":"p-"}${p.img}${small?"-480":""}.webp
 const altImg=p=>`assets/${light()?"p-":"d-"}${p.img}-480.webp`;
 const scene=p=>p.cat==="kaffe"?"assets/l-kaffe.webp":(p.cat==="whisky"||p.cat==="cocktail")?"assets/l-bar.webp":"assets/l-middag.webp";
 const SUP={A:[2,4],B:[3,5],C:[4,7]};
-const STOCK={nora:"Få kvar",svala:"Få kvar"};
-const stockTxt=p=>STOCK[p.id]||"I lager hos glasbruket";
+/* Shopify (Storefront API). Tomt = visningsversion med priserna i P.
+   Ifyllt = priser, lagerstatus och kassa kommer från Shopify (049-shopify.js).
+   Storefront-token är publik och får ligga i koden. Admin-nycklar får aldrig ligga här. */
+const SHOPIFY={domain:"",token:"",version:"2025-07"};
+const shopOn=()=>!!(SHOPIFY.domain&&SHOPIFY.token);
+const STOCK=shopOn()?{}:{nora:"Få kvar",svala:"Få kvar"};
+const stockTxt=p=>p.avail===false?"Slut just nu":STOCK[p.id]||"I lager hos glasbruket";
 const TIERN={low:"Vardag",mid:"Design",high:"Premium"};
 const care=p=>[p.props.includes("diskmaskin")?"Tål diskmaskin enligt tillverkaren. Ställ glasen så att de inte slår i varandra.":"Diska för hand i ljummet vatten med lite diskmedel.","Torka direkt med en luddfri linneduk, så blir glaset blankt.",p.shape==="rott"||p.shape==="vitt"||p.shape==="flojt"||p.shape==="coupe"||p.shape==="cocktail"?"Håll i foten, inte kupan, när du torkar.":"Undvik snabba temperaturskiften."];
 const packTxt=p=>p.pack===1?"1 st":p.pack+"-pack";
