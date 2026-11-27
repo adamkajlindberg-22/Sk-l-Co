@@ -340,7 +340,7 @@ addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onS
 video.addEventListener("seeked",()=>{if(!raf&&Math.abs(target-shown)>.0005)raf=requestAnimationFrame(tick)});
 async function loadVideo(){
   loader.classList.add("on");
-  const res=await fetch(innerWidth*(devicePixelRatio||1)<1400?"assets/hero-1280.mp4":"assets/hero.mp4");if(!res.ok)throw new Error("video "+res.status);
+  const res=await fetch((dw=>dw>=2200?"assets/hero-2560.mp4":dw>=1400?"assets/hero.mp4":"assets/hero-1280.mp4")(innerWidth*(devicePixelRatio||1))+"?v=4k");if(!res.ok)throw new Error("video "+res.status);
   const len=+res.headers.get("content-length")||0;let blob;
   if(res.body&&len){const rd=res.body.getReader(),parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;bar.style.strokeDashoffset=113-113*got/len}blob=new Blob(parts,{type:"video/mp4"})}
   else blob=await res.blob();

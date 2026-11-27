@@ -24,7 +24,7 @@ docs/                 Publicerad sajt (GitHub Pages läser härifrån)
   assets/site.css     All CSS (bas + tillägg per version längst ner)
   assets/site.js      BYGGD fil, redigera inte
   assets/*.webp       Bilder. p-* kvällsljus, d-* dagsljus, -480 för kort, -800 för rutnät
-  assets/hero*.mp4    Hjältefilmen som scrubbas med scroll. hero.mp4 är 1920 (crf 20), hero-1280.mp4 för skärmar under 1400 fysiska pixlar
+  assets/hero*.mp4    Hjältefilmen, uppskalad till 4K i Higgsfield (Topaz). hero-2560 från 2200 fysiska pixlar, hero (1920) från 1400, annars hero-1280
 src/js/               Källkod, sätts ihop i denna ordning:
   01-core.js          Hjälpfunktioner, glasformer (SH, FILL), produktdata (P), lagring (S), produktkort
   02-pages.js         Sidor och adresser, startsida, Handla med filter, varumärken, megameny, sök
