@@ -6,7 +6,7 @@ let photoState=null;
 function renderGlasskap(){
   const el=$("#gk");if(!el)return;
   $("#gkHello").textContent=cloud.name?"Hej "+cloud.name.split(" ")[0]+".":"Välkommen.";
-  const stEl=$("#gkStatus");stEl.classList.toggle("local",!cloud.on);stEl.lastChild.textContent=cloud.on?"Inloggad via Claude, sparas på ditt konto":"Sparas i den här webbläsaren";
+  const stEl=$("#gkStatus");stEl.classList.toggle("local",!cloud.on);stEl.lastChild.textContent=cloud.on?(cloud.provider==="firebase"?"Inloggad, sparas på ditt konto":"Inloggad via Claude, sparas på ditt konto"):"Sparas i den här webbläsaren";
   const prof=S.profile;
   const owned=S.owned;
   const ownedIds=new Set(owned.map(o=>o.id).filter(Boolean));
@@ -15,7 +15,11 @@ function renderGlasskap(){
   const upcoming=S.dates.map(d=>({...d,days:Math.ceil((new Date(d.date)-new Date().setHours(0,0,0,0))/864e5)})).sort((a,b)=>a.days-b.days);
   const readNext=ART.map((a,i)=>({a,i})).filter(x=>!S.read.includes(x.i)).sort((x,y)=>score(y.a)-score(x.a)).slice(0,3);
   function score(a){let s=0;if(S.finder&&a[0]===S.finder.drink)s+=2;if(owned.some(o=>byId[o.id]&&(byId[o.id].cat===a[0]||byId[o.id].drinks.includes(a[0]))))s+=1.5;if(a[0]==="skotsel"&&owned.length)s+=1;return s}
-  el.innerHTML=`
+  const u=AUTH.user;
+  const acct=authOn()?(u?`<section class="gk wide acct"><div><span class="mono">Ditt konto</span><h2 class="gk-h">${esc(u.displayName||"Inloggad")}</h2><p style="color:var(--ink2)">${esc(u.email||"")}${u.email&&!u.emailVerified&&u.providerData[0]?.providerId==="password"?" · bekräfta e-posten via länken vi skickade":""}</p></div><div class="pdp-actions"><button class="small-btn" data-logout>Logga ut</button><button class="small-btn" data-delacc>Radera konto</button></div></section>`
+    :`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Spara ditt glasskåp på alla enheter.</h2><p style="color:var(--ink2)">Logga in med Google eller skapa ett konto med e-post. Det du redan sparat här följer med in på kontot.</p></div><div class="pdp-actions"><button class="btn btn-google" data-login="in"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.6 2.3 2.3 6.6 2.3 12s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg> Logga in</button><button class="btn btn-ghost" data-login="up">Skapa konto</button></div></section>`)
+    :(window.claude?"":`<section class="gk wide acct acct-out"><div><span class="mono">Logga in</span><h2 class="gk-h">Inloggning kommer snart.</h2><p style="color:var(--ink2)">Snart kan du logga in med Google eller e-post och nå ditt glasskåp på alla enheter. Tills dess sparas allt i den här webbläsaren.</p></div></section>`);
+  el.innerHTML=acct+`
   <section class="gk"><span class="mono">Smakprofil</span>${prof?`<h2 class="gk-h">${esc(prof.name)}</h2><p style="color:var(--ink2)">Du gillar ${esc(prof.summary)}.</p>`:`<h2 class="gk-h">Vi känner dig inte än.</h2><p style="color:var(--ink2)">Swipea fram din stil eller svara på Glasguiden. Sedan anpassas förslagen på hela sidan.</p>`}
     ${S.finder?`<p class="note">Glasguiden: ${esc(FQ[0].o.find(o=>o[0]===S.finder.drink||(S.finder.drink==="vin"&&o[0]==="vin"))?.[1]||"")}, ${esc(S.finder.count||"")} glas, ${esc(FQ[2].o.find(o=>o[0]===S.finder.style)?.[1]||"")}.</p>`:""}
     <div class="pdp-actions"><a class="small-btn" href="#upptack">${prof?"Swipea igen":"Starta Glas-swipe"}</a><a class="small-btn" href="#glasguiden">Glasguiden</a></div>
@@ -59,7 +63,7 @@ function renderGlasskap(){
   <section class="gk third"><span class="mono">Läsning för dig</span><h2 class="gk-h">Utvalt utifrån dina glas</h2>
     <div class="gk-list">${readNext.map(x=>`<button class="small-btn" data-art="${x.i}" style="justify-content:flex-start;text-align:left">${esc(x.a[2])}</button>`).join("")||'<p class="gk-empty">Du har läst allt. Snyggt.</p>'}</div>
   </section>
-  <section class="gk wide" style="display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap"><div><span class="mono">Din data</span><p style="color:var(--ink2);margin-top:6px">${cloud.on?"Sparas privat på ditt konto. Bara du kan se den.":"Sparas bara i den här webbläsaren. Öppna sidan inloggad i Claude för att spara på ditt konto."}</p></div><button class="small-btn" id="gkWipe">Radera all min data</button></section>`;
+  <section class="gk wide" style="display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap"><div><span class="mono">Din data</span><p style="color:var(--ink2);margin-top:6px">${cloud.on?"Sparas privat på ditt konto. Bara du kan se den.":"Sparas bara i den här webbläsaren. Logga in för att spara på ditt konto."}</p></div><button class="small-btn" id="gkWipe">Radera all min data</button></section>`;
 }
 onState(()=>{if(curView==="glasskap")renderGlasskap()});
 $("#gk").addEventListener("click",e=>{
@@ -310,5 +314,6 @@ try{const ld=document.createElement("script");ld.type="application/ld+json";ld.t
 $$(".rv").forEach(el=>io.observe(el));
 route();
 connectCloud();
+initAuth();
 setConcMode();
 })();

@@ -31,6 +31,7 @@ src/js/               Källkod, sätts ihop i denna ordning:
   03-product.js       Produktsida, Form och storlek, 3D (three.js), varukorg, kassa
   04-tools.js         Glasguiden, Glas-swipe, Glasväggen, Dukningsstudion, Barstudion, Provlådan, Present, Journal
   045-legal.js        Villkor, samtycke, mätpunkter (track), ångerfunktion
+  046-auth.js         Inloggning till Mitt glasskåp (Firebase: Google och e-post)
   05-account.js       Mitt glasskåp, glassommelieren (AI), tema, meny, hjältefilm, start
 scripts/build.mjs     Byggskript
 tests/                Playwright och axe
@@ -42,8 +43,9 @@ tests/                Playwright och axe
 - **Allt i en IIFE**, ingen ramverk, ingen byggkedja utöver sammanslagning. Funktioner anropas mellan filerna, så ordningen i build.mjs spelar roll.
 - **Tillstånd:** objektet `S` (favoriter, listor, egna glas, sparade val, ordrar, poäng, profil, sökhistorik) sparas i `localStorage` under `skal-glasskap-v1`. Ändra via `save()`, som också meddelar lyssnare (`onState`).
 - **Claude-förmågor:** när sajten körs som Claude-artefakt finns `window.claude.use("db" | "user" | "sample")`. Då synkas Mitt glasskåp till kontot och AI-funktionerna går via Claude. Utanför Claude (GitHub Pages, Hostinger) är `window.claude` odefinierat och allt faller tillbaka: lagring i webbläsaren och regelbaserade svar. **Varje AI-funktion ska ha en reserv.** Inför lansering ersätts `getSample()` med ett eget API.
+- **Inloggning (Mitt glasskåp):** Firebase Authentication (Google och e-post med lösenord) laddas från gstatic när `FIREBASE_CONFIG` i `046-auth.js` är ifyllt. Glasskåpet sparas som JSON i Firestore under `glasskap/{uid}`. Reglerna i Firestore ska bara släppa in ägaren (`request.auth.uid == uid`). Lagt till domäner i Firebase: `adamkajlindberg-22.github.io` (lägg till egen domän vid lansering). Vid utloggning töms webbläsarens kopia. Inne i Claude används `claude.use("db")` i stället.
 - **3D** laddas först när fliken öppnas, från `cdn.jsdelivr.net/npm/three@0.160.0`. LatheGeometry från profilerna i `PROF`, inga tillägg.
-- **Hjältefilmen** hämtas som Blob och scrubbas med `requestAnimationFrame`. Statiskt läge (bild som tonas) på mobil, med reducerad rörelse och vid sparat data-läge.
+- **Hjältefilmen "Skålen"** (ljus, sju glas från sortimentet möts i en skål, `#hero.hero-light`) hämtas som Blob och scrubbas med `requestAnimationFrame`. Statiskt läge (bild som tonas) på mobil, med reducerad rörelse och vid sparat data-läge.
 
 ## Produktdata (`P` i 01-core.js)
 
