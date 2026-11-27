@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 import os
 FAKE=open(os.path.join(os.path.dirname(__file__),"fake-firebase.js")).read()
 with sync_playwright() as p:
-    b=p.chromium.launch(executable_path=os.environ.get("CHROME","/usr/bin/google-chrome"))
+    b=p.chromium.launch(executable_path=os.environ.get("CHROME") or None)
     c=b.new_context(viewport={'width':1280,'height':860})
     c.add_init_script("localStorage.setItem('skal-consent','{\"stat\":false,\"ts\":1}');window.__fuser={uid:'u1',displayName:'Test Testsson',email:'t@x.se',emailVerified:true,providerData:[{providerId:'google.com'}]};navigator.share=undefined")
     c.route("https://www.gstatic.com/**",lambda r:r.fulfill(status=200,content_type="application/javascript",body=FAKE))

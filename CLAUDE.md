@@ -2,7 +2,27 @@
 
 Webbutik för glas, koppar och karaffer utan eget lager. Vi säljer andras glas på ett unikt sätt: guidning från dryck och tillfälle till rätt glas, över alla varumärken.
 
-**Status:** visningsversion 5 (27 nov 2026). 16 exempelglas med AI-bilder, påhittade priser och betyg, kassan är inte kopplad. Ingen riktig produkt säljs än.
+**Status:** visningsversion 10 (27 nov 2026). Sajten ligger på https://adamkajlindberg-22.github.io/Sk-l-Co/ (GitHub Pages från `main`, mappen `docs`). 16 exempelglas med AI-bilder, påhittade priser och betyg. Kassan är inte kopplad och inget säljs. Inloggning, grupper, delade listor och röstning går mot en riktig Firebase-databas.
+
+## Kom igång (Claude Code)
+
+```bash
+git clone https://github.com/adamkajlindberg-22/Sk-l-Co.git && cd Sk-l-Co
+npm install                                   # axe-core för tillgänglighetstestet
+pip install playwright pillow && playwright install chromium
+npm run dev                                   # http://localhost:8765
+npm run test:all                              # bygger, startar server om ingen körs, kör alla tester
+```
+
+Kräver Node 18 eller senare, Python 3 och ffmpeg (bara för `npm run hero`).
+
+**Arbetssätt:** ändra i `src/js/`, `docs/index.html` och `docs/assets/site.css`. Kör `npm run test:all` innan du pushar. Allt som pushas till `main` publiceras på GitHub Pages inom någon minut. Byt `?v=` på filer i `docs/assets` som byts ut med samma namn, annars visar webbläsare gamla kopior.
+
+**Externa tjänster (ingen nyckel ligger i repot utom Firebase-konfigurationen, som är offentlig):**
+- **Firebase**, projekt `skal-co`: inloggning (Google, e-post) och Realtime Database. Reglerna finns längre ner och ska klistras in under Realtime Database, Rules när de ändras. Lägg till nya domäner under Authentication, Settings, Authorized domains.
+- **Higgsfield**: alla bilder och filmen. Original för hjältefilmen ligger i `media/` (se `media/README.md`).
+- **GitHub Pages**: Settings, Pages, Deploy from branch `main`, mappen `/docs`.
+- **Planeringsdokument** ligger privat i Claude-projektet "Glas", inte här, eftersom repot är publikt.
 
 ## Kommandon
 
@@ -12,7 +32,11 @@ npm run check      # bygg och syntaxkontrollera
 npm run dev        # bygg och starta lokal server på http://localhost:8765
 npm test           # Playwright-tester (kräver: pip install playwright && playwright install chromium)
 npm run test:a11y  # axe-granskning av alla sidor (kräver npm install)
+npm run test:all   # allt ovan, med egen server
+npm run hero       # gör om hjältefilmens filer från media/ (kräver ffmpeg)
 ```
+
+Testerna kräver att `npm run dev` körs (utom `test:all`, som startar servern själv). `CHROME=/sökväg` väljer en egen webbläsare.
 
 Ändra alltid i `src/js/`, aldrig direkt i `docs/assets/site.js`. Kör `npm run build` efter varje ändring.
 
@@ -36,7 +60,10 @@ src/js/               Källkod, sätts ihop i denna ordning:
   048-delat.js        Delade listor (#lista-ID), röstning på dukning (#bord-ID), påminnelser i grupper
   05-account.js       Mitt glasskåp, glassommelieren (AI), tema, meny, hjältefilm, start
 scripts/build.mjs     Byggskript
-tests/                Playwright och axe
+scripts/hero.sh       Gör om hjältefilmens filer från media/
+scripts/test-all.sh   Bygger, startar server och kör alla tester
+media/                Original för hjältefilmen (4K-film och startbild), används inte av sajten
+tests/                Playwright och axe. Skärmbilder hamnar i tests/out/ (ignoreras av git)
 ```
 
 ## Arkitektur

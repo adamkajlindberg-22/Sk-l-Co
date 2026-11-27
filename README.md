@@ -8,18 +8,22 @@ Visningsversion av en webbutik för glas, koppar och karaffer. Rätt glas för v
 
 ## Vad som finns
 
-- Hjältefilm som spelas när du scrollar, mörkt och ljust läge
-- Handla med filter som går att kombinera, megameny, varumärken A till Ö, smart sök
-- Glasguiden, Glas-swipe, Glasväggen (alla glas i skala), Dukningsstudion, Barstudion, Provlådan, Presentguiden
+- Hjältefilm som följer scrollen, på dator och mobil, mörkt och ljust läge
+- Handla med filter, megameny, varumärken A till Ö, smart sök
+- Glasguiden med flera drycker, stilar och krav, ett glas per dryck
+- Glas-swipe, själv eller tillsammans med vänner i en grupp med kod och länk
+- Glasväggen, Dukningsstudion (dela och rösta), Barstudion, Provlådan, Presentguiden
 - Produktsida med Form och storlek, förenklad 3D, gravyr, frågor och svar
-- Mitt glasskåp med favoriter, listor, egna glas och ersättningsglas
-- Glassommelieren, villkor med ångerfunktion, samtyckesruta och förberedd mätning
+- Mitt glasskåp med inloggning (Google och e-post), favoriter, listor att dela med gäster, egna glas
+- Glassommelieren som utgår från din stil, villkor med ångerfunktion, samtyckesruta och förberedd mätning
 
 ## Kom igång
 
 ```bash
 npm install
-npm run dev     # öppna http://localhost:8765
+pip install playwright pillow && playwright install chromium
+npm run dev       # öppna http://localhost:8765
+npm run test:all  # bygg och kör alla tester
 ```
 
 Mer om koden och reglerna finns i [CLAUDE.md](CLAUDE.md).
