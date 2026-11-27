@@ -45,6 +45,7 @@ function openList(id){
 }
 function renderListView(){
   const el=$("#listaV"),m=LV.meta,k=LV.kopt,mine=AUTH.user&&AUTH.user.uid===m.owner;
+  document.title="SKÅL & CO · "+m.name;
   const items=(m.items||[]).map(id=>byId[id]).filter(Boolean),n=items.filter(p=>k[p.id]).length;
   el.innerHTML=`<header class="page-head lv-head"><span class="mono">${m.type==="brollop"?"Bröllopslista":"Önskelista"}</span><h1>${esc(m.name)}</h1><p class="lead">${mine?"Det här är din lista. Dela länken, så ser gästerna vad som redan är köpt.":esc(m.ownerName||"Någon")+" önskar sig de här glasen. Köp ett och markera det, så köper ingen annan samma."}</p>
     <div class="lv-prog"><span><b>${n}</b> av ${items.length} köpta</span><i style="--w:${items.length?Math.round(n/items.length*100):0}%"></i></div>

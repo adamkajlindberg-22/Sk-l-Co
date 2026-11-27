@@ -25,7 +25,7 @@ function showView(v){
   curView=v;
   document.body.classList.toggle("view-home",v==="hem");
   $$(".nav-links a,.mmenu a").forEach(a=>a.toggleAttribute("aria-current",a.getAttribute("href")==="#"+v)&&a.setAttribute("aria-current","page"));
-  const titles={hem:"Rätt glas för varje skål",handla:"Handla glas",glasguiden:"Glasguiden",upptack:"Glas-swipe",glasvaggen:"Glasväggen",dukning:"Dukningsstudion",barstudion:"Barstudion",provladan:"Provlådan",present:"Presentguiden",glasskap:"Mitt glasskåp",journal:"Glasjournalen",om:"Om oss och kontakt",varumarken:"Varumärken A till Ö"};
+  const titles={hem:"Rätt glas för varje skål",handla:"Handla glas",glasguiden:"Glasguiden",upptack:"Glas-swipe",glasvaggen:"Glasväggen",dukning:"Dukningsstudion",barstudion:"Barstudion",provladan:"Provlådan",present:"Presentguiden",glasskap:"Mitt glasskåp",journal:"Glasjournalen",om:"Om oss och kontakt",varumarken:"Varumärken A till Ö",lista:"Önskelista"};
   document.title="SKÅL & CO · "+(titles[v]||"");
   if(changed)window.scrollTo(0,0);
   if(viewHooks[v])viewHooks[v]();
