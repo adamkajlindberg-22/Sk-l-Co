@@ -1110,3 +1110,8 @@ body:has(.modal.open,.drawer.open,.search.open,.mmenu.open) .conc-btn{opacity:0!
   .modal{padding:10px}
   .modal .box{max-height:calc(100dvh - 20px);border-radius:20px}
 }
+
+/* v13: språkknapp */
+.lang-btn{font-family:var(--mono);font-size:12px;letter-spacing:.08em;font-weight:500}
+html.lang-wait body{opacity:0}
+@media (max-width:640px){.nav-tools .lang-btn{display:none}}

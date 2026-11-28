@@ -41,7 +41,7 @@ npm run shopify:csv  # produktfil för Shopifys import (shopify/produkter.csv)
 
 Testerna kräver att `npm run dev` körs (utom `test:all`, som startar servern själv). `CHROME=/sökväg` väljer en egen webbläsare. `BROWSER=webkit python3 tests/routes.py` kör adresstestet i Safaris motor.
 
-Tester: `routes.py` (adresser), `flows.py`, `legal_and_consent.py`, `group.py` och `shared.py` (låtsas-Firebase), `shopify.py` (låtsasbutik), `tools.py` (Glass Match och Presentguiden), `a11y.py` (axe).
+Tester: `routes.py` (adresser), `i18n.py` (engelska), `flows.py`, `legal_and_consent.py`, `group.py` och `shared.py` (låtsas-Firebase), `shopify.py` (låtsasbutik), `tools.py` (Glass Match och Presentguiden), `a11y.py` (axe).
 
 Ändra alltid i `src/js/`, aldrig direkt i `docs/assets/site.js`. Kör `npm run build` efter varje ändring.
 
@@ -67,10 +67,13 @@ src/js/               Källkod, sätts ihop i denna ordning:
   048-delat.js        Delade listor (#lista-ID), röstning på dukning (#bord-ID), påminnelser i grupper
   049-shopify.js      Shopify Storefront API: priser, lager och kassa när SHOPIFY är ifyllt
   05-account.js       Mitt glasskåp, glassommelieren (AI), tema, meny, hjältefilm, start
+  06-i18n.js          Engelska: språkknappen och översättningen av allt som visas. Stänger funktionen som omsluter allt
 scripts/build.mjs     Byggskript. Kör också pages.mjs
 scripts/pages.mjs     En HTML-fil per sida, kategori och produkt med egen titel, beskrivning, kanonisk adress och strukturerad data. SITE=https://... byter domän
 scripts/shopify-csv.mjs  Produktfil för Shopify, alla som utkast och märkta som exempel
 shopify/              Guide och importfil för Shopify
+i18n/en.json          Engelska översättningar, svensk mening som nyckel. delar.txt har delmeningar
+scripts/i18n-*.py     Samla texter, göra nycklar, slå ihop översättningar (se Språk nedan)
 scripts/hero.sh       Gör om hjältefilmens filer från media/
 scripts/test-all.sh   Bygger, startar server och kör alla tester
 media/                Original för hjältefilmen (4K-film och startbild), används inte av sajten
@@ -81,6 +84,8 @@ tests/                Playwright och axe. Skärmbilder hamnar i tests/out/ (igno
 
 - **En sida, flera vyer, riktiga adresser.** Varje vy har en adress (`handla/`, `glasskap/`), kategorier `handla/vinglas/` (`CATPAGE` i 02-pages.js) och produkter `glas/bourgogne/`. `route()` läser adressen, `goto(nyckel)` byter sida med `pushState`, `urlFor()` och `keyOf()` översätter. Interna länkar skrivs som `href="handla/"` och fångas av en klicklyssnare, så sidan laddas inte om. `<base>` görs absolut i `<head>` så att `assets/` alltid pekar rätt. Gamla `#handla` och `#p-id` flyttas till den nya adressen. Privata länkar (`#rum-`, `#lista-`, `#bord-`, `#tillsammans`) har kvar `#`. `showView()` visar en vy och kör `viewHooks[vy]`. Produktsidan är en modal.
 - **Nya sidor eller kategorier** läggs till i `VIEWS` eller `CATPAGE` och `CATINTRO`. `npm run build` skapar HTML-filen och sitemapen.
+- **Språk (svenska och engelska).** Svenska är grundspråket i all kod. Knappen EN/SV (`[data-lang]`, i menyraden, mobilmenyn och sidfoten) sparar valet i `localStorage` (`skal-lang`). På engelska hämtas `docs/assets/i18n-en.json` och `06-i18n.js` byter varje text och attribut (placeholder, aria-label, title, alt) som visas, även sådant som skapas senare (MutationObserver). Originalet sparas så att bytet tillbaka blir exakt. Siffror, glasnamn, veckodagar och månader blir platshållare `{n0}`, `{p0}`, `{d0}`, `{m0}`. Saknas en mening delas den vid " · ", ". " och ", ". Glassommelieren (AI) svarar på engelska. Element med `data-notr` översätts inte. Inga egna engelska adresser än.
+- **Ny text på sajten** ska få engelsk översättning: `npm run dev`, sedan `python3 scripts/i18n-collect.py` och `python3 scripts/i18n-keys.py` (listar saknade i `i18n/nycklar.json`). Skriv `i18n/tr-1.txt` med "radnummer<TAB>engelska", kör `python3 scripts/i18n-merge.py` och ta bort tr-filen. `tests/i18n.py` larmar om svensk text blir kvar.
 - **Allt i en IIFE**, ingen ramverk, ingen byggkedja utöver sammanslagning. Funktioner anropas mellan filerna, så ordningen i build.mjs spelar roll.
 - **Tillstånd:** objektet `S` (favoriter, listor, egna glas, sparade val, ordrar, poäng, profil, sökhistorik) sparas i `localStorage` under `skal-glasskap-v1`. Ändra via `save()`, som också meddelar lyssnare (`onState`).
 - **Claude-förmågor:** när sajten körs som Claude-artefakt finns `window.claude.use("db" | "user" | "sample")`. Då synkas Mitt glasskåp till kontot och AI-funktionerna går via Claude. Utanför Claude (GitHub Pages, Hostinger) är `window.claude` odefinierat och allt faller tillbaka: lagring i webbläsaren och regelbaserade svar. **Varje AI-funktion ska ha en reserv.** Inför lansering ersätts `getSample()` med ett eget API.

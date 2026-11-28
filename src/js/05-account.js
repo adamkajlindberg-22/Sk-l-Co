@@ -267,7 +267,7 @@ async function ask(q){
   const bub=botBubble();
   if(!sample){bub.innerHTML='<span class="spin"></span>';await new Promise(r=>setTimeout(r,reduce?0:400));bub.innerHTML=answer(q);msgs.scrollTop=msgs.scrollHeight;busy=false;return}
   convo.push({role:"user",content:q});convo=convo.slice(-10);
-  const messages=convo.map((m,i)=>i===0?{role:"user",content:SYS+"\n\nKunden skriver: "+m.content}:m);
+  const messages=convo.map((m,i)=>i===0?{role:"user",content:SYS+(typeof lang!=="undefined"&&lang==="en"?"\n\nSidan visas på engelska. Svara på enkel engelska.":"")+"\n\nKunden skriver: "+m.content}:m);
   bub.innerHTML='<span class="spin"></span>';
   try{
     const res=await sample(messages,{tools:TOOLS_AI,cache:false,modelTier:"default",onText:({text})=>{bub.innerHTML=renderAI(text);msgs.scrollTop=msgs.scrollHeight}});
@@ -398,4 +398,4 @@ route();
 connectCloud();
 initAuth();
 setConcMode();
-})();
+/* Funktionen som omsluter allt stängs sist i 06-i18n.js */
