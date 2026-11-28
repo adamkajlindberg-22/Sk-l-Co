@@ -1091,3 +1091,22 @@ body:has(.modal.open,.drawer.open,.search.open,.mmenu.open) .conc-btn{opacity:0!
 .g-set p{margin:0 0 10px;color:var(--ink2)}
 .g-set-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 @media(max-width:700px){.gift .row{grid-template-columns:1fr 1fr}}
+
+/* v12: mobilrättningar */
+.fnav{flex-wrap:wrap}
+.modal .box{max-height:calc(100dvh - 40px)}
+@media (max-width:640px){
+  .fnav{gap:8px}
+  .fnav #fAll{flex:1 1 100%;order:-1;justify-content:center}
+  .fnav .btn-ghost{flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px;justify-content:center}
+  .finder{padding:22px 16px;gap:24px}
+  .fres .pick{grid-template-columns:60px 1fr auto;gap:12px;padding:10px}
+  .fres .pick img{width:60px;height:60px}
+  .fres .pick b{font-size:18px}
+  .fsum{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .fsum-chip{padding:7px 10px;min-width:0}
+  .fsum-chip small{font-size:9px;letter-spacing:.08em;line-height:1.3}
+  .finder:has(.fres) .g-stage,.finder:has(.fres) .g-label{display:none}
+  .modal{padding:10px}
+  .modal .box{max-height:calc(100dvh - 20px);border-radius:20px}
+}
