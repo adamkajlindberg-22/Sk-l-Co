@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>SKÅL & CO · Valvet, moderniserat</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500&family=Hanken+Grotesk:wght@400&display=block" rel="stylesheet">
+<style>
+:root{--dk:#141110;--ink:#eee5d6;--gold:#c49a5e;--lt:#f3eee6;--ink2:#22201d;--gold2:#765c2f}
+*{box-sizing:border-box;margin:0}
+body{background:#0c0a09;color:var(--ink);font-family:"Hanken Grotesk",sans-serif;padding:40px;width:1600px}
+h1{font-family:Fraunces;font-weight:300;font-size:44px;margin-bottom:6px}
+.sub{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:34px}
+.c{display:grid;grid-template-columns:230px 1fr 1fr;gap:16px;margin-bottom:26px}
+.info h2{font-family:Fraunces;font-weight:400;font-size:28px;margin:6px 0 10px}
+.info .n{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.18em;color:var(--gold)}
+.info p{font-size:15px;line-height:1.5;color:#b9ad9c}
+.tile{border-radius:18px;padding:28px 30px;display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;min-height:420px}
+.tile.dk{background:var(--dk);color:var(--ink);--acc:var(--gold);--bg:#141110;--edge:rgba(238,229,214,.92);--thin:rgba(238,229,214,.35)}
+.tile.lt{background:var(--lt);color:var(--ink2);--acc:var(--gold2);--bg:#f3eee6;--edge:rgba(34,32,29,.92);--thin:rgba(34,32,29,.3)}
+.side{display:flex;flex-direction:column;gap:22px;font-family:"IBM Plex Mono";font-size:10.5px;letter-spacing:.14em;opacity:.9}
+.side .r{display:flex;align-items:center;gap:12px}
+.fav{width:32px;height:32px;border-radius:7px;display:grid;place-items:center}
+.dk .fav{background:#221c18}.lt .fav{background:#e6ddcf}
+.app{width:64px;height:64px;border-radius:15px;display:grid;place-items:center}
+.dk .app{background:#221c18}.lt .app{background:#e6ddcf}
+.nav{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px}
+.dk .nav{background:#1b1714}.lt .nav{background:#ebe4d8}
+.wm{font-family:Fraunces;font-size:21px;letter-spacing:.16em;white-space:nowrap}
+.wm i{font-style:normal;color:var(--acc);font-weight:300}
+.mark{display:flex;flex-direction:column;align-items:center;gap:14px}
+.mark .big{font-family:Fraunces;font-size:30px;letter-spacing:.2em;padding-left:.2em}
+.mark .tag{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.32em;opacity:.7;padding-left:.32em}
+svg text{font-family:Fraunces}
+</style>
+</head>
+<body>
+<h1>Valvet, moderniserat</h1>
+<div class="sub">Tre varianter · tydligare, modernare, lika enkel</div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="dryck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1d396"/><stop offset=".5" stop-color="#d4a253"/><stop offset="1" stop-color="#9a6a2a"/></linearGradient>
+  <linearGradient id="yta" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6e0ad"/><stop offset=".5" stop-color="#fff4d6"/><stop offset="1" stop-color="#e8c685"/></linearGradient>
+  <linearGradient id="reflex" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+
+  <!-- Tulpanglaset: kupa 60 bred, mittlinje x=0, kant y=0, fot y=96 -->
+  <g id="tulpan">
+    <path d="M-30 0 C-33 44 -18 60 0 60 C18 60 33 44 30 0 Z" fill="#fff" fill-opacity=".06"/>
+    <path d="M-30.4 24 C-29 50 -15 58.5 0 58.5 C15 58.5 29 50 30.4 24 Z" fill="url(#dryck)"/>
+    <ellipse cx="0" cy="24" rx="30.4" ry="4.4" fill="url(#yta)"/>
+    <ellipse cx="-9" cy="23.4" rx="10" ry="1.2" fill="#fff" opacity=".6"/>
+    <g fill="#fff6dc" opacity=".75"><circle cx="-4" cy="52" r="1.2"/><circle cx="-1" cy="45" r=".9"/><circle cx="-5" cy="38" r=".8"/><circle cx="5" cy="53" r="1"/><circle cx="7" cy="45" r=".7"/></g>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="0" cy="0" rx="30" ry="4.6" stroke="var(--edge)" stroke-width="2"/>
+      <path d="M-30 0 C-33 44 -18 60 0 60 C18 60 33 44 30 0" stroke="var(--edge)" stroke-width="2.4"/>
+      <path d="M-27.6 2.6 C-30 42 -16.6 57 0 57 C16.6 57 30 42 27.6 2.6" stroke="var(--thin)" stroke-width="1"/>
+    </g>
+    <path d="M-24 6 C-25 24 -22 38 -15 48" stroke="url(#reflex)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M24 8 C24.5 18 23 26 20 32" stroke="#fff" stroke-opacity=".5" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path d="M-2.2 59 C-1 70 -1.2 82 -1.4 92 L1.4 92 C1.2 82 1 70 2.2 59 Z" fill="#fff" fill-opacity=".25" stroke="var(--edge)" stroke-width="1.3"/>
+    <ellipse cx="0" cy="95" rx="18" ry="3.4" fill="#fff" fill-opacity=".06" stroke="var(--edge)" stroke-width="1.8"/>
+  </g>
+
+  <!-- 1. Rent valv: större glas, namnet under -->
+  <symbol id="v1" viewBox="0 0 200 220">
+    <path d="M40 206 V92 A60 60 0 0 1 160 92 V206 Z" fill="none" stroke="currentColor" stroke-width="3"/>
+    <use href="#tulpan" transform="translate(100 92) scale(1.06)"/>
+  </symbol>
+  <symbol id="v1-ikon" viewBox="0 0 100 100">
+    <path d="M20 94 V44 A30 30 0 0 1 80 44 V94 Z" fill="none" stroke="currentColor" stroke-width="5.5"/>
+    <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M35 36 C34 60 42 67 50 67 C58 67 66 60 65 36"/><path d="M50 67 V83"/><path d="M41 86 H59"/></g>
+    <path d="M35.4 49 H64.6 C63.5 60 57 65.5 50 65.5 C43 65.5 36.5 60 35.4 49 Z" fill="var(--acc)"/>
+  </symbol>
+
+  <!-- 2. Namnet i bågen, större -->
+  <symbol id="v2" viewBox="0 0 200 220">
+    <path d="M36 206 V96 A64 64 0 0 1 164 96 V206 Z" fill="none" stroke="currentColor" stroke-width="3"/>
+    <path id="v2-arc" d="M 58 100 A 42 42 0 0 1 142 100" fill="none"/>
+    <text font-size="17" letter-spacing="2.4" font-weight="500" fill="currentColor"><textPath href="#v2-arc" startOffset="50%" text-anchor="middle">SKÅL <tspan fill="var(--acc)" font-weight="400">&amp;</tspan> CO</textPath></text>
+    <use href="#tulpan" transform="translate(100 110) scale(.9)"/>
+  </symbol>
+
+  <!-- 3. Fyllt valv: glaset som urklipp, gyllene dryck -->
+  <symbol id="v3" viewBox="0 0 200 220">
+    <path d="M40 206 V92 A60 60 0 0 1 160 92 V206 Z" fill="currentColor"/>
+    <g transform="translate(100 90) scale(1.1)">
+      <path d="M-30 0 C-33 44 -18 60 0 60 C18 60 33 44 30 0" fill="none" stroke="var(--bg)" stroke-width="3.2" stroke-linecap="round"/>
+      <ellipse cx="0" cy="0" rx="30" ry="4.6" fill="none" stroke="var(--bg)" stroke-width="2.6"/>
+      <path d="M-30.4 24 C-29 50 -15 58.5 0 58.5 C15 58.5 29 50 30.4 24 Z" fill="url(#dryck)"/>
+      <ellipse cx="0" cy="24" rx="30.4" ry="4.4" fill="url(#yta)"/>
+      <g fill="#fff6dc" opacity=".8"><circle cx="-4" cy="52" r="1.2"/><circle cx="-1" cy="45" r=".9"/><circle cx="5" cy="53" r="1"/></g>
+      <path d="M0 60 V92" stroke="var(--bg)" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M-18 95 H18" stroke="var(--bg)" stroke-width="3.2" stroke-linecap="round"/>
+    </g>
+  </symbol>
+  <symbol id="v3-ikon" viewBox="0 0 100 100">
+    <path d="M18 96 V44 A32 32 0 0 1 82 44 V96 Z" fill="currentColor"/>
+    <g fill="none" stroke="var(--bg)" stroke-width="5.5" stroke-linecap="round"><path d="M35 34 C34 60 42 67 50 67 C58 67 66 60 65 34"/><path d="M50 67 V84"/><path d="M40 87 H60"/></g>
+    <path d="M35.6 48 H64.4 C63.4 60 57 65 50 65 C43 65 36.6 60 35.6 48 Z" fill="var(--acc)"/>
+  </symbol>
+</defs></svg>
+
+<script>
+const tag='<div class="tag">GLAS · KOPPAR · KARAFFER</div>';
+const C=[
+ ["01","Rent valv","Glaset fyller valvet och namnet står i en tydlig rad under. Ingen liten text i bågen, så märket går att läsa på avstånd och i alla storlekar.",
+  `<div class="mark"><svg width="200" height="220"><use href="#v1"/></svg><div class="big">SKÅL <i style="font-style:normal;color:var(--acc);font-weight:300">&amp;</i> CO</div>${tag}</div>`,"v1-ikon"],
+ ["02","Namnet i bågen","Samma idé som förut, men med större och tydligare text, ett större glas och utan golvlinjen. Märket är komplett i sig själv.",
+  `<div class="mark"><svg width="220" height="242"><use href="#v2"/></svg>${tag}</div>`,"v1-ikon"],
+ ["03","Fyllt valv","Ett helt fyllt valv där glaset syns som ett urklipp med gyllene dryck. Modernast och starkast, även som app-ikon och på en ask.",
+  `<div class="mark"><svg width="200" height="220"><use href="#v3"/></svg><div class="big">SKÅL <i style="font-style:normal;color:var(--acc);font-weight:300">&amp;</i> CO</div>${tag}</div>`,"v3-ikon"]];
+document.body.insertAdjacentHTML("beforeend",C.map(([n,h,p,big,ik])=>`<div class="c"><div class="info"><span class="n">${n}</span><h2>${h}</h2><p>${p}</p></div>
+${["dk","lt"].map(t=>`<div class="tile ${t}">${big}
+<div class="side"><div class="r"><span class="app"><svg width="50" height="50"><use href="#${ik}"/></svg></span><span class="fav"><svg width="26" height="26"><use href="#${ik}"/></svg></span><span class="fav" style="width:16px;height:16px;border-radius:4px"><svg width="14" height="14"><use href="#${ik}"/></svg></span></div><span>APP-IKON · FAVICON 32 · 16</span>
+<div class="r"><span class="nav"><svg width="32" height="32"><use href="#${ik}"/></svg><span class="wm">SKÅL <i>&amp;</i> CO</span></span></div><span>MENYRAD</span></div></div>`).join("")}</div>`).join(""));
+</script>
+</body>
+</html>

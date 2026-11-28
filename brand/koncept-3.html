@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>SKÅL & CO · logotyper, detaljerad version</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400&family=Hanken+Grotesk:wght@400&display=block" rel="stylesheet">
+<style>
+:root{--dk:#141110;--ink:#eee5d6;--gold:#c49a5e;--lt:#f3eee6;--ink2:#22201d;--gold2:#765c2f}
+*{box-sizing:border-box;margin:0}
+body{background:#0c0a09;color:var(--ink);font-family:"Hanken Grotesk",sans-serif;padding:40px;width:1600px}
+h1{font-family:Fraunces;font-weight:300;font-size:44px;margin-bottom:6px}
+.sub{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:34px}
+.c{display:grid;grid-template-columns:230px 1fr 1fr;gap:16px;margin-bottom:26px}
+.info h2{font-family:Fraunces;font-weight:400;font-size:28px;margin:6px 0 10px}
+.info .n{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.18em;color:var(--gold)}
+.info p{font-size:15px;line-height:1.5;color:#b9ad9c}
+.tile{border-radius:18px;padding:26px 30px;display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:center;min-height:400px}
+.tile.dk{background:radial-gradient(120% 90% at 30% 40%,#221b16,#141110 60%);color:var(--ink);--acc:var(--gold);--hl:#fff;--edge:rgba(238,229,214,.9);--thin:rgba(238,229,214,.35)}
+.tile.lt{background:radial-gradient(120% 90% at 30% 40%,#fbf7f0,#efe8dc 60%);color:var(--ink2);--acc:var(--gold2);--hl:#fff;--edge:rgba(34,32,29,.92);--thin:rgba(34,32,29,.3)}
+.side{display:flex;flex-direction:column;gap:20px;font-family:"IBM Plex Mono";font-size:10.5px;letter-spacing:.14em;opacity:.9}
+.side .r{display:flex;align-items:center;gap:12px}
+.fav{width:32px;height:32px;border-radius:7px;display:grid;place-items:center}
+.dk .fav{background:#221c18}.lt .fav{background:#e6ddcf}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px}
+.dk .nav{background:#1b1714}.lt .nav{background:#ebe4d8}
+svg text{font-family:Fraunces}
+</style>
+</head>
+<body>
+<h1>SKÅL &amp; CO · detaljerad version</h1>
+<div class="sub">Glas med reflexer och tjocklek, dryck med djup och bubblor · enkel ikon för små storlekar</div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <!-- Gemensamma toningar -->
+  <linearGradient id="bubbel" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f3d79c"/><stop offset=".45" stop-color="#d9a957"/><stop offset="1" stop-color="#9a6a2a"/>
+  </linearGradient>
+  <linearGradient id="bubbelSida" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#7a521f" stop-opacity=".55"/><stop offset=".22" stop-color="#7a521f" stop-opacity="0"/><stop offset=".78" stop-color="#7a521f" stop-opacity="0"/><stop offset="1" stop-color="#7a521f" stop-opacity=".6"/>
+  </linearGradient>
+  <linearGradient id="yta" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#f7e3b5"/><stop offset=".5" stop-color="#fff3d4"/><stop offset="1" stop-color="#e9c98b"/>
+  </linearGradient>
+  <linearGradient id="reflex" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".25" stop-color="#fff" stop-opacity=".85"/><stop offset=".7" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <radialGradient id="glasKropp" cx=".35" cy=".35" r=".8">
+    <stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset=".6" stop-color="#fff" stop-opacity=".03"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/>
+  </radialGradient>
+  <linearGradient id="stam" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#fff" stop-opacity=".15"/><stop offset=".35" stop-color="#fff" stop-opacity=".9"/><stop offset=".6" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/>
+  </linearGradient>
+  <radialGradient id="skugga" cx=".5" cy=".5" r=".5">
+    <stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="glans" cx=".5" cy=".5" r=".5">
+    <stop offset="0" stop-color="#fff2cf" stop-opacity=".55"/><stop offset="1" stop-color="#fff2cf" stop-opacity="0"/>
+  </radialGradient>
+
+  <!-- Bubblor som återanvänds -->
+  <g id="bubblor">
+    <circle cx="0" cy="0" r="1.3"/><circle cx="4" cy="-6" r="1"/><circle cx="-2" cy="-11" r="1.15"/><circle cx="3" cy="-17" r=".8"/><circle cx="-1" cy="-22" r=".7"/>
+  </g>
+
+  <!-- ===== Bågen: coupe ===== -->
+  <symbol id="bagen" viewBox="0 0 200 200">
+    <ellipse cx="100" cy="181" rx="34" ry="4.5" fill="url(#skugga)"/>
+    <path id="b-arc" d="M 30 112 A 78 78 0 0 1 170 112" fill="none"/>
+    <text font-size="25" letter-spacing="3.2" fill="currentColor"><textPath href="#b-arc" startOffset="50%" text-anchor="middle">SKÅL <tspan fill="var(--acc)" font-weight="300">&amp;</tspan> CO</textPath></text>
+    <!-- glaskropp -->
+    <path d="M58 104 C60 137 140 137 142 104 Z" fill="url(#glasKropp)"/>
+    <!-- dryck -->
+    <path d="M61.5 114 C66 131 86 134 100 134 C114 134 134 131 138.5 114 Z" fill="url(#bubbel)"/>
+    <path d="M61.5 114 C66 131 86 134 100 134 C114 134 134 131 138.5 114 Z" fill="url(#bubbelSida)"/>
+    <ellipse cx="100" cy="114" rx="38.5" ry="4.2" fill="url(#yta)"/>
+    <ellipse cx="88" cy="113.6" rx="12" ry="1.3" fill="#fff" opacity=".55"/>
+    <g fill="#fff6dc" opacity=".8"><use href="#bubblor" transform="translate(92 130)"/><use href="#bubblor" transform="translate(108 131) scale(.8)"/></g>
+    <!-- bubblor ovanför -->
+    <g fill="var(--acc)"><circle cx="95" cy="94" r="1.9"/><circle cx="104" cy="86" r="1.4"/><circle cx="98" cy="78" r="1.1"/></g>
+    <!-- kontur och tjocklek -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="100" cy="104" rx="42" ry="5" stroke="var(--edge)" stroke-width="1.8"/>
+      <ellipse cx="100" cy="104.6" rx="40.3" ry="4" stroke="var(--thin)" stroke-width="1"/>
+      <path d="M58 104 C60 137 140 137 142 104" stroke="var(--edge)" stroke-width="2"/>
+      <path d="M60.4 105.5 C62.6 133.5 137.4 133.5 139.6 105.5" stroke="var(--thin)" stroke-width="1"/>
+    </g>
+    <!-- reflexer -->
+    <path d="M65 108 C66 120 72 126 80 129" stroke="url(#reflex)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M131 109 C130.5 115 128.5 119 125.5 122" stroke="#fff" stroke-opacity=".55" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <!-- stjälk och fot -->
+    <path d="M97.4 131.5 C98.6 140 98.4 155 98 168 L102 168 C101.6 155 101.4 140 102.6 131.5 Z" fill="url(#stam)" stroke="var(--edge)" stroke-width="1.1"/>
+    <ellipse cx="100" cy="171" rx="19" ry="3.6" fill="url(#glasKropp)" stroke="var(--edge)" stroke-width="1.6"/>
+    <path d="M86 170.2 C92 169 108 169 114 170.2" stroke="#fff" stroke-opacity=".6" stroke-width="1" fill="none"/>
+  </symbol>
+
+  <!-- ===== Graverat: vinglas snett uppifrån ===== -->
+  <symbol id="graverat" viewBox="0 0 200 200">
+    <ellipse cx="100" cy="180" rx="36" ry="5" fill="url(#skugga)"/>
+    <!-- glaskropp -->
+    <path d="M42 34 C40 100 72 124 100 124 C128 124 160 100 158 34 Z" fill="url(#glasKropp)"/>
+    <!-- bortre insidan av kanten -->
+    <path d="M44 36 C70 26 130 26 156 36" stroke="var(--thin)" stroke-width="1" fill="none"/>
+    <!-- dryck -->
+    <path d="M47.5 86 C54 112 76 121.5 100 121.5 C124 121.5 146 112 152.5 86 Z" fill="url(#bubbel)"/>
+    <path d="M47.5 86 C54 112 76 121.5 100 121.5 C124 121.5 146 112 152.5 86 Z" fill="url(#bubbelSida)"/>
+    <ellipse cx="100" cy="86" rx="52.5" ry="8.5" fill="url(#yta)"/>
+    <ellipse cx="84" cy="85" rx="18" ry="2.2" fill="#fff" opacity=".5"/>
+    <g fill="#fff6dc" opacity=".75"><use href="#bubblor" transform="translate(88 116)"/><use href="#bubblor" transform="translate(112 117) scale(.85)"/><use href="#bubblor" transform="translate(100 119) scale(.7)"/></g>
+    <!-- gravyren -->
+    <path id="g-arc" d="M 56 62 C 74 76 126 76 144 62" fill="none"/>
+    <text font-size="14" letter-spacing="3" fill="currentColor" opacity=".92"><textPath href="#g-arc" startOffset="50%" text-anchor="middle">SKÅL <tspan fill="var(--acc)">&amp;</tspan> CO</textPath></text>
+    <!-- kontur, kant och tjocklek -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="100" cy="34" rx="58" ry="12" stroke="var(--edge)" stroke-width="1.8"/>
+      <path d="M44.5 36.5 C70 45 130 45 155.5 36.5" stroke="var(--thin)" stroke-width="1"/>
+      <path d="M42 34 C40 100 72 124 100 124 C128 124 160 100 158 34" stroke="var(--edge)" stroke-width="2"/>
+      <path d="M45 38 C43.5 98 74 121 100 121 C126 121 156.5 98 155 38" stroke="var(--thin)" stroke-width="1"/>
+    </g>
+    <!-- reflexer -->
+    <path d="M52 42 C50 66 53 88 64 104" stroke="url(#reflex)" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <path d="M58 46 C57 58 58 66 60 72" stroke="#fff" stroke-opacity=".5" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M149 46 C149.5 62 147 78 141 92" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M70 29.5 C84 27 104 26.5 118 27.5" stroke="#fff" stroke-opacity=".7" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <!-- stjälk och fot -->
+    <path d="M97.2 123 C98.6 133 98.4 152 98 166 L102 166 C101.6 152 101.4 133 102.8 123 Z" fill="url(#stam)" stroke="var(--edge)" stroke-width="1.1"/>
+    <ellipse cx="100" cy="170" rx="28" ry="5.5" fill="url(#glasKropp)" stroke="var(--edge)" stroke-width="1.6"/>
+    <path d="M80 169 C90 167 110 167 120 169" stroke="#fff" stroke-opacity=".55" stroke-width="1" fill="none"/>
+  </symbol>
+
+  <!-- ===== Valvet: tulpan i ett valv ===== -->
+  <symbol id="valvet" viewBox="0 0 200 200">
+    <path d="M44 184 V84 A56 56 0 0 1 156 84 V184 Z" fill="url(#glans)" opacity=".7"/>
+    <path d="M44 184 V84 A56 56 0 0 1 156 84 V184" fill="none" stroke="currentColor" stroke-width="2.2"/>
+    <path id="v-arc" d="M 62 90 A 38 38 0 0 1 138 90" fill="none"/>
+    <text font-size="12.5" letter-spacing="2.6" fill="currentColor"><textPath href="#v-arc" startOffset="50%" text-anchor="middle">SKÅL <tspan fill="var(--acc)">&amp;</tspan> CO</textPath></text>
+    <ellipse cx="100" cy="178" rx="20" ry="3" fill="url(#skugga)"/>
+    <!-- glaskropp -->
+    <path d="M78 100 C76 132 87 144 100 144 C113 144 124 132 122 100 Z" fill="url(#glasKropp)"/>
+    <!-- dryck -->
+    <path d="M77.8 119 C79 136 89 142.5 100 142.5 C111 142.5 121 136 122.2 119 Z" fill="url(#bubbel)"/>
+    <path d="M77.8 119 C79 136 89 142.5 100 142.5 C111 142.5 121 136 122.2 119 Z" fill="url(#bubbelSida)"/>
+    <ellipse cx="100" cy="119" rx="22.2" ry="3.2" fill="url(#yta)"/>
+    <ellipse cx="93" cy="118.6" rx="7" ry=".9" fill="#fff" opacity=".55"/>
+    <g fill="#fff6dc" opacity=".75"><use href="#bubblor" transform="translate(96 139) scale(.75)"/><use href="#bubblor" transform="translate(105 140) scale(.6)"/></g>
+    <!-- kontur och tjocklek -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="100" cy="100" rx="22" ry="3.6" stroke="var(--edge)" stroke-width="1.6"/>
+      <path d="M78 100 C76 132 87 144 100 144 C113 144 124 132 122 100" stroke="var(--edge)" stroke-width="1.9"/>
+      <path d="M79.8 102 C78.4 130 88.4 141.6 100 141.6 C111.6 141.6 121.6 130 120.2 102" stroke="var(--thin)" stroke-width=".9"/>
+    </g>
+    <path d="M82.5 104 C82 118 84 128 88.5 135" stroke="url(#reflex)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M117.5 105 C117.6 113 116.5 119 114.5 124" stroke="#fff" stroke-opacity=".5" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    <!-- stjälk och fot -->
+    <path d="M98.2 143 C99 151 98.8 160 98.6 168 L101.4 168 C101.2 160 101 151 101.8 143 Z" fill="url(#stam)" stroke="var(--edge)" stroke-width="1"/>
+    <ellipse cx="100" cy="170.5" rx="13.5" ry="2.8" fill="url(#glasKropp)" stroke="var(--edge)" stroke-width="1.4"/>
+    <path d="M28 184 H172" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- Enkla ikoner för små storlekar -->
+  <symbol id="bagen-ikon" viewBox="0 0 100 100">
+    <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 34 H84"/><path d="M16 34 C18 62 82 62 84 34"/><path d="M50 55 V80"/><path d="M34 84 Q50 79 66 84"/></g>
+    <path d="M19 42 H81 C77 56 63 59 50 59 C37 59 23 56 19 42 Z" fill="var(--acc)"/>
+    <g fill="var(--acc)"><circle cx="46" cy="22" r="4"/><circle cx="56" cy="12" r="3"/></g>
+  </symbol>
+  <symbol id="graverat-ikon" viewBox="0 0 100 100">
+    <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><ellipse cx="50" cy="22" rx="32" ry="8"/><path d="M18 22 C17 54 34 66 50 66 C66 66 83 54 82 22"/><path d="M50 66 V86"/><path d="M36 90 H64"/></g>
+    <path d="M20 40 C28 41 38 44 50 44 C62 44 72 41 80 40 C77 56 64 64 50 64 C36 64 23 56 20 40 Z" fill="var(--acc)"/>
+  </symbol>
+  <symbol id="valvet-ikon" viewBox="0 0 100 100">
+    <path d="M18 94 V42 A32 32 0 0 1 82 42 V94 Z" fill="none" stroke="currentColor" stroke-width="5"/>
+    <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M36 36 C35 58 42 66 50 66 C58 66 65 58 64 36"/><path d="M50 66 V82"/><path d="M41 85 H59"/></g>
+    <path d="M36.3 48 H63.7 C62.5 59 57 64.5 50 64.5 C43 64.5 37.5 59 36.3 48 Z" fill="var(--acc)"/>
+  </symbol>
+</defs></svg>
+
+<script>
+const C=[
+ ["01","Graverat","Vinglas sett snett uppifrån med namnet graverat på kupan. Kanten i perspektiv, glasets tjocklek, reflexer längs kupan och en gyllene dryck med yta och bubblor.","graverat"],
+ ["02","Valvet","Tulpanglaset står utställt i valvet, med ett svagt ljus bakom. Samma valv som i Mitt glasskåp.","valvet"],
+ ["03","Bågen","Namnet i en båge över en coupe med gyllene bubbel. Kanten i perspektiv och bubblor som stiger.","bagen"]];
+document.body.insertAdjacentHTML("beforeend",C.map(([n,h,p,id])=>`<div class="c"><div class="info"><span class="n">${n}</span><h2>${h}</h2><p>${p}</p></div>
+${["dk","lt"].map(t=>`<div class="tile ${t}"><svg width="300" height="300"><use href="#${id}"/></svg>
+<div class="side"><div class="r"><span class="fav"><svg width="26" height="26"><use href="#${id}-ikon"/></svg></span><span class="fav" style="width:16px;height:16px;border-radius:4px"><svg width="14" height="14"><use href="#${id}-ikon"/></svg></span>FAVICON, ENKEL</div>
+<div class="r"><span class="nav"><svg width="30" height="30"><use href="#${id}-ikon"/></svg><span style="font-family:Fraunces;font-size:20px;letter-spacing:.14em">SKÅL <span style="color:var(--acc)">&amp;</span> CO</span></span></div><span>MENYRAD</span></div></div>`).join("")}</div>`).join(""));
+</script>
+</body>
+</html>

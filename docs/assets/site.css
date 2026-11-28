@@ -867,7 +867,7 @@ body:has(.modal.open,.drawer.open,.search.open,.mmenu.open) .conc-btn{opacity:0!
 }
 @media (max-width:360px){.gk-txt{display:none}.gk-btn{padding:0 4px}}
 /* Smala telefoner: menyraden ska rymmas inom skärmen */
-@media (max-width:430px){
+@media (max-width:480px){
   .nav-in{gap:10px}
   .logo{font-size:20px;letter-spacing:.1em}
   .nav-tools{gap:0}
@@ -1115,3 +1115,18 @@ body:has(.modal.open,.drawer.open,.search.open,.mmenu.open) .conc-btn{opacity:0!
 .lang-btn{font-family:var(--mono);font-size:12px;letter-spacing:.08em;font-weight:500}
 html.lang-wait body{opacity:0}
 @media (max-width:640px){.nav-tools .lang-btn{display:none}}
+
+/* v14: logotypen Rent valv */
+.logo{display:inline-flex;align-items:center;gap:.42em}
+.logo-mark{width:1.3em;height:1.3em;flex:none;margin-top:-.16em}
+@media (max-width:480px){.logo{font-size:18px;letter-spacing:.08em;gap:.34em}.logo-mark{width:1.25em;height:1.25em}}
+/* Menyraden krymper mellanrummen med bredden, så att allt ryms från surfplatta till dator */
+@media (min-width:1081px) and (max-width:1300px){
+  .nav-in{gap:clamp(12px,1.6vw,28px);padding-left:clamp(18px,2vw,28px);padding-right:clamp(18px,2vw,28px)}
+  .nav-links{gap:clamp(12px,1.25vw,22px);font-size:14px}
+  .nav-links button{font-size:14px}
+  .gk-btn{margin:0 2px}
+}
+@media (min-width:641px) and (max-width:720px){.gk-txt .l{display:none}.gk-txt .s{display:inline}}
+@media (min-width:1081px) and (max-width:1160px){.gk-txt .l{display:none}.gk-txt .s{display:inline}}
+.logo .logo-txt{color:inherit}.logo .logo-txt span{color:#c49a5e}
