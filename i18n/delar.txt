@@ -1,0 +1,138 @@
+# Delar som funktionerna sätter ihop. Svensk nyckel, tabb, engelska. Används när en hel mening saknas:
+# meningen delas vid " · " och ". " och varje del översätts för sig.
+Till vinälskaren	For the wine lover
+Till den som gillar bubbel	For the bubbly lover
+Till whiskyvännen	For the whisky friend
+Till cocktailblandaren	For the cocktail mixer
+Till kaffe- och tedrickaren	For the coffee and tea drinker
+Till den som bjuder	For the host
+Passar till bröllop	Suits a wedding
+Passar till förlovning	Suits an engagement
+Passar till årsdag	Suits an anniversary
+Passar till födelsedag	Suits a birthday
+Passar till jul	Suits Christmas
+Passar till inflyttning	Suits a housewarming
+Passar till examen	Suits a graduation
+Passar till företagsgåva	Suits a corporate gift
+Passar till tack	Suits a thank-you
+Kristall, kan graveras	Crystal, can be engraved
+Tål diskmaskin	Dishwasher safe
+Munblåst	Mouth-blown
+Kristall	Crystal
+Färgat	Coloured
+Dubbelväggat	Double-walled
+Stapelbart	Stackable
+Skandinavisk	Scandinavian
+Klassisk kristall	Classic crystal
+Modern	Modern
+Färgstarkt	Colourful
+Vintage	Vintage
+Lyx	Luxury
+Rustikt	Rustic
+{n0} st i förpackningen	{n0} in the pack
+Alla tål diskmaskin enligt tillverkaren	All are dishwasher safe according to the manufacturer
+{p0} tål diskmaskin enligt tillverkaren	{p0} is dishwasher safe according to the manufacturer
+{p0} och {p1} tål diskmaskin enligt tillverkaren	{p0} and {p1} are dishwasher safe according to the manufacturer
+{p0}, {p1} och {p2} tål diskmaskin enligt tillverkaren	{p0}, {p1} and {p2} are dishwasher safe according to the manufacturer
+{p0} ska diskas för hand	{p0} should be washed by hand
+{p0} och {p1} ska diskas för hand	{p0} and {p1} should be washed by hand
+{p0}, {p1} och {p2} ska diskas för hand	{p0}, {p1} and {p2} should be washed by hand
+{p0} är gjort för rött vin	{p0} is made for red wine
+{p0} är gjort för vitt vin	{p0} is made for white wine
+{p0} är gjort för vin	{p0} is made for wine
+{p0} är gjort för whisky	{p0} is made for whisky
+{p0} är gjort för champagne	{p0} is made for champagne
+{p0} är gjort för champagne och cocktail	{p0} is made for champagne and cocktails
+{p0} är gjort för cocktail	{p0} is made for cocktails
+{p0} är gjort för kaffe	{p0} is made for coffee
+{p0} är gjort för kaffe och te	{p0} is made for coffee and tea
+{p0} är gjort för te	{p0} is made for tea
+{p0} är gjort för vatten	{p0} is made for water
+{p0} är gjort för vin och vatten	{p0} is made for wine and water
+{p0} är gjort för öl	{p0} is made for beer
+{p0} är gjort för dessert	{p0} is made for dessert
+{p0} är gjort för cocktail och vatten	{p0} is made for cocktails and water
+{p0} är gjort för vatten och cocktail	{p0} is made for water and cocktails
+Alla passar till vin	They all suit wine
+Alla passar till champagne	They all suit champagne
+Alla passar till kaffe	They all suit coffee
+Alla passar till cocktail	They all suit cocktails
+Alla passar till vatten	They all suit water
+Alla passar till te	They all suit tea
+{p0} är bredast ({n0} cm)	{p0} is the widest ({n0} cm)
+{p0} är högst ({n0} cm), {p1} lägst ({n1} cm)	{p0} is the tallest ({n0} cm), {p1} the shortest ({n1} cm)
+{p0} rymmer mest ({n0} cl), {p1} minst ({n1} cl)	{p0} holds the most ({n0} cl), {p1} the least ({n1} cl)
+{p0} kostar minst per glas ({n0} kr)	{p0} costs the least per glass ({n0} kr)
+Alla hör till serien Kupa och passar ihop på bordet	They all belong to the Kupa series and go well together on the table
+Alla hör till serien Bölja och passar ihop på bordet	They all belong to the Bölja series and go well together on the table
+Rött vin	Red wine
+Vitt vin	White wine
+Bubbel	Bubbly
+Whisky	Whisky
+Cocktail	Cocktail
+Kaffe	Coffee
+Te	Tea
+Vatten	Water
+Öl	Beer
+Dessert	Dessert
+Karaffer	Decanters
+Vardag	Everyday
+Middagsbjudning	Dinner party
+Fest	Party
+Hemmabar	Home bar
+Frukost	Breakfast
+Present	Gift
+lyx	luxury
+skandinavisk	Scandinavian
+modern	modern
+Middag	Dinner
+Julbord	Christmas dinner
+Nyår	New Year
+Midsommar	Midsummer
+Kräftskiva	Crayfish party
+Bröllop	Wedding
+Kristall, Munblåst	Crystal, Mouth-blown
+Uppgift saknas	Information missing
+Ja, enligt tillverkaren	Yes, according to the manufacturer
+Handdisk	Hand wash
+Ett helt set ryms inte i budgeten. Höj budgeten, eller välj en sak.	A complete set doesn't fit the budget. Raise the budget, or choose a single item.
+Höj budgeten lite, så hittar vi något.	Raise the budget a little and we'll find something.
+Hej! Jag ser ditt set från Glasguiden. Vill du att jag kompletterar det, eller letar du efter något annat?	Hi! I can see your set from the Glass Guide. Would you like me to complete it, or are you looking for something else?
+Hej! Jag hjälper dig hitta rätt glas. Vad ska du dricka, hur många glas behöver du och vad får det kosta?	Hi! I'll help you find the right glass. What will you drink, how many glasses do you need and what can they cost?
+Hela setet ligger i varukorgen	The whole set is in the cart
+{n0} glas ligger i varukorgen	{n0} glasses are in the cart
+{p0} ligger i varukorgen	{p0} is in the cart
+Provlådan ligger i varukorgen	The trial box is in the cart
+Två glas, ett för varje dryck.	Two glasses, one for each drink.
+Tre glas, ett för varje dryck.	Three glasses, one for each drink.
+Fyra glas, ett för varje dryck.	Four glasses, one for each drink.
+Fem glas, ett för varje dryck.	Five glasses, one for each drink.
+Ditt glas för rött vin.	Your glass for red wine.
+Ditt glas för vitt vin.	Your glass for white wine.
+Ditt glas för bubbel.	Your glass for bubbly.
+Ditt glas för whisky.	Your glass for whisky.
+Ditt glas för cocktail.	Your glass for cocktails.
+Ditt glas för öl.	Your glass for beer.
+Ditt glas för vatten.	Your glass for water.
+Ditt glas för kaffe.	Your glass for coffee.
+Ditt glas för te.	Your glass for tea.
+Ditt glas för dessert.	Your glass for dessert.
+Kaffe och te	Coffee and tea
+Har redan allt	Already has everything
+Tack! Visningsversion, så inget utskick görs.	Thanks! Preview version, so nothing is sent.
+Skriv en giltig e-postadress	Enter a valid email address
+Välj minst två glas att jämföra	Choose at least two glasses to compare
+Du kan jämföra {n0} glas åt gången	You can compare {n0} glasses at a time
+Datumet är sparat i Mitt glasskåp	The date is saved in My glass cabinet
+Tack! Statistik är tillåten.	Thanks! Analytics is allowed.
+Okej, vi mäter ingenting.	Okay, we won't measure anything.
+Översättningen kunde inte laddas.	The translation could not be loaded.
+Länken är kopierad	The link is copied
+Kopierat	Copied
+Sparat	Saved
+Borttagen	Removed
+Kaffe, te	Coffee, tea
+te	tea
+kaffe	coffee
+Martini, {n0} cl fyller ungefär {n1} % av glaset	Martini, {n0} cl fills about {n1} % of the glass
+Whisky, {n0} cl fyller ungefär {n1} % av glaset	Whisky, {n0} cl fills about {n1} % of the glass
