@@ -1137,3 +1137,16 @@ html.hero-loop .hero-stage{position:relative}
 html.hero-loop .band{transition:opacity .9s var(--ease),transform .9s var(--ease)}
 html.hero-loop .scroll-cue,html.hero-loop .loader{display:none}
 html.hero-loop .hero-media video{transition:opacity .85s var(--ease)}
+
+/* v16: skarpare text. Texten ligger på hela pixlar och ritas inte som en suddig bild under rörelse */
+html{text-rendering:optimizeLegibility;font-kerning:normal;font-optical-sizing:auto;-moz-osx-font-smoothing:grayscale}
+.band{top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;transform:none;will-change:auto}
+.band h1,.band h2{text-shadow:0 1px 2px rgba(0,0,0,.35),0 0 40px rgba(20,17,16,.3)}
+.band p{text-shadow:0 1px 2px rgba(0,0,0,.45),0 0 24px rgba(20,17,16,.35)}
+.scroll-cue{left:0;right:0;margin:0 auto;width:max-content;transform:none}
+.cmpbar{left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 24px);transform:translateY(120px)}
+.cmpbar.on{transform:none}
+.toast{left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 32px);transform:translateY(30px)}
+.toast.on{transform:none}
+.stamp.save{left:0;right:0;margin:0 auto;width:max-content;transform:none}
+@media (max-width:640px){.band{top:auto;bottom:12vh;display:block}}
