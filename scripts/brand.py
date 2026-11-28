@@ -15,6 +15,8 @@ os.makedirs(OUT, exist_ok=True)
 THEMES = {
     # för mörk bakgrund: ljust bläck, guld
     "mork": {"ink": "#eee5d6", "acc": "#c49a5e", "edge": "rgba(238,229,214,.92)", "thin": "rgba(238,229,214,.35)", "bg": "#141110"},
+    # vit logga på mörk ruta, för app och favicon
+    "vit": {"ink": "#ffffff", "acc": "#d2a35c", "edge": "rgba(255,255,255,.95)", "thin": "rgba(255,255,255,.4)", "bg": "#141110"},
     # för ljus bakgrund: mörkt bläck, mörkare guld för kontrast
     "ljus": {"ink": "#22201d", "acc": "#765c2f", "edge": "rgba(34,32,29,.92)", "thin": "rgba(34,32,29,.3)", "bg": "#f3eee6"},
 }
@@ -132,6 +134,13 @@ for key, t in THEMES.items():
     write(f"skalco-ikon-{key}.svg", 100, 100, icon(t), "SKÅL & CO")
 
 # App-ikon och favicon: mörk ruta, ljust valv, guld dryck
-write("skalco-app.svg", 100, 100, icon(THEMES["mork"], "#141110", 22, .74), "SKÅL & CO")
-write("favicon.svg", 100, 100, icon(THEMES["mork"], "#141110", 20, .86), "SKÅL & CO")
+# App: helt fyrkantig, telefonen rundar hörnen själv. Innehållet inom 70 % så att Androids runda mask inte klipper.
+write("skalco-app.svg", 100, 100, icon(THEMES["vit"], "#141110", 0, .7), "SKÅL & CO")
+# App med det detaljerade glaset, för stora storlekar (butikssida, profilbild)
+write("skalco-app-detalj.svg", 200, 200, defs(THEMES["vit"], "ad") + '<rect width="200" height="200" fill="#141110"/>'
+      + f'<g transform="translate(30 22) scale(.7)">{mark(THEMES["vit"], "ad")}</g>', "SKÅL & CO")
+# Favicon: rundad ruta, visas som den är i webbläsarens flik
+write("favicon.svg", 100, 100, icon(THEMES["vit"], "#141110", 20, .86), "SKÅL & CO")
+# Profilbild med rundade hörn för förhandsvisning
+write("skalco-profil.svg", 100, 100, icon(THEMES["vit"], "#141110", 0, .58), "SKÅL & CO")
 print("Klart:", sorted(os.listdir(OUT)))

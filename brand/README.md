@@ -10,10 +10,33 @@ Logotypen heter **Rent valv**: ett tulpanglas med gyllene dryck, utställt i ett
 | `skalco-liggande-mork.svg` / `-ljus.svg` | Enkel ikon och namn på en rad. Menyrad, e-post, kvitton |
 | `skalco-mark-mork.svg` / `-ljus.svg` | Valvet med det detaljerade glaset, utan text |
 | `skalco-ikon-mork.svg` / `-ljus.svg` | Enkel ikon för små storlekar, utan bakgrund |
-| `skalco-app.svg`, `favicon.svg` | Ikon i mörk ruta för app, favicon och profilbild |
+| `skalco-app.svg` | App-ikon: vit logga på mörk, fyrkantig ruta. Telefonen rundar hörnen själv |
+| `skalco-app-detalj.svg` | App-ikon med det detaljerade glaset, för stora storlekar som en butikssida |
+| `skalco-profil.svg` | Profilbild med extra luft för runda ramar |
+| `favicon.svg` | Favicon med rundade hörn |
+| `*-vit.svg` | Samma logotyper i rent vitt, för mörka bilder och bakgrunder |
 | `png/` | Samma i PNG: logotyper 1200 px, märket 800 px, profilbild 1000 px |
 
 Webbikonerna ligger i `docs/assets/` (`favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) och `docs/site.webmanifest`.
+
+## Sociala medier (`brand/sociala-medier/`)
+
+Vit logga på mörk bakgrund med de svävande glasen. Byggs med `python3 scripts/brand-social.py`.
+
+| Fil | Var |
+|---|---|
+| `profilbild-1080.png` | Profilbild på Instagram, Facebook, LinkedIn, TikTok, X och YouTube. Fungerar i rund ram |
+| `facebook-omslag-1640x624.png` | Omslagsbild på Facebook |
+| `linkedin-omslag-1584x396.png` | Omslag för en personlig LinkedIn-profil |
+| `linkedin-foretag-omslag-1128x191.png` | Omslag för LinkedIn-företagssida |
+| `x-omslag-1500x500.png` | Omslag på X |
+| `youtube-omslag-2560x1440.png` | Kanalbild på YouTube. Loggan ligger i den del som syns på alla skärmar |
+| `instagram-inlagg-1080x1080.png` | Första inlägget eller fäst inlägg |
+| `instagram-inlagg-bild-1080x1350.png` | Inlägg i stående format, med glasen bakom |
+| `instagram-story-1080x1920.png` | Story eller höjdpunkt |
+| `delningsbild-1200x630.png` | Bilden som visas när någon delar en länk till sajten (används i `docs/assets/delningsbild.png`) |
+
+Skriptet skapar också `SKAL-CO-logotyp-och-sociala-medier.zip` med allt samlat. Den sparas inte i git.
 
 ## Regler
 
