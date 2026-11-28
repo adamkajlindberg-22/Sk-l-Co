@@ -3,3 +3,6 @@ tests/out/
 .DS_Store
 *.log
 __pycache__/
+
+# Skapas av scripts/brand-social.py
+brand/*.zip
