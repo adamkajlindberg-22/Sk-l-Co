@@ -320,10 +320,9 @@ let duration=0,target=0,shown=0,ready=false,raf=0,heroStarted=false;
 const lastOp=new Map();
 function progress(){const r=hero.getBoundingClientRect();return Math.min(1,Math.max(0,-r.top/(hero.offsetHeight-innerHeight)))}
 function updateBands(p){
-  const wide=innerWidth>640;
   bands.forEach(b=>{const a=+b.dataset.in,z=+b.dataset.out,w=Math.min((z-a)*.28,.1);
     let o=p<a?0:p<a+w?(p-a)/w:p<z-w?1:p<z?(z-p)/w:0; if(a===0&&p<w)o=1; o=Math.round(o*100)/100;
-    if(lastOp.get(b)!==o){lastOp.set(b,o);b.style.opacity=o;b.style.transform=(wide?"translateY(calc(-50% + ":"translateY(calc(0% + ")+((1-o)*18)+"px))"}});
+    if(lastOp.get(b)!==o){lastOp.set(b,o);b.style.opacity=o;const y=Math.round((1-o)*18);b.style.transform=y?"translateY("+y+"px)":"none"}});
   const c=p>.03?"0":"1";if(cue.style.opacity!==c)cue.style.opacity=c;
   if(staticMode)endImg.style.opacity=Math.min(1,Math.max(0,(p-.1)/.6)).toFixed(2);
 }
