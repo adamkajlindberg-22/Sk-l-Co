@@ -74,6 +74,7 @@ scripts/shopify-csv.mjs  Produktfil för Shopify, alla som utkast och märkta so
 shopify/              Guide och importfil för Shopify
 i18n/en.json          Engelska översättningar, svensk mening som nyckel. delar.txt har delmeningar
 scripts/i18n-*.py     Samla texter, göra nycklar, slå ihop översättningar (se Språk nedan)
+brand/                Logotypen Rent valv: SVG, PNG, typsnitt och koncept (se brand/README.md). Byggs med scripts/brand.py och scripts/brand-png.py
 scripts/hero.sh       Gör om hjältefilmens filer från media/
 scripts/test-all.sh   Bygger, startar server och kör alla tester
 media/                Original för hjältefilmen (4K-film och startbild), används inte av sajten
@@ -151,6 +152,7 @@ tests/                Playwright och axe. Skärmbilder hamnar i tests/out/ (igno
 - Mörkt: `--bg #141110`, `--surface #221c18`, `--ink #eee5d6`, `--accent #c49a5e`, `--vin #7c1e2c`.
 - Ljust: `--bg #f3eee6`, `--ink #22201d`, `--accent #765c2f` (mörkare än tidigare för kontrastens skull), oliv `#6D7156`.
 - Typsnitt: Fraunces (rubriker), Hanken Grotesk (text), IBM Plex Mono (små etiketter).
+- Logotyp: Rent valv (tulpanglas med gyllene dryck i ett valv). I menyraden och sidfoten som enkel ikon (`.logo-mark`, inline SVG) plus namnet. Favicon och appikoner i `docs/assets`. Se `brand/README.md`.
 - Känsla: lugn lyx, som ett galleri. Produkterna är färgen, resten är dovt.
 
 ## Bilder
