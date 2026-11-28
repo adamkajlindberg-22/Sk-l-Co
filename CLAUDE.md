@@ -55,7 +55,7 @@ docs/                 Publicerad sajt (GitHub Pages läser härifrån)
   assets/site.css     All CSS (bas + tillägg per version längst ner)
   assets/site.js      BYGGD fil, redigera inte
   assets/*.webp       Bilder. p-* kvällsljus, d-* dagsljus, -480 för kort, -800 för rutnät
-  assets/hero*.mp4    Hjältefilmen från 4K-originalet (Higgsfield, Topaz). Väljs efter fysiska pixlar: hero-2560 (2560x1440) från 2200, hero (1920) från 1400, annars hero-1280. Stående skärmar (mobil) får hero-m.mp4, ett stående utsnitt i 1080x1920, och egna stillbilder (hero-start-m, hero-end-m). Kodade med nyckelbild var sjätte ruta och utan B-rutor (-g 6 -bf 0) så att scrollningen går lätt, CRF 20, aq-mode=3 och lätt skärpning. Se scripts/hero.sh
+  assets/hero*.mp4    Hjältefilmen från 4K-originalet (Higgsfield, Topaz). Väljs efter fysiska pixlar: hero-2560 (2560x1440) från 2200, hero (1920) från 1400, annars hero-1280. Stående skärmar (mobil) får hero-m.mp4, ett stående utsnitt i 1080x1920, och egna stillbilder (hero-start-m, hero-end-m). Alla startbilder tas från filmens första ruta, så att inget zoomar eller hoppar när filmen tonas in. Kodade med nyckelbild var sjätte ruta och utan B-rutor (-g 6 -bf 0) så att scrollningen går lätt, CRF 20, aq-mode=3 och lätt skärpning. Se scripts/hero.sh
 src/js/               Källkod, sätts ihop i denna ordning:
   01-core.js          Hjälpfunktioner, glasformer (SH, FILL), produktdata (P), lagring (S), produktkort
   02-pages.js         Sidor och adresser, startsida, Handla med filter, varumärken, megameny, sök
