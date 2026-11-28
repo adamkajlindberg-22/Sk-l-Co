@@ -125,7 +125,7 @@ tests/                Playwright och axe. Skärmbilder hamnar i tests/out/ (igno
   }}
   ```
 - **3D** laddas först när fliken öppnas, från `cdn.jsdelivr.net/npm/three@0.160.0`. LatheGeometry från profilerna i `PROF`, inga tillägg.
-- **Hjältefilmen "Svävet"** (mörk, åtta glasmodeller med dryck svävar i luften och en kupa häller ut bubbel på sten) hämtas som Blob och scrubbas med `requestAnimationFrame`. Filmen scrubbas även på mobil. Statiskt läge (bild som tonas) bara vid reducerad rörelse och sparat data-läge.
+- **Hjältefilmen "Svävet"** (mörk, åtta glasmodeller med dryck svävar i luften och en kupa häller ut bubbel på sten). På dator (liggande skärm) hämtas den som Blob och scrubbas med scrollen (`requestAnimationFrame`). På mobil och andra stående skärmar (`heroPortrait()`, `startLoop()`) är startbilden en skärm hög: filmen rullar av sig själv i 0,7 gångers fart och tonas mjukt över till början, och texterna visas efter varandra tills den sista med knapparna ligger kvar (`html.hero-loop`). Reducerad rörelse visar stillbilden och den sista texten direkt. Sparat data-läge på dator ger stillbild som tonas.
 
 ## Produktdata (`P` i 01-core.js)
 
