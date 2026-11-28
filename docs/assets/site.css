@@ -1130,3 +1130,10 @@ html.lang-wait body{opacity:0}
 @media (min-width:641px) and (max-width:720px){.gk-txt .l{display:none}.gk-txt .s{display:inline}}
 @media (min-width:1081px) and (max-width:1160px){.gk-txt .l{display:none}.gk-txt .s{display:inline}}
 .logo .logo-txt{color:inherit}.logo .logo-txt span{color:#c49a5e}
+
+/* v15: rullande hjältefilm på stående skärmar (mobil) */
+html.hero-loop #hero{height:100vh;height:100svh}
+html.hero-loop .hero-stage{position:relative}
+html.hero-loop .band{transition:opacity .9s var(--ease),transform .9s var(--ease)}
+html.hero-loop .scroll-cue,html.hero-loop .loader{display:none}
+html.hero-loop .hero-media video{transition:opacity .85s var(--ease)}

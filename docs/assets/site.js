@@ -2168,10 +2168,33 @@ function updateBands(p){
 function tick(){raf=0;const d=target-shown;shown+=Math.abs(d)<.002?d:d*.14;
   if(ready&&!video.seeking&&Math.abs(video.currentTime-shown)>.012){try{video.currentTime=shown}catch(e){}}
   if(Math.abs(target-shown)>.0005)raf=requestAnimationFrame(tick)}
+/* Mobil och andra stående skärmar: filmen rullar av sig själv och texterna visas efter varandra.
+   Startbilden är en skärm hög, så att man kommer vidare med en vanlig scroll. Datorn scrubbar filmen med scrollen. */
+let heroLoop=false;
+function showBand(i,instant){
+  bands.forEach((b,j)=>{const on=j===i;b.style.opacity=on?1:0;b.style.transform=on?"none":"translateY(18px)";
+    if(b.classList.contains("settle"))b.inert=!on});
+  if(instant)bands.forEach(b=>b.style.transition="none");
+}
+function startLoop(){
+  heroLoop=true;root.classList.add("hero-loop");
+  const last=bands.length-1;
+  if(reduce){showBand(last,true);return}
+  // De första texterna efter varandra, sedan ligger den sista kvar med knapparna
+  showBand(0);let i=0;const next=()=>{i++;showBand(i);if(i<last)setTimeout(next,3600)};setTimeout(next,3600);
+  if(staticMode)return;
+  video.muted=true;video.playsInline=true;video.autoplay=true;video.preload="auto";
+  video.src="assets/hero-m.mp4?v=6";
+  video.addEventListener("loadedmetadata",()=>{video.playbackRate=.7},{once:true});
+  video.addEventListener("playing",()=>video.classList.add("ready"));
+  // Mjuk övergång vid slutet: filmen tonas ut mot startbilden och börjar om
+  video.addEventListener("ended",()=>{video.classList.remove("ready");setTimeout(()=>{video.currentTime=0;video.playbackRate=.7;video.play().catch(()=>{})},850)});
+  const p=video.play();if(p&&p.catch)p.catch(()=>{/* t.ex. strömsparläge: stillbilden ligger kvar */});
+}
 function onScroll(){
   const home=curView==="hem";
   nav.classList.toggle("solid",!home||mm.classList.contains("open")||!mega.hidden||scrollY>hero.offsetHeight-innerHeight*.6);
-  if(!home)return;
+  if(!home||heroLoop)return;
   const p=progress();updateBands(p);
   if(ready){target=p*Math.max(0,duration-.04);if(!raf)raf=requestAnimationFrame(tick)}
 }
@@ -2194,6 +2217,7 @@ async function loadVideo(){
   duration=video.duration||6;ready=true;video.classList.add("ready");loader.classList.remove("on");onScroll();
 }
 function startHero(){if(heroStarted)return;heroStarted=true;
+  if(heroPortrait()){startLoop();return}
   if(staticMode)root.classList.add("static");
   else loadVideo().catch(()=>{staticMode=true;root.classList.add("static");loader.classList.remove("on");onScroll()});
 }
